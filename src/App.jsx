@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Navbar from './components/Navbar/Navbar';
-import './index.css';
-
+import React from 'react';
+import HomePage from './components/Homepage/HomePage.jsx'; // Đảm bảo đường dẫn chính xác
 
 const App = () => {
   return (
- <div>
-  <div className="container mx-auto">
-  <Navbar/>
-  </div>
-  </div>
+    <div>
+      <HomePage />
+    </div>
   );
 };
 
