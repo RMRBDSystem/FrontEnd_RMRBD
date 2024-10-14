@@ -1,6 +1,6 @@
 import React from 'react';
-import Navbar from '../Navbar/Navbar.jsx'; // Đảm bảo đường dẫn chính xác
-import BackgroundImage from '../../assets/Background.jpg'; // Hình nền (nếu có)
+import Navbar from '../Navbar/Navbar.jsx';
+import BackgroundImage from '../../assets/Background.jpg';
 
 const HomePage = () => {
   return (
@@ -9,7 +9,7 @@ const HomePage = () => {
       <Navbar />
 
       {/* Main Content */}
-      <div className="flex flex-col items-center bg-gray-100 p-6">
+      <div className="pt-24 flex flex-col items-center bg-gray-100"> {/* Thêm `pt-24` để tạo khoảng trống bên dưới navbar */}
         {/* Banner Area */}
         <div 
           className="w-full h-64 bg-cover bg-center mb-6" 
@@ -26,7 +26,7 @@ const HomePage = () => {
             16 Caramel-Apple Desserts to Indulge in This Fall
           </h2>
           <p className="text-gray-700 mb-6">
-            Caramel and apple. A flavor pairing that dates back to the 1950s when caramel apples were invented by a Kraft Foods employee. Today, this flavor combination has gone well beyond apples on a stick and is associated with fall festivals and country hayrides.
+            Caramel and apple. A flavor pairing that dates back to the 1950s when caramel apples were invented by a Kraft Foods employee...
           </p>
 
           <h3 className="text-xl font-semibold mb-3">Favorite Recipe</h3>
@@ -34,7 +34,7 @@ const HomePage = () => {
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="bg-white shadow-lg rounded-lg p-4">
                 <img 
-                  src={`https://via.placeholder.com/150`} 
+                  src={`https://www.goodiegoodielunchbox.com.au/wp-content/uploads/2021/08/IMG_5382-2-web.jpg`} 
                   alt="Recipe" 
                   className="w-full h-32 object-cover rounded-md mb-2" 
                 />

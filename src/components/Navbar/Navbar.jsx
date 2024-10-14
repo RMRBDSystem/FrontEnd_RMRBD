@@ -28,13 +28,14 @@ const Navbar = () => {
   return (
     <div className={`fixed w-full z-50 transition-transform duration-300 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
       <div className="bg-primary/100">
-        <div className="container mx-auto flex justify-between items-center py-4">
-          {/* Upper Navbar content */}
+        <div className="container mx-auto flex justify-between items-center"> {/* Điều chỉnh lại padding */}
+          {/* Nội dung Navbar trên cùng */}
         </div>
       </div>
 
       <div className="bg-gray-200 shadow-lg">
         <div className="container mx-auto flex justify-between items-center p-4">
+          {/* Logo */}
           <div className="flex">
             <a href="#">
               <img src={Logo} alt="Logo" className="w-32" />
