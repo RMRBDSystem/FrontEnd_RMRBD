@@ -61,16 +61,17 @@ const Landing = () => {
         style={{ width: boxWidth }}>
         {/* Stars and Text */}
         <div className={`flex items-center pl-10 space-x-3 text-white text-lg font-bold h-full transition-transform duration-700 
-            ${isVisible ? 'transform translate-y-[-140px]' : 'transform translate-y-0'}`}>
-          {stars.map((isVisible, index) => (
-            <div key={index} className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-              <RiStarFill color={index === 4 ? "black" : "gold"} size={30} />
-            </div>
-          ))}
-          <span className={`transition-opacity duration-700 ${textVisible ? 'opacity-100' : 'opacity-0'}`}>
-            More than 100,000 satisfied customers!
-          </span>
-        </div>
+          ${isVisible ? 'transform translate-y-[-140px]' : 'transform translate-y-0'}`}>
+            {stars.map((isVisible, index) => (
+              <div key={index} className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                <RiStarFill color={index === 4 ? "black" : "gold"} size={30} />
+              </div>
+            ))}
+            <span className={`transition-opacity duration-700 ${textVisible ? 'opacity-100' : 'opacity-0'}`} 
+                style={{ color: 'white' }}>
+              More than 100,000 satisfied customers!
+            </span>
+          </div>
       </div>
 
       {/* Big Text And Small Paragraph*/}
