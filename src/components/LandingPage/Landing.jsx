@@ -59,7 +59,7 @@ const Landing = () => {
         style={{ width: boxWidth, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         
         {/* Stars and Customer Text */}
-        <div className={`flex items-center space-x-3 text-white text-lg font-bold transition-transform duration-700 z-10 
+        <div className={`flex items-center space-x-3 text-white text-lg font-bold transition-transform duration-700 z-15 
           ${isVisible ? 'transform translate-y-[-50px]' : 'transform translate-y-0'}`}>
             {stars.map((isVisible, index) => (
               <div key={index} className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
