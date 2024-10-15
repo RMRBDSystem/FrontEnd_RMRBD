@@ -16,7 +16,7 @@ const Landing = () => {
     const timer = setTimeout(() => {
       setBoxWidth('50%');
     }, 100);
-
+  
     stars.forEach((_, index) => {
       setTimeout(() => {
         setStars(prev => {
@@ -26,19 +26,17 @@ const Landing = () => {
         });
       }, index * 300);
     });
-
-    setTimeout(() => {
-      setIsVisible(true);
-    }, stars.length * 300 + 100);
-
-    setTimeout(() => {
-      setTextVisible(true);
-    }, stars.length * 300 + 500);
-
-    setTimeout(() => {
-      setBigTextVisible(true);
-    }, stars.length * 300 + 700);
-
+  
+    const textTimers = [
+      { delay: stars.length * 300 + 100, action: () => setIsVisible(true) },     //Star//
+      { delay: stars.length * 300 + 500, action: () => setTextVisible(true) },   //More than 100k text//
+      { delay: stars.length * 300 + 700, action: () => setBigTextVisible(true) }, // From a meal text//
+    ];
+  
+    textTimers.forEach(({ delay, action }) => {
+      setTimeout(action, delay);
+    });
+  
     return () => clearTimeout(timer);
   }, []);
 
