@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../../assets/Landing Background.png';
 import logo from '../../assets/Logo.png';
 import { RiStarFill } from "react-icons/ri";
@@ -10,13 +10,13 @@ const Landing = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
   const [bigTextVisible, setBigTextVisible] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setBoxWidth('50%');
     }, 100);
-  
+
     stars.forEach((_, index) => {
       setTimeout(() => {
         setStars(prev => {
@@ -26,17 +26,17 @@ const Landing = () => {
         });
       }, index * 300);
     });
-  
+
     const textTimers = [
-      { delay: stars.length * 300 + 100, action: () => setIsVisible(true) },     //Star//
-      { delay: stars.length * 300 + 500, action: () => setTextVisible(true) },   //More than 100k text//
-      { delay: stars.length * 300 + 700, action: () => setBigTextVisible(true) }, // From a meal text//
+      { delay: stars.length * 300 + 100, action: () => setIsVisible(true) },
+      { delay: stars.length * 300 + 500, action: () => setTextVisible(true) },
+      { delay: stars.length * 300 + 700, action: () => setBigTextVisible(true) },
     ];
-  
+
     textTimers.forEach(({ delay, action }) => {
       setTimeout(action, delay);
     });
-  
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -46,7 +46,7 @@ const Landing = () => {
         <img src={logo} alt="Logo" className="h-24" />
         <button 
           className="bg-orange-500 text-black rounded-lg px-4 py-2 transition-all duration-300 transform hover:bg-black hover:scale-105 font-roboto group hover:text-white hover:shadow-lg hover:shadow-orange-500/50"
-          onClick={() => navigate('/home')} // Navigate to HomePage on click
+          onClick={() => navigate('/home')}
         >
           <span className="transition-all duration-100 group-hover:font-bold">
             Search Your Own List Today!
@@ -54,12 +54,13 @@ const Landing = () => {
         </button>
       </div>
 
-      {/* Plain Box */}
+      {/* Single Plain Box */}
       <div className={`absolute top-24 left-0 h-1/2 bg-teal-600 z-0 opacity-75 transition-all duration-700`} 
-        style={{ width: boxWidth }}>
-        {/* Stars and Text */}
-        <div className={`flex items-center pl-10 space-x-3 text-white text-lg font-bold h-full transition-transform duration-700 
-          ${isVisible ? 'transform translate-y-[-140px]' : 'transform translate-y-0'}`}>
+        style={{ width: boxWidth, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        
+        {/* Stars and Customer Text */}
+        <div className={`flex items-center space-x-3 text-white text-lg font-bold transition-transform duration-700 z-10 
+          ${isVisible ? 'transform translate-y-[-50px]' : 'transform translate-y-0'}`}>
             {stars.map((isVisible, index) => (
               <div key={index} className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
                 <RiStarFill color={index === 4 ? "black" : "gold"} size={30} />
@@ -69,24 +70,23 @@ const Landing = () => {
                 style={{ color: 'white' }}>
               More than 100,000 satisfied customers!
             </span>
-          </div>
-      </div>
+        </div>
 
-      {/* Big Text And Small Paragraph*/}
-      <div className={`absolute top-48 left-20 text-black text-4xl font-bold z-10 transition-opacity duration-700 ${bigTextVisible ? 'opacity-100' : 'opacity-0'}`}>
-        <span className="font-bold drop-shadow-lg">
-          From a meal to a <br />
-          <span className='drop-shadow-lg'>Michelin Plates Quality!</span> 
-        </span>
-        <div className={`mt-4 text-sm drop-shadow-md p-1 rounded-lg max-w-md transition-opacity duration-700 ${bigTextVisible ? 'opacity-100' : 'opacity-0'}`}>
-          Our website's purpose is to share new and good quality products of recipes, books, and 
-          ebooks for people to see and purchase for improving their cooking quality or looking for more 
-          unique flavors in contrasts!
+        {/* Michelin Text */}
+        <div className={`text-center text-black text-4xl font-bold transition-opacity duration-700 ${bigTextVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <span className="font-bold drop-shadow-lg">
+            From a meal to a <br />
+            <span className='drop-shadow-lg'>Michelin Plates Quality!</span> 
+          </span>
+          <div className={`mt-4 text-sm drop-shadow-md p-1 rounded-lg max-w-md transition-opacity duration-700 ${bigTextVisible ? 'opacity-100' : 'opacity-0'}`}>
+            Our website's purpose is to share new and good quality products of recipes, books, and 
+            ebooks for people to see and purchase for improving their cooking quality or looking for more 
+            unique flavors in contrasts!
+          </div>
         </div>
       </div>
 
       <div className="flex-grow" />
-      {/* Footer Section */}
       <footer className="bg-[#14213D] text-white py-4">
         <div className="container mx-auto text-center">
           <p className="text-sm">
