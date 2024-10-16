@@ -16,9 +16,13 @@ const CustomerList = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(apiUrl);
-        setCustomers(response.data.value || []);
+        console.log('API Response:', response.data); // Log the entire response
+
+        // Set customers directly from the response if it's an array
+        setCustomers(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
-        setError(err.message);
+        console.error('Error fetching customers:', err); // Log the error
+        setError('Failed to fetch customers. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -47,7 +51,7 @@ const CustomerList = () => {
         await axios.post(apiUrl, payload);
       }
       resetForm();
-      fetchCustomers();
+      fetchCustomers(); // Refetch customers after submit
     } catch (err) {
       setError(err.response ? err.response.data : err.message);
     }
@@ -59,15 +63,6 @@ const CustomerList = () => {
     setCurrentId(cust.customerId);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${apiUrl}(${id})`);
-      fetchCustomers();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   const resetForm = () => {
     setCustomer({ userName: '', email: '', phoneNumber: '' });
     setEditing(false);
@@ -77,7 +72,8 @@ const CustomerList = () => {
   const fetchCustomers = async () => {
     try {
       const response = await axios.get(apiUrl);
-      setCustomers(response.data.value || []);
+      console.log('Fetched Customers:', response.data); // Log fetched customers
+      setCustomers(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       setError(err.message);
     }
@@ -87,7 +83,7 @@ const CustomerList = () => {
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Customer List</h1>
       <form onSubmit={handleSubmit} className="mb-4">
         <input
@@ -96,7 +92,7 @@ const CustomerList = () => {
           value={customer.userName}
           onChange={handleInputChange}
           placeholder="Customer Name"
-          className="border rounded p-2 mr-2"
+          className="border rounded p-2 mr-2 w-full"
           required
           autoComplete="name"
         />
@@ -106,7 +102,7 @@ const CustomerList = () => {
           value={customer.email}
           onChange={handleInputChange}
           placeholder="Customer Email"
-          className="border rounded p-2 mr-2"
+          className="border rounded p-2 mr-2 w-full"
           required
           autoComplete="email"
         />
@@ -116,29 +112,30 @@ const CustomerList = () => {
           value={customer.phoneNumber}
           onChange={handleInputChange}
           placeholder="Customer Phone"
-          className="border rounded p-2 mr-2"
+          className="border rounded p-2 mr-2 w-full"
           autoComplete="tel"
         />
-        <button type="submit" className="bg-blue-500 text-white rounded p-2">
+        <button type="submit" className="bg-blue-500 text-white rounded p-2 hover:bg-blue-600">
           {editing ? 'Update' : 'Add'}
         </button>
       </form>
       <ul className="space-y-2">
-        {customers.map(cust => (
-          <li key={cust.customerId} className="p-4 border rounded-lg shadow">
-            <h2 className="font-semibold">{cust.userName}</h2>
-            <p>Email: {cust.email}</p>
-            <p>Phone: {cust.phoneNumber || 'N/A'}</p>
-            <div className="mt-2">
-              <button onClick={() => handleEdit(cust)} className="bg-yellow-500 text-white rounded p-1 mr-1">
-                Edit
-              </button>
-              <button onClick={() => handleDelete(cust.customerId)} className="bg-red-500 text-white rounded p-1">
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
+        {customers.length > 0 ? (
+          customers.map(cust => (
+            <li key={cust.customerId} className="p-4 border rounded-lg shadow hover:shadow-lg transition-shadow duration-200">
+              <h2 className="font-semibold">{cust.userName}</h2>
+              <p>Email: {cust.email}</p>
+              <p>Phone: {cust.phoneNumber || 'N/A'}</p>
+              <div className="mt-2">
+                <button onClick={() => handleEdit(cust)} className="bg-yellow-500 text-white rounded p-1 hover:bg-yellow-600">
+                  Edit
+                </button>
+              </div>
+            </li>
+          ))
+        ) : (
+          <li>No customers available</li>
+        )}
       </ul>
     </div>
   );
