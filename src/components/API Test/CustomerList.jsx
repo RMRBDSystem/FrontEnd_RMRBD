@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import ErrorBoundary from './ErrorBoundary';
 
 const apiUrl = 'https://rmrbdapi.somee.com/odata/Customer';
+
+const generateGoogleId = () => {
+  return `${Date.now()}-${Math.floor(Math.random() * 1000)}`; // Remove "google-" prefix
+};
 
 const CustomerList = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [customer, setCustomer] = useState({ userName: '', email: '', phoneNumber: '' });
+  const [customer, setCustomer] = useState({ userName: '', email: '', phoneNumber: '', GoogleId: '' });
   const [editing, setEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
@@ -15,10 +20,8 @@ const CustomerList = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(apiUrl);
-        console.log('API Response:', response.data);
         setCustomers(response.data.value || []);
       } catch (err) {
-        console.error('Error fetching data:', err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -35,22 +38,28 @@ const CustomerList = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = {
+      userName: customer.userName,
+      email: customer.email,
+      phoneNumber: customer.phoneNumber || null,
+      GoogleId: editing ? customer.GoogleId : generateGoogleId(), // Generate if not editing
+    };
+
     try {
       if (editing) {
-        await axios.put(`${apiUrl}(${currentId})`, customer);
+        await axios.put(`${apiUrl}(${currentId})`, payload);
       } else {
-        await axios.post(apiUrl, customer);
+        await axios.post(apiUrl, payload);
       }
       resetForm();
       fetchCustomers();
     } catch (err) {
-      console.error('Error saving customer:', err);
-      setError(err.message);
+      setError(err.response ? err.response.data : err.message);
     }
   };
 
   const handleEdit = (cust) => {
-    setCustomer({ userName: cust.userName, email: cust.email, phoneNumber: cust.phoneNumber });
+    setCustomer({ userName: cust.userName, email: cust.email, phoneNumber: cust.phoneNumber, GoogleId: cust.GoogleId });
     setEditing(true);
     setCurrentId(cust.customerId);
   };
@@ -60,13 +69,12 @@ const CustomerList = () => {
       await axios.delete(`${apiUrl}(${id})`);
       fetchCustomers();
     } catch (err) {
-      console.error('Error deleting customer:', err);
       setError(err.message);
     }
   };
 
   const resetForm = () => {
-    setCustomer({ userName: '', email: '', phoneNumber: '' });
+    setCustomer({ userName: '', email: '', phoneNumber: '', GoogleId: '' });
     setEditing(false);
     setCurrentId(null);
   };
@@ -76,7 +84,6 @@ const CustomerList = () => {
       const response = await axios.get(apiUrl);
       setCustomers(response.data.value || []);
     } catch (err) {
-      console.error('Error fetching data:', err);
       setError(err.message);
     }
   };
@@ -96,6 +103,7 @@ const CustomerList = () => {
           placeholder="Customer Name"
           className="border rounded p-2 mr-2"
           required
+          autoComplete="name"
         />
         <input
           type="email"
@@ -105,6 +113,7 @@ const CustomerList = () => {
           placeholder="Customer Email"
           className="border rounded p-2 mr-2"
           required
+          autoComplete="email"
         />
         <input
           type="text"
@@ -113,6 +122,16 @@ const CustomerList = () => {
           onChange={handleInputChange}
           placeholder="Customer Phone"
           className="border rounded p-2 mr-2"
+          autoComplete="tel"
+        />
+        <input
+          type="text"
+          name="GoogleId"
+          value={customer.GoogleId}
+          onChange={handleInputChange}
+          placeholder="Google ID"
+          className="border rounded p-2 mr-2"
+          readOnly
         />
         <button type="submit" className="bg-blue-500 text-white rounded p-2">
           {editing ? 'Update' : 'Add'}
@@ -124,6 +143,7 @@ const CustomerList = () => {
             <h2 className="font-semibold">{cust.userName}</h2>
             <p>Email: {cust.email}</p>
             <p>Phone: {cust.phoneNumber || 'N/A'}</p>
+            <p>Google ID: {cust.GoogleId || 'N/A'}</p>
             <div className="mt-2">
               <button onClick={() => handleEdit(cust)} className="bg-yellow-500 text-white rounded p-1 mr-1">
                 Edit
@@ -139,4 +159,10 @@ const CustomerList = () => {
   );
 };
 
-export default CustomerList;
+const App = () => (
+  <ErrorBoundary>
+    <CustomerList />
+  </ErrorBoundary>
+);
+
+export default App;
