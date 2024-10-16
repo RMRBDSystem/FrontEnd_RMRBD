@@ -103,13 +103,13 @@ const EbookList = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 0:
-        return 'Bị khoá';
+        return 'Blocked';
       case 1:
-        return 'Đã kiểm duyệt';
+        return 'Censored';
       case -1:
-        return 'Chưa kiểm duyệt';
+        return 'Uncensored';
       default:
-        return 'Không xác định';
+        return 'Unknown';
     }
   };
 
@@ -157,9 +157,9 @@ const EbookList = () => {
           className="border rounded p-2 mr-2"
           required
         >
-          <option value="-1">Chưa kiểm duyệt</option>
-          <option value="1">Đã kiểm duyệt</option>
-          <option value="0">Bị khoá</option>
+          <option value="-1">Uncensored</option>
+          <option value="1">Censored</option>
+          <option value="0">Blocked</option>
         </select>
         <input
           type="text"
