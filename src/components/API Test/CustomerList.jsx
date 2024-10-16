@@ -4,15 +4,11 @@ import ErrorBoundary from './ErrorBoundary';
 
 const apiUrl = 'https://rmrbdapi.somee.com/odata/Customer';
 
-const generateGoogleId = () => {
-  return `${Date.now()}-${Math.floor(Math.random() * 1000)}`; // Remove "google-" prefix
-};
-
 const CustomerList = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [customer, setCustomer] = useState({ userName: '', email: '', phoneNumber: '', GoogleId: '' });
+  const [customer, setCustomer] = useState({ userName: '', email: '', phoneNumber: '' });
   const [editing, setEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
@@ -42,7 +38,6 @@ const CustomerList = () => {
       userName: customer.userName,
       email: customer.email,
       phoneNumber: customer.phoneNumber || null,
-      GoogleId: editing ? customer.GoogleId : generateGoogleId(), // Generate if not editing
     };
 
     try {
@@ -59,7 +54,7 @@ const CustomerList = () => {
   };
 
   const handleEdit = (cust) => {
-    setCustomer({ userName: cust.userName, email: cust.email, phoneNumber: cust.phoneNumber, GoogleId: cust.GoogleId });
+    setCustomer({ userName: cust.userName, email: cust.email, phoneNumber: cust.phoneNumber });
     setEditing(true);
     setCurrentId(cust.customerId);
   };
@@ -74,7 +69,7 @@ const CustomerList = () => {
   };
 
   const resetForm = () => {
-    setCustomer({ userName: '', email: '', phoneNumber: '', GoogleId: '' });
+    setCustomer({ userName: '', email: '', phoneNumber: '' });
     setEditing(false);
     setCurrentId(null);
   };
@@ -124,15 +119,6 @@ const CustomerList = () => {
           className="border rounded p-2 mr-2"
           autoComplete="tel"
         />
-        <input
-          type="text"
-          name="GoogleId"
-          value={customer.GoogleId}
-          onChange={handleInputChange}
-          placeholder="Google ID"
-          className="border rounded p-2 mr-2"
-          readOnly
-        />
         <button type="submit" className="bg-blue-500 text-white rounded p-2">
           {editing ? 'Update' : 'Add'}
         </button>
@@ -143,7 +129,6 @@ const CustomerList = () => {
             <h2 className="font-semibold">{cust.userName}</h2>
             <p>Email: {cust.email}</p>
             <p>Phone: {cust.phoneNumber || 'N/A'}</p>
-            <p>Google ID: {cust.GoogleId || 'N/A'}</p>
             <div className="mt-2">
               <button onClick={() => handleEdit(cust)} className="bg-yellow-500 text-white rounded p-1 mr-1">
                 Edit
