@@ -8,6 +8,7 @@ import CRUDTemp from './CRUDTemp';
 //import CustomerCrud from './CustomerCrud';// //Remove if wanted to test CRUD//
 
 
+
 const App = () => {
   return (
     // <Router>
@@ -19,7 +20,6 @@ const App = () => {
     // </Router>
     <div>
       <CustomerList/>
-      <CRUDTemp/>
     </div>
   );
 };
