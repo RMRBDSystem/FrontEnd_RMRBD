@@ -49,7 +49,7 @@ const EbookList = () => {
       ebookName: ebook.ebookName || '',
       description: ebook.description || '',
       price: parseFloat(ebook.price) || 0,
-      status: parseInt(ebook.status) || -1,
+      status: parseInt(ebook.status),
       pdfurl: ebook.pdfurl || '',
       imageUrl: ebook.imageUrl || ''
     };

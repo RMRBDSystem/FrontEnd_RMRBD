@@ -15,13 +15,10 @@ const RecipeList = () => {
     nutrition: "",
     tutorial: "",
     video: "",
-    createById: "",
     price: "",
     ingredient: "",
-    status: "-1", // Trạng thái mặc định chưa kiểm duyệt
-    createDate: "",
-    updateDate: "",
-    totalTime: "",
+    status: "",
+    totalTime: ""
   });
   const [editing, setEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
@@ -62,22 +59,20 @@ const RecipeList = () => {
       video: recipe.video || "",
       price: parseFloat(recipe.price) || 0,
       ingredient: recipe.ingredient || "",
-      status: parseInt(recipe.status), // Giá trị status đã khởi tạo ở state
+      status: parseInt(recipe.status), // Defaulting to uncensored
       totalTime: parseInt(recipe.totalTime) || 0,
-      createDate: recipe.createDate,
-      updateDate: recipe.updateDate,
     };
 
     setSubmitting(true);
 
     try {
       if (editing) {
-        await axios.put(`${apiUrl}/${currentId}`, payload); // Sử dụng OData syntax nếu cần
+        await axios.put(`${apiUrl}/${currentId}`, payload); // PUT request for update
       } else {
-        await axios.post(apiUrl, payload);
+        await axios.post(apiUrl, payload); // POST request for create
       }
       resetForm();
-      fetchRecipes(); // Refetch dữ liệu sau khi submit
+      fetchRecipes(); // Refetch after submission
     } catch (err) {
       setError(
         err.response
@@ -99,10 +94,8 @@ const RecipeList = () => {
       video: rcp.video,
       price: rcp.price,
       ingredient: rcp.ingredient,
-      status: rcp.status.toString(), // Trạng thái chuyển thành chuỗi
+      status: rcp.status,
       totalTime: rcp.totalTime,
-      createDate: rcp.createDate,
-      updateDate: rcp.updateDate,
     });
     setEditing(true);
     setCurrentId(rcp.recipeId);
@@ -118,10 +111,8 @@ const RecipeList = () => {
       video: "",
       price: "",
       ingredient: "",
-      status: "-1", // Trạng thái chưa kiểm duyệt
-      totalTime: "",
-      createDate: "",
-      updateDate: "",
+      status: "-1",
+      totalTime: ""
     });
     setEditing(false);
     setCurrentId(null);
@@ -130,10 +121,23 @@ const RecipeList = () => {
   const fetchRecipes = async () => {
     try {
       const response = await axios.get(apiUrl);
-      console.log('Fetched Recipe:', response.data);
-      setRecipes(Array.isArray(response.data) ? response.data : []);
+      console.log('Fetched Recipes:', response.data);
+      setRecipes(Array.isArray(response.data) ? response.data : []); // OData f ormat
     } catch (err) {
       setError("Failed to fetch recipes. Please try again later.");
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 0:
+        return 'Blocked';
+      case 1:
+        return 'Censored';
+      case -1:
+        return 'Uncensored';
+      default:
+        return 'Unknown';
     }
   };
 
@@ -144,6 +148,7 @@ const RecipeList = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Recipe List</h1>
       <form onSubmit={handleSubmit} className="mb-4">
+        {/* Input fields similar to EbookList */}
         <input
           type="text"
           name="recipeName"
@@ -152,7 +157,6 @@ const RecipeList = () => {
           placeholder="Recipe Name"
           className="border rounded p-2 mr-2"
           required
-          autoComplete="off"
         />
         <input
           type="text"
@@ -162,7 +166,6 @@ const RecipeList = () => {
           placeholder="Description"
           className="border rounded p-2 mr-2"
           required
-          autoComplete="off"
         />
         <input
           type="number"
@@ -172,7 +175,6 @@ const RecipeList = () => {
           placeholder="Number of Service"
           className="border rounded p-2 mr-2"
           required
-          autoComplete="off"
         />
         <input
           type="number"
@@ -182,7 +184,6 @@ const RecipeList = () => {
           placeholder="Price"
           className="border rounded p-2 mr-2"
           required
-          autoComplete="off"
         />
         <input
           type="text"
@@ -192,7 +193,6 @@ const RecipeList = () => {
           placeholder="Ingredient"
           className="border rounded p-2 mr-2"
           required
-          autoComplete="off"
         />
         <input
           type="text"
@@ -234,13 +234,13 @@ const RecipeList = () => {
           required
         >
           <option value="-1">Uncensored</option>
-          <option value="0">Blocked</option>
           <option value="1">Censored</option>
+          <option value="0">Blocked</option>
         </select>
         <button
           type="submit"
           className={`bg-blue-500 text-white rounded p-2 ${
-            submitting ? "opacity-50 cursor-not-allowed" : ""
+            submitting ? "opacity-50 cursor-not-allowed" : ''
           }`}
           disabled={submitting}
         >
@@ -250,7 +250,7 @@ const RecipeList = () => {
 
       <ul className="space-y-2">
         {recipes.length > 0 ? (
-          recipes.map((rcp) => (
+          recipes.map(rcp => (
             <li key={rcp.recipeId} className="p-4 border rounded-lg shadow">
               <h2 className="font-semibold">ID: {rcp.recipeId}</h2>
               <h3 className="font-semibold">{rcp.recipeName}</h3>
@@ -262,30 +262,7 @@ const RecipeList = () => {
               <p>Price: {rcp.price} ₫</p>
               <p>Ingredient: {rcp.ingredient}</p>
               <p>Total Time: {rcp.totalTime} mins</p>
-              <p>
-                Status:{" "}
-                {rcp.status === 1
-                  ? "Censored"
-                  : rcp.status === 0
-                  ? "Blocked"
-                  : "Uncensored"}
-              </p>
-              <p>Created By (ID): {rcp.createById}</p>
-              <p>
-                Create Date: {new Date(rcp.createDate).toLocaleDateString()}
-              </p>
-              <p>
-                Update Date:{" "}
-                {rcp.updateDate
-                  ? new Date(rcp.updateDate).toLocaleDateString()
-                  : "N/A"}
-              </p>
-
-              {/* Display relationships such as Comments, Images, Tags, etc., if necessary */}
-              <p>Comments: {rcp.comments?.length || 0}</p>
-              <p>Images: {rcp.images?.length || 0}</p>
-              <p>Recipe Tags: {rcp.recipeTags?.length || 0}</p>
-
+              <p>Status: {getStatusText(rcp.status)}</p>
               <div className="mt-2">
                 <button
                   onClick={() => handleEdit(rcp)}
