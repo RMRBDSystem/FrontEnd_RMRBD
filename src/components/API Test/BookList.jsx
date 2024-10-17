@@ -8,7 +8,7 @@ const BookList = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [book, setBook] = useState({ bookName: '', description: '', price: '' });
+  const [book, setBook] = useState({ bookName: '', description: '', price: '', status: '-1' });
   const [editing, setEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -17,12 +17,10 @@ const BookList = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(apiUrl);
-        console.log('API Response:', response.data); // Log the entire response
-
-        // Assuming the response contains the books directly
+        console.log('API Response:', response.data);
         setBooks(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
-        console.error('Error fetching books:', err); // Log the error
+        console.error('Error fetching books:', err);
         setError('Failed to fetch books. Please try again later.');
       } finally {
         setLoading(false);
@@ -43,6 +41,7 @@ const BookList = () => {
       bookName: book.bookName || '',
       description: book.description || '',
       price: parseFloat(book.price) || 0,
+      status: parseInt(book.status) || -1,
     };
 
     setSubmitting(true);
@@ -54,7 +53,7 @@ const BookList = () => {
         await axios.post(apiUrl, payload);
       }
       resetForm();
-      fetchBooks(); // Refetch the books after submit
+      fetchBooks();
     } catch (err) {
       setError(err.response ? err.response.data : 'An error occurred. Please try again.');
     } finally {
@@ -63,13 +62,18 @@ const BookList = () => {
   };
 
   const handleEdit = (bk) => {
-    setBook({ bookName: bk.bookName, description: bk.description, price: bk.price });
+    setBook({ 
+      bookName: bk.bookName, 
+      description: bk.description, 
+      price: bk.price, 
+      status: bk.status 
+    });
     setEditing(true);
     setCurrentId(bk.bookId);
   };
 
   const resetForm = () => {
-    setBook({ bookName: '', description: '', price: '' });
+    setBook({ bookName: '', description: '', price: '', status: '-1' });
     setEditing(false);
     setCurrentId(null);
   };
@@ -77,10 +81,23 @@ const BookList = () => {
   const fetchBooks = async () => {
     try {
       const response = await axios.get(apiUrl);
-      console.log('Fetched Books:', response.data); // Log fetched books
+      console.log('Fetched Books:', response.data);
       setBooks(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       setError('Failed to fetch books. Please try again later.');
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 0:
+        return 'Block';
+      case 1:
+        return 'Permitted';
+      case -1:
+        return 'Non-Permitted';
+      default:
+        return 'Unknown';
     }
   };
 
@@ -121,6 +138,17 @@ const BookList = () => {
           required
           autoComplete="off"
         />
+        <select
+          name="status"
+          value={book.status}
+          onChange={handleInputChange}
+          className="border rounded p-2 mr-2"
+          required
+        >
+          <option value="-1">Non-Permitted</option>
+          <option value="1">Permitted</option>
+          <option value="0">Block</option>
+        </select>
         <button type="submit" className={`bg-blue-500 text-white rounded p-2 ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={submitting}>
           {submitting ? 'Submitting...' : (editing ? 'Update' : 'Add')}
         </button>
@@ -133,11 +161,11 @@ const BookList = () => {
               <h3 className="font-semibold">{bk.bookName}</h3>
               <p>Description: {bk.description}</p>
               <p>Price: {bk.price} ₫</p>
+              <p>Status: {getStatusText(bk.status)}</p>
               <div className="mt-2">
                 <button onClick={() => handleEdit(bk)} className="bg-yellow-500 text-white rounded p-1 mr-1">
                   Edit
                 </button>
-                {/* Delete button has been removed */}
               </div>
             </li>
           ))
