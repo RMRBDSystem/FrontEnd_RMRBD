@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 import BackgroundImage from '../../../assets/Background.jpg';
 import Logo from '../../../assets/Logo.png';
 import { IoMdSearch } from 'react-icons/io';
@@ -50,6 +50,8 @@ const AddBook = () => {
   const dropdownRef = useRef(null);
   const buttonNames = ['Home', 'About', 'Services', 'Contact'];
 
+  const navigate = useNavigate(); // Initialize navigate
+
   const toggleDropdown = () => {
     setIsDropdownOpen(prev => !prev);
   };
@@ -64,7 +66,7 @@ const AddBook = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    
     const categoryIdMapping = {
       "Appetizers": 1,
       "Soups": 2,
@@ -85,7 +87,7 @@ const AddBook = () => {
       ISBN: isbn,
       CategoryId: categoryIdMapping[category] || null,
       ImageUrl: imageUrl,
-      book: { // Ensure to include a book field if required
+      book: { 
         BookName: bookName,
         // Include other necessary fields here as per API requirements
       }
@@ -98,6 +100,7 @@ const AddBook = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Token': '123-abc', // Add the Token header here
         },
         body: JSON.stringify(payload),
       });
@@ -118,6 +121,9 @@ const AddBook = () => {
       setIsbn('');
       setCategory('');
       setImageUrl('');
+  
+      // Navigate to a specific route after successful submission
+      navigate('/home'); // Adjust this path as needed
   
     } catch (error) {
       console.error('Error:', error);
