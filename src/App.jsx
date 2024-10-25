@@ -7,7 +7,9 @@ import CustomerList from './components/API Test/CustomerList';
 import CRUDTemp from './CRUDTemp';
 import EBookList from './components/API Test/EBookList';
 import RecipeList from './components/API Test/RecipeList';
+import RouterPage from './components/RouterPage/RouterPage'
 
+import RecipeList_ToastNotification from './components/API Test/RecipeList_ToastNotification';
 //import CustomerCrud from './CustomerCrud';// //Remove if wanted to test CRUD//
 
 
@@ -23,8 +25,9 @@ const App = () => {
       </Routes>
     </Router> */}
       {/* <EBookList/>  */}
-      <RecipeList/>
-      
+      {/* <RecipeList/> */}
+      {/* <RecipeList_ToastNotification/> */}
+      <RouterPage/>
     </div>
   );
 };
