@@ -1,17 +1,197 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch } from "react-icons/fa";
-import { IoIosNotifications } from "react-icons/io";
-import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { Link, useLocation } from 'react-router-dom';
+import { IoIosNotifications } from 'react-icons/io';
 
+// Add Customer Modal Component
+const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
+  const [formData, setFormData] = useState({ userName: '', email: '', phoneNumber: '', accountStatus: 1, googleId: '' });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onAdd(formData);
+    resetForm();
+    onClose();
+  };
+
+  const resetForm = () => {
+    setFormData({ userName: '', email: '', phoneNumber: '', accountStatus: 1, googleId: '' });
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-4 rounded shadow-lg w-1/3">
+        <h2 className="text-lg font-bold mb-4">Add Customer</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-2">
+            <label htmlFor="userName" className="block">Username</label>
+            <input
+              id="userName"
+              type="text"
+              name="userName"
+              value={formData.userName}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+              required
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="email" className="block">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+              required
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="phoneNumber" className="block">Phone Number</label>
+            <input
+              id="phoneNumber"
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+              required
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="googleId" className="block">Google ID</label>
+            <input
+              id="googleId"
+              type="text"
+              name="googleId"
+              value={formData.googleId}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+            />
+          </div>
+          <div className="flex justify-end">
+            <button type="button" onClick={onClose} className="mr-2 bg-gray-300 px-4 py-2 rounded">Cancel</button>
+            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Edit Customer Modal Component
+const EditCustomerModal = ({ isOpen, onClose, onEdit, customer }) => {
+  const [formData, setFormData] = useState({ userName: '', email: '', phoneNumber: '', accountStatus: 1, googleId: '' });
+
+  useEffect(() => {
+    if (customer) {
+      setFormData({ 
+        userName: customer.userName, 
+        email: customer.email, 
+        phoneNumber: customer.phoneNumber, 
+        accountStatus: customer.accountStatus,
+        googleId: customer.googleId || '' // Include GoogleId if available
+      });
+    }
+  }, [customer]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onEdit(customer.customerId, formData);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-4 rounded shadow-lg w-1/3">
+        <h2 className="text-lg font-bold mb-4">Edit Customer</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-2">
+            <label htmlFor="userName" className="block">Username</label>
+            <input
+              id="userName"
+              type="text"
+              name="userName"
+              value={formData.userName}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+              required
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="email" className="block">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+              required
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="phoneNumber" className="block">Phone Number</label>
+            <input
+              id="phoneNumber"
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+              required
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="googleId" className="block">Google ID</label>
+            <input
+              id="googleId"
+              type="text"
+              name="googleId"
+              value={formData.googleId}
+              onChange={handleChange}
+              className="border rounded w-full px-2 py-1"
+            />
+          </div>
+          <div className="flex justify-end">
+            <button type="button" onClick={onClose} className="mr-2 bg-gray-300 px-4 py-2 rounded">Cancel</button>
+            <button type="submit" className="bg-orange-400 text-white px-4 py-2 rounded">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Account Management Component
 const AccountManagement = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
+  const [editCustomerModalOpen, setEditCustomerModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const notifications = ["Notification 1", "Notification 2"];
   
   const location = useLocation();
+
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
@@ -21,15 +201,10 @@ const AccountManagement = () => {
             'Token': '123-abc',
           },
         });
-        console.log('Response data:', response.data);
-           {/* Error Old Code To Check Array Data */}
-//      const customersData = Array.isArray(response.data.value) ? response.data.value : [];
         const customersData = Array.isArray(response.data) ? response.data : [];
-        console.log('Extracted customers:', customersData);
         setCustomers(customersData);
       } catch (error) {
         setError(error.message);
-        console.error('Error fetching customers:', error);
       } finally {
         setLoading(false);
       }
@@ -37,7 +212,62 @@ const AccountManagement = () => {
   
     fetchCustomers();
   }, []);
+
+  const handleEdit = async (id, updatedData) => {
+    try {
+      const updatedCustomerData = {
+        userName: updatedData.userName,
+        email: updatedData.email,
+        phoneNumber: updatedData.phoneNumber,
+        accountStatus: updatedData.accountStatus,
+        googleId: updatedData.googleId || null,
+      };
   
+      const response = await axios.put(`https://rmrbdapi.somee.com/odata/Customer/${id}`, updatedCustomerData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Token': '123-abc',
+        },
+      });
+  
+      // Update the customers state with the response data
+      setCustomers((prevCustomers) =>
+        prevCustomers.map((customer) =>
+          customer.customerId === id ? response.data : customer
+        )
+      );
+  
+      console.log("Update successful:", response.data);
+    } catch (error) {
+      setError("Failed to update customer.");
+      console.error("Error updating customer:", error.response ? error.response.data : error.message);
+    }
+  };
+  
+  
+  const handleAdd = async (newCustomer) => {
+    try {
+      const response = await axios.post('https://rmrbdapi.somee.com/odata/Customer', newCustomer, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Token': '123-abc',
+        },
+      });
+      setCustomers(prevCustomers => [...prevCustomers, response.data]);
+      console.log("Customer added:", response.data); // Log success
+    } catch (error) {
+      setError("Failed to add customer."); // Set error message
+      console.error(error.message);
+    }
+  };
+
+  const filteredCustomers = customers.filter(customer => {
+    const userNameMatch = customer.userName && customer.userName.toLowerCase().includes(searchQuery.toLowerCase());
+    const emailMatch = customer.email && customer.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const phoneMatch = customer.phoneNumber && customer.phoneNumber.includes(searchQuery);
+    return userNameMatch || emailMatch || phoneMatch;
+  });
+
   return (
     <div className="flex flex-col min-h-screen font-roboto">
       <div className="flex flex-1">
@@ -65,18 +295,17 @@ const AccountManagement = () => {
           <header className="p-4 bg-orange-400 flex justify-between items-center">
             <h1 className="text-white text-xl">Account Management</h1>
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="rounded-md px-3 py-2 text-gray-800 pr-10" 
-                  name="accountSearch"
-                />
-                <button className="absolute right-0 top-0 bottom-0 text-black rounded-r-md px-3 flex items-center">
-                  <FaSearch />
-                </button>
-              </div>
-              <button onClick={() => setShowNotifications(!showNotifications)} className="text-white flex items-center relative">
+              <input 
+                type="text" 
+                id="search-input" // Unique id added
+                placeholder="Search..." 
+                className="rounded-md px-3 py-2 text-gray-800"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)} 
+                className="text-white flex items-center relative">
                 <IoIosNotifications size={24} />
                 {notifications.length > 0 && (
                   <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notifications.length}</span>
@@ -85,45 +314,68 @@ const AccountManagement = () => {
             </div>
           </header>
 
-          {showNotifications && (
-            <div className="absolute right-4 top-16 bg-white shadow-lg rounded-lg p-4 w-64 z-50">
-              <h2 className="font-semibold mb-2">Notifications</h2>
-              {notifications.length > 0 ? (
-                <ul className="space-y-1">
-                  {notifications.map((note, index) => (
-                    <li key={index} className="text-gray-800">{note}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No notifications</p>
-              )}
-            </div>
-          )}
-
-          {/* Customer Data Display */}
           <div className="p-4">
-            {loading && <p>Loading customers...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && !error && customers.length ===  0 && <p>No customers found.</p>}
-            {!loading && !error && customers.length > 0 && (
-              <ul className="space-y-2">
-                {customers.map(customer => (
-                  <li key={customer.customerId} className="bg-white shadow p-3 rounded">
-                    <h3 className="font-semibold">{customer.userName}</h3>
-                    <p>Email: {customer.email}</p>
-                    <p>Phone: {customer.phoneNumber || 'N/A'}</p>
-                    <p>Account Status: {customer.accountStatus ? (customer.accountStatus === 1 ? 'Active' : 'Inactive') : 'N/A'}</p>
-                  </li>
-                ))}
-              </ul>
+            <button onClick={() => setAddCustomerModalOpen(true)} className="bg-green-500 text-white px-4 py-2 rounded">
+              Add Customer
+            </button>
+          </div>
+
+          {/* Customers List */}
+          <div className="flex-1 overflow-auto p-4">
+            {loading ? (
+              <p>Loading...</p>
+            ) : error ? (
+              <p>Error: {error}</p>
+            ) : (
+              <table className="min-w-full bg-white">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border-b text-center">#</th>
+                    <th className="py-2 px-4 border-b text-center">Username</th>
+                    <th className="py-2 px-4 border-b text-center">Email</th>
+                    <th className="py-2 px-4 border-b text-center">Phone Number</th>
+                    <th className="py-2 px-4 border-b text-center">Account Status</th>
+                    <th className="py-2 px-4 border-b text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCustomers.map((customer, index) => (
+                    <tr key={customer.customerId}>
+                      <td className="py-2 px-4 border-b text-center">{index + 1}</td>
+                      <td className="py-2 px-4 border-b text-center">{customer.userName}</td>
+                      <td className="py-2 px-4 border-b text-center">{customer.email}</td>
+                      <td className="py-2 px-4 border-b text-center">{customer.phoneNumber}</td>
+                      <td className="py-2 px-4 border-b text-center">{customer.accountStatus === 1 ? 'Active' : 'Inactive'}</td>
+                      <td className="py-2 px-4 border-b text-center">
+                        <button onClick={() => { setSelectedCustomer(customer); setEditCustomerModalOpen(true); }} className="bg-orange-400 text-white px-2 py-1 rounded">
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </main>
       </div>
+
+      {/* Add Customer Modal */}
+      <AddCustomerModal
+        isOpen={addCustomerModalOpen}
+        onClose={() => setAddCustomerModalOpen(false)}
+        onAdd={handleAdd}
+      />
+
+      {/* Edit Customer Modal */}
+      <EditCustomerModal
+        isOpen={editCustomerModalOpen}
+        onClose={() => setEditCustomerModalOpen(false)}
+        onEdit={handleEdit}
+        customer={selectedCustomer}
+      />
     </div>
   );
 };
 
 export default AccountManagement;
-
-

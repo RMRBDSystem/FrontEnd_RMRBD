@@ -3,10 +3,12 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { IoIosNotifications } from "react-icons/io";
 import { FaSearch } from "react-icons/fa";
-import { IoIosArrowDown } from "react-icons/io"; 
+import { IoChevronDown } from "react-icons/io5";
+import axios from 'axios';
 import AccountManagement from './AccountManagement';
 import IncomeManagement from './IncomeManagement';
 import ProductManagement from './ProductManagement';
+import AddBook from './AddBook';
 import Delivery from './Delivery';
 import Reports from './Reports';
 
@@ -23,9 +25,31 @@ const debounce = (func, delay) => {
 const Dashboard = () => {
   const location = useLocation();
   const [chartData, setChartData] = useState([]);
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [newUsers, setNewUsers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [totalEarnings, setTotalEarnings] = useState(1500000);
+  const [totalExpenses, setTotalExpenses] = useState(-200000);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showAllUsers, setShowAllUsers] = useState(false);
+
+  useEffect(() => {
+    const fetchNewUsers = async () => {
+      try {
+        const response = await axios.get('https://rmrbdapi.somee.com/odata/Customer', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Token': '123-abc',
+          },
+        });
+        setNewUsers(response.data);
+      } catch (error) {
+        console.error('Error fetching new users:', error);
+      }
+    };
+
+    fetchNewUsers();
+  }, []);
 
   useEffect(() => {
     const hardcodedData = [
@@ -40,7 +64,6 @@ const Dashboard = () => {
   const handleSearch = useCallback(
     debounce((query) => {
       console.log('Searching for:', query);
-      // Here you would typically call an API to fetch search results
     }, 300),
     []
   );
@@ -51,15 +74,8 @@ const Dashboard = () => {
     handleSearch(query);
   };
 
-  const newUsers = ["User 1", "User 2", "User 3", "User 4", "User 5"];
-  const notifications = ["Notification 1", "Notification 2", "Notification 3"];
-
-  const totalEarnings = 1500000; 
-  const totalExpenses = -200000;
   const netProfit = totalEarnings + totalExpenses; 
   const totalTransactions = 150; 
-
-  
 
   return (
     <div className="flex flex-col min-h-screen font-roboto">
@@ -95,7 +111,7 @@ const Dashboard = () => {
                   className="rounded-md px-3 py-2 text-gray-800 pr-10" 
                   name="dashboardSearch"
                   value={searchQuery}
-                  onChange={handleChange} // Use the debounced search
+                  onChange={handleChange}
                 />
                 <button className="absolute right-0 top-0 bottom-0 text-black rounded-r-md px-3 flex items-center">
                   <FaSearch />
@@ -134,7 +150,7 @@ const Dashboard = () => {
             <Route path="/productmanagement" element={<ProductManagement />} />
             <Route path="/deliverymanagement" element={<Delivery />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/" element={
+            <Route path="/*" element={
               <>
                 <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-white p-4 shadow-md rounded-lg">
@@ -183,38 +199,43 @@ const Dashboard = () => {
                   <div className="bg-white shadow-md rounded-lg">
                     <h2 className="bg-orange-400 text-white text-lg font-semibold p-4 rounded-t-lg">New Users</h2>
                     <div className="space-y-2 p-4">
-                      {newUsers.map((user, index) => (
-                        <div key={index}>
-                          <div className="flex items-center">
-                            <div className="bg-gray-400 w-10 h-10 rounded-full"></div>
-                            <span className="ml-4">{user}</span>
+                      {newUsers.length > 0 ? (
+                        <>
+                          {newUsers.slice(0, 7).map((user, index) => (
+                            <div key={index} className="flex items-center justify-between border-b border-gray-300 py-2">
+                              <span>{user.userName}</span>
+                              <button className="text-blue-500">View Profile</button>
+                            </div>
+                          ))}
+                          <div className="flex items-center justify-between border-b border-gray-300 py-2 cursor-pointer" onClick={() => setShowAllUsers(!showAllUsers)}>
+                            <span className="text-orange-500">See more...</span>
+                            <IoChevronDown className={`text-orange-500 transition-transform ${showAllUsers ? 'rotate-180' : ''}`} />
                           </div>
-                          <div className="border-b border-gray-300 my-2"></div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-center mt-4">
-                      <div className="bg-orange-400 p-2 rounded-full flex items-center cursor-pointer" onClick={() => setModalOpen(true)}>
-                        <IoIosArrowDown className="text-white" />
-                      </div>
+                          {showAllUsers && (
+                            <>
+                              {/* Overlay */}
+                              <div className="fixed inset-0 bg-black bg-opacity-80 z-40" onClick={() => setShowAllUsers(false)} />
+                              {/* Popup */}
+                              <div className="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg w-3/4 md:w-1/2">
+                                <h3 className="bg-orange-400 text-white text-lg font-semibold p-4 rounded-t-lg">All New Users</h3>
+                                <div className="p-4">
+                                  <ul>
+                                    {newUsers.map((user, index) => (
+                                      <li key={index} className="py-2 border-b border-gray-300">{user.userName}</li>
+                                    ))}
+                                  </ul>
+                                  <button className="mt-4 text-red-500" onClick={() => setShowAllUsers(false)}>Close</button>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <p>No new users available.</p>
+                      )}
                     </div>
                   </div>
                 </div>
-
-                {isModalOpen && (
-                  <div className="fixed inset-0 flex justify-center items-center z-50">
-                    <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setModalOpen(false)} />
-                    <div className="bg-white p-4 rounded-lg w-1/3 relative z-10">
-                      <h2 className="text-lg font-semibold mb-4">All New Users</h2>
-                      <ul className="space-y-2">
-                        {newUsers.map((user, index) => (
-                          <li key={index} className="p-2 border-b">{user}</li>
-                        ))}
-                      </ul>
-                      <button className="mt-4 bg-orange-400 text-white p-2 rounded" onClick={() => setModalOpen(false)}>Close</button>
-                    </div>
-                  </div>
-                )}
               </>
             } />
           </Routes>
