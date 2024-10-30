@@ -1,112 +1,136 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import Logo from '../../assets/Logo.png';
-import { IoMdSearch } from 'react-icons/io';
-import { AiOutlineUser } from "react-icons/ai";
+import React from "react";
+import { NavLink } from "react-router-dom";
+import LogoA from "../../assets/LogoA.png";
+import {
+  Navbar,
+  MobileNav,
+  Typography,
+  Button,
+  IconButton,
+} from "@material-tailwind/react";
+import SearchWrapper from "./SearchWrapper";
 
-const Navbar = () => {
-  const buttonNames = ['Meals', 'Dinners', 'Ingredients', 'Cuisines', 'Kitchen Tips', 'Features'];
-  
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const profileButtonRef = useRef(null);
+export function StickyNavbar() {
+  const [openNav, setOpenNav] = React.useState(false);
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(prev => !prev);
-  };
-
-  const handleMouseLeave = (event) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.relatedTarget) &&
-      profileButtonRef.current &&
-      !profileButtonRef.current.contains(event.relatedTarget)
-    ) {
-      setIsDropdownOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleMouseLeave);
-    return () => {
-      document.removeEventListener('mousedown', handleMouseLeave);
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 960) setOpenNav(false);
     };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const navList = (
+    <ul className="mt-2 mb-4 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
+      {["home", "pages" ,"meals", "cuisines", "kitchen-tips", "features"].map((item) => (
+        <Typography
+          key={item}
+          as="li"
+          variant="small"
+          className="p-1 font-medium tracking-wide"
+        >
+          <NavLink
+            to={`/${item === 'home' ? 'home' : item}`}
+            className={({ isActive }) => `
+              flex items-center justify-center px-4 py-2 transition-all
+              ${isActive ? 'text-white font-semibold border-b-2 border-white' : 'text-gray-100'}
+              hover:border-b-2 hover:text-white uppercase
+            `}
+          >
+            {item.toUpperCase()}
+          </NavLink>
+        </Typography>
+      ))}
+    </ul>
+  );
+
   return (
-    <div className="fixed w-full z-50">
-      <div className="bg-primary/100">
-        <div className="container mx-auto flex justify-between items-center">
-          {/* Content for Navbar */}
+    <Navbar className="sticky top-0 z-10 h-max max-w-full rounded-none border-0 bg-gradient-to-r from-purple-700 to-blue-700 px-4 py-2 lg:px-8 lg:py-4">
+      <div className="flex items-center justify-between text-blue-gray-900 px-4">
+        <NavLink to="/">
+          <img
+            src={LogoA}
+            alt="LogoA"
+            className="w-20 h-auto object-contain transition-transform duration-500 ease-in-out hover:scale-110"
+          />
+        </NavLink>
+        <div className="flex items-center gap-4">
+          <div className="mr-14 hidden lg:block">{navList}</div>
+          <SearchWrapper />
+          <div className="flex items-center gap-x-1">
+            <Button variant="text" size="sm" className="hidden lg:inline-block text-white">
+              <NavLink to="/login">
+                Log In
+              </NavLink>
+            </Button>
+            <Button
+              variant="gradient"
+              size="sm"
+              className="hidden lg:inline-block bg-custom-gradient text-white"
+            >
+              <NavLink to="/signup">
+                Sign Up
+              </NavLink>
+            </Button>
+          </div>
+          <IconButton
+            variant="text"
+            className="ml-auto h-6 w-6 text-gray-700 hover:bg-gray-100 lg:hidden"
+            ripple={false}
+            onClick={() => setOpenNav(!openNav)}
+            aria-label="Toggle navigation"
+          >
+            {openNav ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            )}
+          </IconButton>
         </div>
       </div>
-
-      <div className="bg-gray-200 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center p-4">
-          {/* Logo */}
-          <div className="flex">
-            <Link to="/">
-              <img src={Logo} alt="Logo" className="w-32" />
-            </Link>
-          </div>
-
-          {/* Search bar & Button Container */}
-          <div className="flex flex-col items-center w-full">
-            <div className="relative group hidden sm:block mb-2">
-              <input
-                type="text"
-                placeholder="Search your items"
-                className="w-[300px] sm:w-[400px] group-hover:w-[500px] transition-all duration-300 rounded-full border border-white px-2 py-1 focus:outline-none focus:border-primary"
-              />
-              <IoMdSearch className="absolute top-1/2 -translate-y-1/2 right-3 w-7 h-6 rounded-full border-2 bg-orange-400" />
-            </div>
-
-            {/* Button Container */}
-            <div className="flex space-x-2">
-              {buttonNames.map((name, index) => (
-                <React.Fragment key={index}>
-                  <Link to={`/${name.toLowerCase()}`} className="bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-400 hover:text-white transition-all">
-                    {name}
-                  </Link>
-                  {index < buttonNames.length - 1 && <div className="border-l border-gray-400 h-8 mx-2" />}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-
-          {/* Profile Button with Dropdown */}
-          <div className="relative flex-shrink-0">
-            <button
-              ref={profileButtonRef}
-              onClick={toggleDropdown}
-              className="border-4 border-gray-300 bg-gray-300 rounded-full p-3 hover:bg-gray-400 hover:border-gray-400 transition-all"
-            >
-              <AiOutlineUser className="w-5 h-5 text-gray-700" />
-            </button>
-            {/* Dropdown Menu */}
-            <div
-              ref={dropdownRef}
-              className={`absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-20 transition-opacity duration-300 ${isDropdownOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-              onMouseLeave={handleMouseLeave}
-              onMouseEnter={() => setIsDropdownOpen(true)}
-            >
-              <ul className="py-1">
-                <li>
-                  <Link to="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</Link>
-                </li>
-                <li>
-                  <Link to="/settings" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Settings</Link>
-                </li>
-                <li>
-                  <Link to="/logout" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
+      <MobileNav open={openNav}>
+        {navList}
+        <div className="flex items-center gap-x-1">
+          <Button fullWidth variant="text" size="sm">
+            <NavLink to="/login">
+              Log In
+            </NavLink>
+          </Button>
+          <Button fullWidth variant="gradient" size="sm">
+            <NavLink to="/signup">
+              Sign Up
+            </NavLink>
+          </Button>
         </div>
-      </div>
-    </div>
+      </MobileNav>
+    </Navbar>
   );
 }
 
-export default Navbar;
+export default StickyNavbar;

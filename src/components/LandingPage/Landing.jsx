@@ -42,10 +42,10 @@ const Landing = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-cover bg-center relative" style={{ backgroundImage: `url(${backgroundImage})` }}>
-      <div className="bg-white h-24 w-full flex items-center justify-between px-5 shadow-md z-10">
-        <img src={logo} alt="Logo" className="h-24" />
+      <div className="h-24 w-full flex items-center justify-between px-5 z-10">
+      <img src={logo} alt="Logo" className="w-24 ml-16 h-auto object-contain"/>
         <button 
-          className="bg-orange-500 text-black rounded-lg px-4 py-2 transition-all duration-300 transform hover:bg-black hover:scale-105 font-roboto group hover:text-white hover:shadow-lg hover:shadow-orange-500/50"
+          className="bg-custom-orange text-black rounded-lg px-4 py-2 transition-all duration-300 transform hover:bg-black hover:scale-105 font-roboto group hover:text-white hover:shadow-lg hover:shadow-orange-500/50 animate-tada"
           onClick={() => navigate('/home')}
         >
           <span className="transition-all duration-100 group-hover:font-bold">
@@ -55,7 +55,7 @@ const Landing = () => {
       </div>
 
       {/* Single Plain Box */}
-      <div className={`absolute top-24 left-0 h-1/2 bg-teal-600 z-0 opacity-75 transition-all duration-700`} 
+      <div className={`absolute top-24 left-0 h-1/2 bg-gradient-to-b to-teal-500 from-indigo-900 z-0 opacity-75 transition-all duration-700`} 
         style={{ width: boxWidth, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         
         {/* Stars and Customer Text */}
@@ -73,7 +73,7 @@ const Landing = () => {
         </div>
 
         {/* Michelin Text */}
-        <div className={`text-center text-black text-4xl font-bold transition-opacity duration-700 ${bigTextVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`text-center text-white text-4xl font-bold transition-opacity duration-700 ${bigTextVisible ? 'opacity-100' : 'opacity-0'}`}>
           <span className="font-bold drop-shadow-lg">
             From a meal to a <br />
             <span className='drop-shadow-lg'>Michelin Plates Quality!</span> 
@@ -90,7 +90,7 @@ const Landing = () => {
       <footer className="bg-[#14213D] text-white py-4">
         <div className="container mx-auto text-center">
           <p className="text-sm">
-            &copy; {new Date().getFullYear()} FPT Education.
+          FPT University &copy; {new Date().getFullYear()}
           </p>
         </div>
       </footer>
