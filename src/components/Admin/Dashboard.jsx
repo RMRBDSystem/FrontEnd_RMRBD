@@ -7,10 +7,8 @@ import { IoChevronDown } from "react-icons/io5";
 import axios from 'axios';
 import AccountManagement from './AccountManagement';
 import IncomeManagement from './IncomeManagement';
-import ProductManagement from './ProductManagement';
-import AddBook from './AddBook';
-import Delivery from './Delivery';
 import Reports from './Reports';
+import CategoryManagement from './CategoryManagement';
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -32,6 +30,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAllUsers, setShowAllUsers] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const fetchNewUsers = async () => {
@@ -81,19 +80,28 @@ const Dashboard = () => {
     <div className="flex flex-col min-h-screen font-roboto">
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-1/5 bg-white text-black flex flex-col">
-          <div className="p-4 flex justify-center">
-            <img src="/src/assets/Logo.png" alt="Logo" className="w-40" />
+        <aside 
+          className={`bg-white text-black flex flex-col transition-all duration-300 ${isSidebarOpen ? 'w-1/5' : 'w-16'}`}
+          onMouseEnter={() => setIsSidebarOpen(true)}
+          onMouseLeave={() => setIsSidebarOpen(false)}
+        >
+          <div className="p-2 flex justify-center">
+            <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
           </div>
           <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Product Management", "Feedback & Comments", "Reports", "Delivery Management"].map((item, index) => (
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => (
               <div key={index}>
                 <Link 
                   to={`/${item.replace(/ /g, '').toLowerCase()}`} 
-                  className={`block py-2.5 px-4 rounded ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? "text-orange-500 font-semibold border-b-2 border-orange-500" : "text-black"}`}>
-                  {item}
+                  className={`block py-2.5 px-4 rounded transition-colors duration-200 
+                    ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? 
+                      "text-orange-500 font-semibold border-b-2 border-orange-500" : 
+                      "text-black"}`}
+                  style={{ opacity: isSidebarOpen ? 1 : 0 }} // Hide text when sidebar is collapsed
+                >
+                  {isSidebarOpen ? item : <span className="text-transparent">{item.charAt(0)}</span>} {/* Only show first letter when closed */}
                 </Link>
-                <div className={`border-b border-gray-300 ${item !== "Delivery Management" ? "mb-2" : ""}`} />
+                {isSidebarOpen && <div className={`border-b border-gray-300 ${item !== "Reports" ? "mb-2" : ""}`} />}
               </div>
             ))}
           </nav>
@@ -101,33 +109,34 @@ const Dashboard = () => {
 
         {/* Main Dashboard */}
         <main className="flex-1 bg-gray-50 flex flex-col">
-          <header className="p-4 bg-orange-400 flex justify-between items-center">
-            <h1 className="text-white text-xl">Admin Dashboard</h1>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="rounded-md px-3 py-2 text-gray-800 pr-10" 
-                  name="dashboardSearch"
-                  value={searchQuery}
-                  onChange={handleChange}
-                />
-                <button className="absolute right-0 top-0 bottom-0 text-black rounded-r-md px-3 flex items-center">
-                  <FaSearch />
-                </button>
-              </div>
-              <button onClick={() => setShowNotifications(!showNotifications)} className="text-white flex items-center relative">
-                <IoIosNotifications size={24} />
-                {notifications.length > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notifications.length}</span>
-                )}
+        <header className="p-4 flex justify-between items-center">
+          <h1 className="text-orange-500 text-xl font-bold">Admin Dashboard</h1> {/* Added font-bold class */}
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="rounded-md px-3 py-2 text-gray-800 pr-10" 
+                name="dashboardSearch"
+                value={searchQuery}
+                onChange={handleChange}
+              />
+              <button className="absolute right-0 top-0 bottom-0 text-black rounded-r-md px-3 flex items-center">
+                <FaSearch />
               </button>
-              <div className="text-white flex items-center">
-                <div className="ml-2">Admin1</div>
-              </div>
             </div>
-          </header>
+            <button onClick={() => setShowNotifications(!showNotifications)} className="text-black flex items-center relative">
+              <IoIosNotifications size={24} />
+              {notifications.length > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notifications.length}</span>
+              )}
+            </button>
+            <div className="text-black flex items-center">
+              <div className="ml-2">Admin1</div>
+            </div>
+          </div>
+        </header>
+
 
           {showNotifications && (
             <div className="absolute right-4 top-16 bg-white shadow-lg rounded-lg p-4 w-64 z-50">
@@ -145,12 +154,14 @@ const Dashboard = () => {
           )}
 
           <Routes>
+            {/* Specific Routes */}
             <Route path="/accountmanagement" element={<AccountManagement />} />
             <Route path="/incomemanagement" element={<IncomeManagement />} />
-            <Route path="/productmanagement" element={<ProductManagement />} />
-            <Route path="/deliverymanagement" element={<Delivery />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/*" element={
+            <Route path="/categorymanagement" element={<CategoryManagement />} />
+
+            {/* Main Dashboard Route */}
+            <Route path="/" element={
               <>
                 <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-white p-4 shadow-md rounded-lg">
@@ -213,9 +224,7 @@ const Dashboard = () => {
                           </div>
                           {showAllUsers && (
                             <>
-                              {/* Overlay */}
                               <div className="fixed inset-0 bg-black bg-opacity-80 z-40" onClick={() => setShowAllUsers(false)} />
-                              {/* Popup */}
                               <div className="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg w-3/4 md:w-1/2">
                                 <h3 className="bg-orange-400 text-white text-lg font-semibold p-4 rounded-t-lg">All New Users</h3>
                                 <div className="p-4">

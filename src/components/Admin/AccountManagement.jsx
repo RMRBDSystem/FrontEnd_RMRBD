@@ -6,17 +6,20 @@ import { IoIosNotifications } from 'react-icons/io';
 // Add Customer Modal Component
 const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({ userName: '', email: '', phoneNumber: '', accountStatus: 1, googleId: '' });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAdd(formData);
+    setLoading(true);
+    await onAdd(formData);
     resetForm();
     onClose();
+    setLoading(false);
   };
 
   const resetForm = () => {
@@ -26,7 +29,7 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true">
       <div className="bg-white p-4 rounded shadow-lg w-1/3">
         <h2 className="text-lg font-bold mb-4">Add Customer</h2>
         <form onSubmit={handleSubmit}>
@@ -79,7 +82,9 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
           </div>
           <div className="flex justify-end">
             <button type="button" onClick={onClose} className="mr-2 bg-gray-300 px-4 py-2 rounded">Cancel</button>
-            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Add</button>
+            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded" disabled={loading}>
+              {loading ? 'Adding...' : 'Add'}
+            </button>
           </div>
         </form>
       </div>
@@ -90,6 +95,7 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
 // Edit Customer Modal Component
 const EditCustomerModal = ({ isOpen, onClose, onEdit, customer }) => {
   const [formData, setFormData] = useState({ userName: '', email: '', phoneNumber: '', accountStatus: 1, googleId: '' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (customer) {
@@ -98,7 +104,7 @@ const EditCustomerModal = ({ isOpen, onClose, onEdit, customer }) => {
         email: customer.email, 
         phoneNumber: customer.phoneNumber, 
         accountStatus: customer.accountStatus,
-        googleId: customer.googleId || '' // Include GoogleId if available
+        googleId: customer.googleId || ''
       });
     }
   }, [customer]);
@@ -108,16 +114,18 @@ const EditCustomerModal = ({ isOpen, onClose, onEdit, customer }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onEdit(customer.customerId, formData);
+    setLoading(true);
+    await onEdit(customer.customerId, formData);
     onClose();
+    setLoading(false);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true">
       <div className="bg-white p-4 rounded shadow-lg w-1/3">
         <h2 className="text-lg font-bold mb-4">Edit Customer</h2>
         <form onSubmit={handleSubmit}>
@@ -170,7 +178,9 @@ const EditCustomerModal = ({ isOpen, onClose, onEdit, customer }) => {
           </div>
           <div className="flex justify-end">
             <button type="button" onClick={onClose} className="mr-2 bg-gray-300 px-4 py-2 rounded">Cancel</button>
-            <button type="submit" className="bg-orange-400 text-white px-4 py-2 rounded">Save</button>
+            <button type="submit" className="bg-orange-400 text-white px-4 py-2 rounded" disabled={loading}>
+              {loading ? 'Saving...' : 'Save'}
+            </button>
           </div>
         </form>
       </div>
@@ -191,6 +201,7 @@ const AccountManagement = () => {
   const notifications = ["Notification 1", "Notification 2"];
   
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -204,7 +215,7 @@ const AccountManagement = () => {
         const customersData = Array.isArray(response.data) ? response.data : [];
         setCustomers(customersData);
       } catch (error) {
-        setError(error.message);
+        setError(error.response ? error.response.data : error.message);
       } finally {
         setLoading(false);
       }
@@ -230,20 +241,17 @@ const AccountManagement = () => {
         },
       });
   
-      // Update the customers state with the response data
       setCustomers((prevCustomers) =>
         prevCustomers.map((customer) =>
           customer.customerId === id ? response.data : customer
         )
       );
-  
       console.log("Update successful:", response.data);
     } catch (error) {
-      setError("Failed to update customer.");
-      console.error("Error updating customer:", error.response ? error.response.data : error.message);
+      setError(error.response ? error.response.data : "Failed to update customer.");
+      console.error("Error updating customer:", error);
     }
   };
-  
   
   const handleAdd = async (newCustomer) => {
     try {
@@ -254,10 +262,10 @@ const AccountManagement = () => {
         },
       });
       setCustomers(prevCustomers => [...prevCustomers, response.data]);
-      console.log("Customer added:", response.data); // Log success
+      console.log("Customer added:", response.data);
     } catch (error) {
-      setError("Failed to add customer."); // Set error message
-      console.error(error.message);
+      setError(error.response ? error.response.data : "Failed to add customer.");
+      console.error(error);
     }
   };
 
@@ -272,47 +280,57 @@ const AccountManagement = () => {
     <div className="flex flex-col min-h-screen font-roboto">
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-1/5 bg-white text-black flex flex-col">
-          <div className="p-4 flex justify-center">
-            <img src="/src/assets/Logo.png" alt="Logo" className="w-40" />
+        <div
+          onMouseEnter={() => setSidebarOpen(true)}
+          onMouseLeave={() => setSidebarOpen(false)}
+          className={`transition-all duration-300 ${sidebarOpen ? 'w-1/5 bg-white' : 'w-16 bg-white'} text-black flex flex-col`}
+        >
+          <div className={`transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="p-4 flex justify-center">
+              <img src="/src/assets/Logo.png" alt="Logo" className="w-40" />
+            </div>
           </div>
-          <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Product Management", "Feedback & Comments", "Reports", "Delivery Management"].map((item, index) => (
-              <div key={index}>
+          
+          <nav className="mt-10 flex flex-col">
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => (
+              <div key={index} className={`relative ${sidebarOpen ? 'block' : 'hidden'}`}>
                 <Link 
                   to={`/${item.replace(/ /g, '').toLowerCase()}`} 
-                  className={`block py-2.5 px-4 rounded ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? "text-orange-500 font-semibold border-b-2 border-orange-500" : "text-black"}`}>
+                  className={`block py-2.5 px-4 rounded ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? "text-orange-500 font-semibold border-b-2 border-orange-500" : "text-black"}`}
+                >
                   {item}
                 </Link>
-                <div className={`border-b border-gray-300 ${item !== "Delivery Management" ? "mb-2" : ""}`} />
               </div>
             ))}
           </nav>
-        </aside>
+        </div>
 
         {/* Main Account Management */}
         <main className="flex-1 bg-gray-50 flex flex-col">
-          <header className="p-4 bg-orange-400 flex justify-between items-center">
-            <h1 className="text-white text-xl">Account Management</h1>
-            <div className="flex items-center space-x-4">
-              <input 
-                type="text" 
-                id="search-input" // Unique id added
-                placeholder="Search..." 
-                className="rounded-md px-3 py-2 text-gray-800"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button 
-                onClick={() => setShowNotifications(!showNotifications)} 
-                className="text-white flex items-center relative">
-                <IoIosNotifications size={24} />
-                {notifications.length > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notifications.length}</span>
-                )}
-              </button>
+        <header className="p-4 bg-white flex justify-between items-center">
+          <h1 className="text-orange-500 text-xl font-bold">Account Management</h1>
+          <div className="flex items-center space-x-4">
+            <input 
+              type="text" 
+              id="search-input"
+              placeholder="Search..." 
+              className="rounded-md px-3 py-2 text-gray-800"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)} 
+              className="text-black flex items-center relative">
+              <IoIosNotifications size={24} />
+              {notifications.length > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notifications.length}</span>
+              )}
+            </button>
+            <div className="text-black flex items-center">
+              <div className="ml-2">Admin1</div>
             </div>
-          </header>
+          </div>
+        </header>
 
           <div className="p-4">
             <button onClick={() => setAddCustomerModalOpen(true)} className="bg-green-500 text-white px-4 py-2 rounded">

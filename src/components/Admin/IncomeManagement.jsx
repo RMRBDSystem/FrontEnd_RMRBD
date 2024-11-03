@@ -7,8 +7,7 @@ import { Link, useLocation } from 'react-router-dom';
 const IncomeManagement = () => {
   const [chartData, setChartData] = useState([]);
   const [isNotificationOpen, setNotificationOpen] = useState(false);
-  const [isSubMenuOpen, setSubMenuOpen] = useState(false);
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar
   const location = useLocation();
 
   useEffect(() => {
@@ -24,27 +23,32 @@ const IncomeManagement = () => {
 
   const notifications = ["None"];
 
-  const toggleSubMenu = () => {
-    setSubMenuOpen(prev => !prev);
-  };
-
   return (
     <div className="flex flex-col min-h-screen font-roboto">
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-1/5 bg-white text-black flex flex-col">
-          <div className="p-4 flex justify-center">
-            <img src="/src/assets/Logo.png" alt="Logo" className="w-40" />
+        <aside 
+          className={`bg-white text-black flex flex-col transition-all duration-300 ${isSidebarOpen ? 'w-1/5' : 'w-16'}`}
+          onMouseEnter={() => setIsSidebarOpen(true)}
+          onMouseLeave={() => setIsSidebarOpen(false)}
+        >
+          <div className="p-2 flex justify-center">
+            <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
           </div>
           <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Product Management", "Feedback & Comments", "Reports", "Delivery Management"].map((item, index) => (
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => (
               <div key={index}>
                 <Link 
                   to={`/${item.replace(/ /g, '').toLowerCase()}`} 
-                  className={`block py-2.5 px-4 rounded ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? "text-orange-500 font-semibold border-b-2 border-orange-500" : "text-black"}`}>
-                  {item}
+                  className={`block py-2.5 px-4 rounded transition-colors duration-200 
+                    ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? 
+                      "text-orange-500 font-semibold border-b-2 border-orange-500" : 
+                      "text-black"}`}
+                  style={{ opacity: isSidebarOpen ? 1 : 0 }} // Hide text when sidebar is collapsed
+                >
+                  {isSidebarOpen ? item : <span className="text-transparent">{item.charAt(0)}</span>} {/* Only show first letter when closed */}
                 </Link>
-                <div className={`border-b border-gray-300 ${item !== "Feedback" ? "mb-2" : ""}`} />
+                {isSidebarOpen && <div className={`border-b border-gray-300 ${item !== "Reports" ? "mb-2" : ""}`} />}
               </div>
             ))}
           </nav>
@@ -52,8 +56,8 @@ const IncomeManagement = () => {
 
         {/* Main Income Management */}
         <main className="flex-1 bg-gray-50 flex flex-col">
-          <header className="p-4 bg-orange-400 flex justify-between items-center">
-            <h1 className="text-white text-xl">Income Management</h1>
+          <header className="p-4 bg-white flex justify-between items-center">
+            <h1 className="text-orange-500 text-xl font-bold">Income Management</h1>
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <input 
@@ -67,7 +71,7 @@ const IncomeManagement = () => {
                 </button>
               </div>
               <div className="relative">
-                <button className="text-white flex items-center" onClick={() => setNotificationOpen(!isNotificationOpen)}>
+                <button className="text-black flex items-center" onClick={() => setNotificationOpen(!isNotificationOpen)}>
                   <IoIosNotifications size={24} />
                 </button>
                 {isNotificationOpen && (
@@ -80,6 +84,9 @@ const IncomeManagement = () => {
                     </ul>
                   </div>
                 )}
+              </div>
+              <div className="text-black flex items-center">
+                <div className="ml-2 font-bold">Admin1</div>
               </div>
             </div>
           </header>

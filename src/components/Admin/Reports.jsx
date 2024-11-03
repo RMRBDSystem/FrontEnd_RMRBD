@@ -1,24 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaSearch } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
-import { MdKeyboardArrowDown } from "react-icons/md";
 import { Link, useLocation } from 'react-router-dom';
 
 const Report = () => {
-  const [showNotifications, setShowNotifications] = React.useState(false);
-  const [isSubMenuOpen, setSubMenuOpen] = React.useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar
   const notifications = ["Notification 1", "Notification 2"];
   const location = useLocation();
-  
+
   const handleToggleNotifications = () => {
     setShowNotifications(prev => !prev);
-  };
-
-  const isAccountManagementActive = location.pathname.includes("accountmanagement");
-  const isReportActive = location.pathname === "/reports";
-
-  const toggleSubMenu = () => {
-    setSubMenuOpen(prev => !prev);
   };
 
   // Sample reports data
@@ -44,26 +36,28 @@ const Report = () => {
     <div className="flex flex-col min-h-screen font-roboto">
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-1/5 bg-white text-black flex flex-col">
-          <div className="p-4 flex justify-center">
-            <img src="/src/assets/Logo.png" alt="Logo" className="w-40" />
+        <aside 
+          className={`bg-white text-black flex flex-col transition-all duration-300 ${isSidebarOpen ? 'w-1/5' : 'w-16'}`}
+          onMouseEnter={() => setIsSidebarOpen(true)}
+          onMouseLeave={() => setIsSidebarOpen(false)}
+        >
+          <div className="p-2 flex justify-center">
+            <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
           </div>
           <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Product Management", "Feedback & Comments", "Reports", "Delivery Management"].map((item, index) => (
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => (
               <div key={index}>
-                <div>
-                  <Link 
-                    to={`/${item.replace(/ /g, '').toLowerCase()}`} 
-                    className={`block py-2.5 px-4 rounded ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? "text-orange-500 font-semibold border-b-2 border-orange-500" : "text-black"}`}>
-                    {item}
-                  </Link>
-                </div>
-                <div className={`border-b border-gray-300 ${item !== "Feedback" ? "mb-2" : ""}`} /> {/* Add this line */}
-                {item === "Account Management" && isSubMenuOpen && (
-                  <div className={`ml-4 overflow-hidden transition-max-height duration-300 ease-in-out ${isSubMenuOpen ? 'max-h-40' : 'max-h-0'}`}>
-                    <Link to="/Feedback/roles" className="block py-2 px-4 text-gray-600 hover:bg-gray-200 rounded">Roles</Link>
-                  </div>
-                )}
+                <Link 
+                  to={`/${item.replace(/ /g, '').toLowerCase()}`} 
+                  className={`block py-2.5 px-4 rounded transition-colors duration-200 
+                    ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? 
+                      "text-orange-500 font-semibold border-b-2 border-orange-500" : 
+                      "text-black"}`}
+                  style={{ opacity: isSidebarOpen ? 1 : 0 }} // Hide text when sidebar is collapsed
+                >
+                  {isSidebarOpen ? item : <span className="text-transparent">{item.charAt(0)}</span>} {/* Only show first letter when closed */}
+                </Link>
+                {isSidebarOpen && <div className={`border-b border-gray-300 ${item !== "Feedback & Comments" ? "mb-2" : ""}`} />}
               </div>
             ))}
           </nav>
@@ -71,8 +65,8 @@ const Report = () => {
 
         {/* Main Reports */}
         <main className="flex-1 bg-gray-50 flex flex-col">
-          <header className="p-4 bg-orange-400 flex justify-between items-center">
-            <h1 className="text-white text-xl">Reports</h1>
+          <header className="p-4 bg-white flex justify-between items-center">
+            <h1 className="text-orange-500 text-xl font-bold">Reports</h1>
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <input 
@@ -85,14 +79,17 @@ const Report = () => {
                   <FaSearch />
                 </button>
               </div>
-              <button onClick={handleToggleNotifications} className="text-white flex items-center relative">
+              <button onClick={handleToggleNotifications} className="text-black flex items-center relative">
                 <IoIosNotifications size={24} />
                 {notifications.length > 0 && (
                   <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notifications.length}</span>
                 )}
               </button>
+            <div className="text-black flex items-center">
+              <div className="ml-2">Admin1</div>
             </div>
-          </header>
+          </div>
+        </header>
 
           {showNotifications && (
             <div className="absolute right-4 top-16 bg-white shadow-lg rounded-lg p-4 w-64 z-50">
