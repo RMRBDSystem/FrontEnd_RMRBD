@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Landing from './components/LandingPage/Landing'; // Ensure this path is correct
 import HomePage from './components/Homepage/HomePage';
 import Meals from './components/Pages/Meals';
+import FAQ from './components/Pages/FAQ';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import LoadingPage from './components/Loader/LoadingPage';
@@ -34,6 +35,8 @@ const App = () => {
         <Route path="/" element={<Landing/>} />
         <Route path="/home" element={<Layout/>} />
         <Route path="/meals" element={<Meals/>} />
+        <Route path="/FAQ" element={<FAQ/>} />
+
       </Routes>
     </Router>
       {/* <EBookList/>  */}
