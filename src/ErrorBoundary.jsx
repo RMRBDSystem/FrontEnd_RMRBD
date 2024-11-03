@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import ErrorPage from './Error';
+import ErrorPage from './Error'; // Use '../' to go back to the src folder
+
 
 class ErrorBoundary extends Component {
   constructor(props) {

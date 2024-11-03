@@ -56,7 +56,7 @@ const CategoryManagement = () => {
         },
       });
       setCategories(prev => prev.map(cat => (cat.categoryId === id ? response.data : cat)));
-      setEditingCategoryId(null); // Close the editing mode
+      setEditingCategoryId(null);
       setEditingCategoryName('');
     } catch (error) {
       console.error('Error updating category:', error);
@@ -81,21 +81,38 @@ const CategoryManagement = () => {
             <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
           </div>
           <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => (
-              <div key={index}>
-                <Link 
-                  to={`/${item.replace(/ /g, '').toLowerCase()}`} 
-                  className={`block py-2.5 px-4 rounded transition-colors duration-200 
-                    ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? 
-                      "text-orange-500 font-semibold border-b-2 border-orange-500" : 
-                      "text-black"}`}
-                  style={{ opacity: isSidebarOpen ? 1 : 0 }}
-                >
-                  {isSidebarOpen ? item : <span className="text-transparent">{item.charAt(0)}</span>}
-                </Link>
-                {isSidebarOpen && <div className={`border-b border-gray-300 ${item !== "Reports" ? "mb-2" : ""}`} />}
-              </div>
-            ))}
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => {
+              let path;
+              switch (item) {
+                case "Account Management":
+                  path = '/admin/account-management';
+                  break;
+                case "Income Management":
+                  path = '/admin/income-management';
+                  break;
+                case "Category Management":
+                  path = '/admin/category-management';
+                  break;
+                default:
+                  path = `/admin/${item.replace(/ /g, '').toLowerCase()}`;
+              }
+
+              return (
+                <div key={index}>
+                  <Link 
+                    to={path} 
+                    className={`block py-2.5 px-4 rounded transition-colors duration-200 
+                      ${location.pathname === path ? 
+                        "text-orange-500 font-semibold border-b-2 border-orange-500" : 
+                        "text-black"}`}
+                    style={{ opacity: isSidebarOpen ? 1 : 0 }} // Hide text when sidebar is collapsed
+                  >
+                    {isSidebarOpen ? item : <span className="text-transparent">{item.charAt(0)}</span>} {/* Only show first letter when closed */}
+                  </Link>
+                  {isSidebarOpen && <div className={`border-b border-gray-300 ${item !== "Reports" ? "mb-2" : ""}`} />}
+                </div>
+              );
+            })}
           </nav>
         </aside>
 

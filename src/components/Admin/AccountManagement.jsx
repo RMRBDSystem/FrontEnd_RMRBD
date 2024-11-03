@@ -292,17 +292,37 @@ const AccountManagement = () => {
           </div>
           
           <nav className="mt-10 flex flex-col">
-            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => (
-              <div key={index} className={`relative ${sidebarOpen ? 'block' : 'hidden'}`}>
-                <Link 
-                  to={`/${item.replace(/ /g, '').toLowerCase()}`} 
-                  className={`block py-2.5 px-4 rounded ${location.pathname === `/${item.replace(/ /g, '').toLowerCase()}` ? "text-orange-500 font-semibold border-b-2 border-orange-500" : "text-black"}`}
-                >
-                  {item}
-                </Link>
-              </div>
-            ))}
-          </nav>
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => {
+                let path;
+                switch (item) {
+                case "Account Management":
+                    path = '/admin/account-management'; // Path for Account Management
+                    break;
+                case "Income Management":
+                    path = '/admin/income-management'; // Path for Income Management
+                    break;
+                case "Category Management":
+                    path = '/admin/category-management'; // Path for Category Management
+                    break;
+                default:
+                    path = `/admin/${item.replace(/ /g, '').toLowerCase()}`; // Path for other items
+                }
+                
+                return (
+                <div key={index} className={`relative ${sidebarOpen ? 'block' : 'hidden'}`}>
+                    <Link 
+                    to={path} 
+                    className={`block py-2.5 px-4 rounded 
+                        ${location.pathname === path ? 
+                        "text-orange-500 font-semibold border-b-2 border-orange-500" : 
+                        "text-black"}`}
+                    >
+                    {item}
+                    </Link>
+                </div>
+                );
+            })}
+            </nav>
         </div>
 
         {/* Main Account Management */}
