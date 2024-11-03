@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Landing from './components/LandingPage/Landing';
 import HomePage from './components/Homepage/HomePage';
 import Meals from './components/Pages/Meals';
-import CRUDTemp from './CRUDTemp';
 import AccountManagement from './components/Admin/AccountManagement';
 import Feedback from './components/Admin/Feedback';
 import Dashboard from './components/Admin/Dashboard';
