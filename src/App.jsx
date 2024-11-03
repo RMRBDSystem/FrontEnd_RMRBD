@@ -4,30 +4,20 @@ import Landing from './components/LandingPage/Landing'; // Ensure this path is c
 import HomePage from './components/Homepage/HomePage';
 import Meals from './components/Pages/Meals';
 import CustomerList from './components/API Test/CustomerList';
-import CRUDTemp from './CRUDTemp';
-import EBookList from './components/API Test/EBookList';
-import RecipeList from './components/API Test/RecipeList';
-import RouterPage from './components/RouterPage/RouterPage'
-
-import RecipeList_ToastNotification from './components/API Test/RecipeList_ToastNotification';
-//import CustomerCrud from './CustomerCrud';// //Remove if wanted to test CRUD//
 
 
 
 const App = () => {
   return (
+    // <Router>
+    //   <Routes>
+    //     <Route path="/" element={<Landing />} />
+    //     <Route path="/home" element={<HomePage />} />
+    //     <Route path="/meals" element={<Meals />} />
+    //   </Routes>
+    // </Router>
     <div>
-    {/* <Router>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/meals" element={<Meals />} />
-      </Routes>
-    </Router> */}
-      {/* <EBookList/>  */}
-      {/* <RecipeList/> */}
-      {/* <RecipeList_ToastNotification/> */}
-      <RouterPage/>
+      <CustomerList/>
     </div>
   );
 };

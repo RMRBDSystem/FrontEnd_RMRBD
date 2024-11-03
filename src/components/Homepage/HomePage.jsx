@@ -5,8 +5,11 @@ import BackgroundImage from '../../assets/Background.jpg';
 const HomePage = () => {
   return (
     <div>
+      {/* Navbar */}
       <Navbar />
-      <div className="pt-24 flex flex-col items-center bg-gray-100"> 
+
+      {/* Main Content */}
+      <div className="pt-24 flex flex-col items-center bg-gray-100"> {/* Thêm `pt-24` để tạo khoảng trống bên dưới navbar */}
         {/* Banner Area */}
         <div 
           className="w-full h-64 bg-cover bg-center mb-6" 
