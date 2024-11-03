@@ -79,7 +79,7 @@ const Landing = () => {
             <span className='drop-shadow-lg'>Michelin Plates Quality!</span> 
           </span>
           <div className={`mt-4 text-sm drop-shadow-md p-1 rounded-lg max-w-md transition-opacity duration-700 ${bigTextVisible ? 'opacity-100' : 'opacity-0'}`}>
-            Our website purpose is to share new and good quality products of recipes, books, and 
+            Our website's purpose is to share new and good quality products of recipes, books, and 
             ebooks for people to see and purchase for improving their cooking quality or looking for more 
             unique flavors in contrasts!
           </div>
