@@ -143,7 +143,7 @@ const FAQPage = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-6 flex flex-col justify-center relative overflow-hidden sm:py-12">
+      <div className="min-h-screen bg-gray-50 py-6 flex flex-col justify-center relative overflow-hidden sm:py-12 font-roboto">
         <img
           src="https://play.tailwindcss.com/img/beams.jpg"
           alt=""
@@ -155,7 +155,7 @@ const FAQPage = () => {
             Frequently Asked Questions: Recipe and Cookbook Marketplace
           </h1>
           <p className="font-heading text-5xl xs:text-6xl md:text-7xl font-bold">
-            You ask? We <span className="font-serif italic">answer.</span>
+            You ask? We answer
           </p>
 
           {/* Section Navigation */}
@@ -181,7 +181,7 @@ const FAQPage = () => {
               }`}
             >
               <button
-                className="accordion-toggle inline-flex items-center justify-between text-left text-lg font-normal leading-8 text-gray-900 w-full transition duration-500 "
+                className="accordion-toggle inline-flex items-center justify-between text-left text-lg font-normal leading-8 text-gray-900 w-full transition duration-500"
                 onClick={() => toggleSection(section.id)}
                 aria-expanded={openSections.includes(section.id)}
               >

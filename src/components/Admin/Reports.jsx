@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaSearch } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
 import { Link, useLocation } from 'react-router-dom';
+import TestEbook from './TestEbook';
 
 const Report = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -45,7 +46,7 @@ const Report = () => {
             <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
           </div>
           <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => {
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management", "Ebook Test"].map((item, index) => {
               let path;
               switch (item) {
                 case "Account Management":
@@ -56,6 +57,9 @@ const Report = () => {
                   break;
                 case "Category Management":
                   path = '/admin/category-management';
+                  break;
+                case "Ebook Test":
+                  path = '/admin/ebooktest'; // Define the path for Ebook Test
                   break;
                 default:
                   path = `/admin/${item.replace(/ /g, '').toLowerCase()}`;
