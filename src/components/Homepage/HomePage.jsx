@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import BackgroundImage from "../../assets/Background.jpg";
 import ImageFilter from "../Filter/ImageFilter";
@@ -23,6 +24,15 @@ const HomePage = () => {
           <Slide />
         </div>
       <div className="flex flex-col items-center bg-gray-200">
+
+import Navbar from '../Navbar/Navbar.jsx';
+import BackgroundImage from '../../assets/Background.jpg';
+
+const HomePage = () => {
+  return (
+    <div>
+      <Navbar />
+      <div className="pt-24 flex flex-col items-center bg-gray-100"> 
         {/* Banner Area */}
         <div className="container mx-auto px-4 lg:px-8 flex flex-col lg:flex-row mb-10">
           <div

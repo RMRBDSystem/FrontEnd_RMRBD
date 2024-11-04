@@ -4,7 +4,7 @@ import logo from "../Picture/LogoA.png";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -46,6 +46,8 @@ const Login = () => {
       case "Admin":
         return "/admindashboard";
       case "Customer":
+        return "/homepageDashboard";
+      case "Seller":
         return "/homepageDashboard";
       default:
         return "/";

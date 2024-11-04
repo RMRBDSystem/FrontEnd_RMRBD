@@ -20,6 +20,16 @@
     "phosphor-react": "^1.4.1",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
+
+    "@react-oauth/google": "^0.12.1",
+    
+    "bootstrap": "^5.3.3",
+    "front-end-rmrbd": "file:",
+    "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
+    "prop-types": "^15.8.1",
+    
+    "react-bootstrap": "^2.10.5",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
     "react-owl-carousel": "^2.3.3",
@@ -27,6 +37,9 @@
     "recharts": "^2.13.3",
     "sass": "^1.80.5",
     "swiper": "^11.1.14",
+
+    "react-toastify": "^10.0.6",
+
     "typeface-roboto": "^1.1.13"
   },
   "devDependencies": {
