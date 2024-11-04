@@ -1,19 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "../LoginPage/LoginPage";
-// import CRUD from "./CRUD";
-// import AdminDashboard from "./AdminDashboard";
-// import HomePage from "./HomePageDashboard";
-// import ProtectedRoute from "./ProtectedRoute";
-// import ModeratorDashboard from "./MorderatorDashboard";
-
+import HomePage from "../HomePage/HomePage";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 // Điều hướng tới đâu thì uncomment thay link đi rồi dùng
 export default function RouterPage() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        {/* <Route path="/adminDashboard" element={<CRUD />} />
-
         <Route
           path="/homepageDashboard"
           element={
@@ -26,10 +20,10 @@ export default function RouterPage() {
           path="/moderatorDashboard"
           element={
             <ProtectedRoute allowedRoles={["Admin", "Moderator"]}>
-              <ModeratorDashboard />
+              {/* <ModeratorDashboard /> */}
             </ProtectedRoute>
           }
-        /> */}
+        />
       </Routes>
     </Router>
   );
