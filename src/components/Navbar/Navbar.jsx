@@ -1,6 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import LogoA from "../../assets/LogoA.png";
+import axios from "axios";
+import Cookies from "js-cookie";
 import {
   Navbar,
   MobileNav,
@@ -8,12 +10,15 @@ import {
   Button,
   IconButton,
 } from "@material-tailwind/react";
-import SearchWrapper from "./SearchWrapper";
+import { useAuth } from "../RouterPage/AuthContext";
 
 export function StickyNavbar() {
   const [openNav, setOpenNav] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 
+  const userRole = Cookies.get("UserRole");
   React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -32,6 +37,27 @@ export function StickyNavbar() {
     };
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        "https://localhost:7220/odata/Login/logout",
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Token: "123-abc",
+          },
+        }
+      );
+      setIsLoggedIn(false);
+      Cookies.remove("UserRole");
+      Cookies.remove("UserName");
+      localStorage.removeItem("isLoggedIn");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const navList = (
     <ul className="mt-2 mb-4 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
       {["home", "pages", "meals", "cuisines", "faq", "features"].map((item) => (
@@ -42,10 +68,16 @@ export function StickyNavbar() {
           className="p-1 font-medium tracking-wide"
         >
           <NavLink
-            to={`/${item === 'home' ? 'home' : item}`}
+            to={`/${item === "home" ? "homepageDashboard" : item}`}
             className={({ isActive }) => `
               flex items-center justify-center px-4 py-2 transition-all
-              ${isActive ? `${isScrolled ? 'text-black' : 'text-white'} font-semibold border-b-2 border-current` : `${isScrolled ? 'text-black' : 'text-gray-100'}`}
+              ${
+                isActive
+                  ? `${
+                      isScrolled ? "text-black" : "text-white"
+                    } font-semibold border-b-2 border-current`
+                  : `${isScrolled ? "text-black" : "text-gray-100"}`
+              }
               hover:border-b-2 uppercase
             `}
           >
@@ -64,7 +96,11 @@ export function StickyNavbar() {
           : "bg-gradient-to-r from-purple-700 to-blue-700"
       }`}
     >
-      <div className={`flex items-center justify-between ${isScrolled ? "text-black" : "text-white"} px-4`}>
+      <div
+        className={`flex items-center justify-between ${
+          isScrolled ? "text-black" : "text-white"
+        } px-4`}
+      >
         <NavLink to="/">
           <img
             src={LogoA}
@@ -74,76 +110,157 @@ export function StickyNavbar() {
         </NavLink>
         <div className="flex items-center gap-4">
           <div className="mr-14 hidden lg:block">{navList}</div>
-          <SearchWrapper />
-          <div className="flex items-center gap-x-1">
-            <Button variant="text" size="sm" className={`hidden lg:inline-block ${isScrolled ? "text-black" : "text-white"}`}>
-              <NavLink to="/login">
-                Log In
-              </NavLink>
-            </Button>
-            <Button
-              variant="gradient"
-              size="sm"
-              className={`hidden lg:inline-block ${isScrolled ? "bg-gray-300 text-white" : "bg-custom-gradient text-white"}`}
-            >
-              <NavLink to="/signup">
-                Sign Up
-              </NavLink>
-            </Button>
-          </div>
-          <IconButton
-            variant="text"
-            className={`ml-auto h-6 w-6 ${isScrolled ? "text-black" : "text-gray-100"} hover:bg-gray-100 lg:hidden`}
-            ripple={false}
-            onClick={() => setOpenNav(!openNav)}
-            aria-label="Toggle navigation"
-          >
-            {openNav ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                className="h-6 w-6"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+          <div className="relative flex items-center gap-x-1">
+            {isLoggedIn ? (
+              <div
+                onMouseEnter={() => setIsDropdownOpen(true)}
+                onMouseLeave={() => setIsDropdownOpen(false)}
+                className="relative"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+                <div className="flex items-center cursor-pointer">
+                  <img
+                    src="https://via.placeholder.com/50" // Hình ảnh mặc định
+                    alt="User Avatar"
+                    className="w-12 h-12 object-cover rounded-full"
+                  />
+                  <span
+                    className={`${
+                      isScrolled ? "text-black" : "text-white"
+                    } ml-2 font-medium`}
+                  >
+                    My Account
+                  </span>
+                </div>
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md text-black z-10">
+                  {userRole === 'Admin' && (
+                      <NavLink
+                        to="/admin-dashboard" // Change to your admin page
+                        className="block px-4 py-2 hover:bg-gray-200"
+                      >
+                        Admin Dashboard
+                      </NavLink>
+                    )}
+                    <NavLink
+                      to="/add-recipe"
+                      className="block px-4 py-2 hover:bg-gray-200"
+                    >
+                      Add a recipe
+                    </NavLink>
+                    <NavLink
+                      to="/update-account"
+                      className="block px-4 py-2 hover:bg-gray-200"
+                    >
+                      My Profile
+                    </NavLink>
+                    <div
+                      className="block px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <>
+                <Button
+                  variant="text"
+                  size="sm"
+                  className={`hidden lg:inline-block ${
+                    isScrolled ? "text-black" : "text-white"
+                  }`}
+                >
+                  <NavLink to="/login">Log in</NavLink>
+                </Button>
+                <Button
+                  variant="gradient"
+                  size="sm"
+                  className={`hidden lg:inline-block ${
+                    isScrolled
+                      ? "bg-gray-300 text-white"
+                      : "bg-custom-gradient text-white"
+                  }`}
+                >
+                  <NavLink to="/signup">Sign up</NavLink>
+                </Button>
+              </>
             )}
-          </IconButton>
+            <IconButton
+              variant="text"
+              className={`ml-auto h-6 w-6 ${
+                isScrolled ? "text-black" : "text-gray-100"
+              } hover:bg-gray-100 lg:hidden`}
+              ripple={false}
+              onClick={() => setOpenNav(!openNav)}
+              aria-label="Toggle Navigation"
+            >
+              {openNav ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  className="h-6 w-6"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              )}
+            </IconButton>
+          </div>
         </div>
       </div>
       <MobileNav open={openNav}>
         {navList}
         <div className="flex items-center gap-x-1">
-          <Button fullWidth variant="text" size="sm" className={`${isScrolled ? "text-black" : "text-white"}`}>
-            <NavLink to="/login">
-              Log In
-            </NavLink>
-          </Button>
-          <Button fullWidth variant="gradient" size="sm" className={`${isScrolled ? "bg-gray-300 text-white" : "bg-custom-gradient text-white"}`}>
-            <NavLink to="/signup">
-              Sign Up
-            </NavLink>
-          </Button>
+          {isLoggedIn ? (
+            <>
+              <div className="w-full">
+                <NavLink to="/user-collection" className="block px-4 py-2">
+                  My Collection
+                </NavLink>
+                <NavLink to="/update-account" className="block px-4 py-2">
+                  Update Account
+                </NavLink>
+                <Button
+                  fullWidth
+                  variant="text"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Button fullWidth variant="text" size="sm">
+                <NavLink to="/login">Log in</NavLink>
+              </Button>
+              <Button fullWidth variant="gradient" size="sm">
+                <NavLink to="/signup">Sign up</NavLink>
+              </Button>
+            </>
+          )}
         </div>
       </MobileNav>
     </Navbar>

@@ -1,9 +1,10 @@
 import "./App.css";
-import RouterPage from './components/RouterPage/RouterPage.jsx'
+import RouterPage from './components/RouterPage/RouterPage.jsx';
+
 const App = () => {
-  return {
+  return (
     <div className="App">
-      <RouterPage/>
+      <RouterPage />
     </div>
   );
 };

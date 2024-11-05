@@ -4,18 +4,19 @@ import logo from "../Picture/LogoA.png";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
-import  { useEffect } from "react";
+import  { useEffect,useState  } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-
+import { useAuth } from "../RouterPage/AuthContext"
 const Login = () => {
   const navigate = useNavigate();
-
+  const { setIsLoggedIn } = useAuth();
   useEffect(() => {
     // Kiểm tra cookie UserRole để xác định trạng thái đăng nhập
     const userRole = Cookies.get("UserRole");
     if (userRole) {
       // Nếu đã đăng nhập, điều hướng đến trang tương ứng
+      setIsLoggedIn(true);
       navigate(getDashboardPath(userRole));
     }
 
@@ -36,30 +37,30 @@ const Login = () => {
     };
   }, [navigate]);
 
-  // Đường dẫn mang tính chất tượng trưng, nên đổi lại
   const getDashboardPath = (role) => {
     switch (role) {
       case "Moderator":
-        return "/moderatorDashboard";
+        return "/homepageDashboard";
       case "Order Distributor":
-        return "/orderDistributorDashboard";
+        return "/homepageDashboard";
       case "Admin":
-        return "/admindashboard";
+        return "/homepageDashboard";
       case "Customer":
         return "/homepageDashboard";
       case "Seller":
         return "/homepageDashboard";
       default:
-        return "/";
+        return "/homepageDashboard";
     }
   };
+
 
   const handleLogin = async ({ credential }) => {
     const { sub: googleId, email, name: userName } = jwtDecode(credential);
     const data = { googleId, userName, email };
 
-    // const url = `https://localhost:7220/odata/Login`; // test localhost
-    const url = `https://rmrbdapi.somee.com/odata/Login`;
+    const url = `https://localhost:7220/odata/Login`; // test localhost
+    // const url = `https://rmrbdapi.somee.com/odata/Login`;
     try {
       const response = await axios.post(url, data, {
         headers: {
@@ -80,7 +81,7 @@ const Login = () => {
       Cookies.set("UserRole", role, { expires: 1 });
       localStorage.setItem("UserRole", role); // Lưu vào localStorage
       Cookies.set("UserName", userName, { expires: 1 });
-
+      setIsLoggedIn(true);
       // Điều hướng đến dashboard tương ứng
       navigate(getDashboardPath(role));
     } catch (error) {

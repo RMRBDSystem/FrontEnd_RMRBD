@@ -1,6 +1,5 @@
 import { Navigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-import PropTypes from 'prop-types';
 // Component yêu cầu xác thực
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = Cookies.get('UserRole');
@@ -13,14 +12,10 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     }
   }
   else {
-    return <Navigate to="/" />;
+    return <Navigate to="/homepageDashboard" />;
   }
   return children;
 };
 
-ProtectedRoute.propTypes = {
-  children: PropTypes.node.isRequired, // Validate that children is required
-  allowedRoles: PropTypes.arrayOf(PropTypes.string), // Validate that allowedRoles is an array of strings
-};
 
 export default ProtectedRoute;

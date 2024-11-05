@@ -15,31 +15,11 @@ const Slide = () => {
     const [hoverIndex, setHoverIndex] = useState(null);
 
     const slidesData = [
-        {
-            image: B01,
-            title: "Delicious Homemade Burger",
-            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tristique nisl vitae luctus sollicitudin. Fusce consectetur sem eget dui tristique, ac posuere arcu varius.",
-        },
-        {
-            image: B02,
-            title: "Cheesy Delight Burger",
-            description: "Experience the creamy goodness of our cheesy delight burger, crafted to perfection.",
-        },
-        {
-            image: B03,
-            title: "Spicy Chicken Burger",
-            description: "Ignite your taste buds with our spicy chicken burger, a true flavor explosion.",
-        },
-        {
-            image: B04,
-            title: "Classic Beef Burger",
-            description: "Savor the taste of our classic beef burger, a timeless favorite.",
-        },
-        {
-            image: B05,
-            title: "Vegan Burger",
-            description: "Enjoy a healthy and delicious vegan burger, packed with flavor.",
-        },
+        { image: B01 },
+        { image: B02 },
+        { image: B03 },
+        { image: B04 },
+        { image: B05 },
     ];
 
     return (
@@ -69,25 +49,29 @@ const Slide = () => {
                 modules={[EffectCoverflow, Navigation, Autoplay]}
             >
                 {slidesData.map((slide, index) => (
-                    <SwiperSlide key={index} className="flex items-center relative"
+                    <SwiperSlide
+                        key={index}
+                        className="flex items-center justify-center relative"
                         onMouseEnter={() => setHoverIndex(index)}
                         onMouseLeave={() => setHoverIndex(null)}
                     >
                         <img src={slide.image} alt={`burger-${index}`} className="w-1/2 h-full object-cover" />
                         {hoverIndex === index && (
-                            <div className="w-full p-6 absolute bottom-0 left-0 bg-white bg-opacity-90 flex flex-col justify-center items-center shadow-lg">
-                                <h2 className="text-3xl font-bold mb-3">{slide.title}</h2>
-                                <p className="mb-5 text-gray-700">{slide.description}</p>
-                                <a href="#" className="btn delicious-btn bg-orange-500 text-white py-2 px-5 rounded-lg hover:bg-orange-600 transition-all duration-300">See Recipe</a>
-                            </div>
+                            <a
+                                href="#"
+                                className="absolute flex items-center justify-center text-white bg-orange-500 hover:bg-orange-600 rounded-full w-16 h-16 text-center text-sm font-semibold transition-transform duration-300"
+                                style={{ transform: 'translate(-50%, -50%)', left: '50%', top: '50%' }}
+                            >
+                                Recipe
+                            </a>
                         )}
                     </SwiperSlide>
                 ))}
                 <div className='slider-controler'>
-                    <div className='swiper-button-prev'>
+                    <div className='swiper-button-prev absolute left-0 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer'>
                         <ArrowLeft size={30} />
                     </div>
-                    <div className='swiper-button-next'>
+                    <div className='swiper-button-next absolute right-0 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer'>
                         <ArrowRight size={30} />
                     </div>
                 </div>

@@ -43,10 +43,10 @@ const Landing = () => {
   return (
     <div className="flex flex-col min-h-screen bg-cover bg-center relative" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <div className="h-24 w-full flex items-center justify-between px-5 z-10">
-      <img src={logo} alt="Logo" className="w-24 ml-16 h-auto object-contain"/>
+        <img src={logo} alt="Logo" className="w-24 ml-16 h-auto object-contain"/>
         <button 
           className="bg-custom-orange text-black rounded-lg px-4 py-2 transition-all duration-300 transform hover:bg-black hover:scale-105 font-roboto group hover:text-white hover:shadow-lg hover:shadow-orange-500/50 animate-tada"
-          onClick={() => navigate('/home')}
+          onClick={() => navigate('/homepageDashboard')}
         >
           <span className="transition-all duration-100 group-hover:font-bold">
             Search Your Own List Today!
