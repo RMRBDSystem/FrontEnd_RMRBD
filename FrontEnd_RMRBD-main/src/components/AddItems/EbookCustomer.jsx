@@ -15,10 +15,31 @@ const EbookCustomer = () => {
     Price: 0,
     Status: 1,
     Pdf: null, 
-    image: null, 
+    image: null,
+    CategoryId: '', // New field for category selection
   });
 
+  const [categories, setCategories] = useState([]);  // Store categories from API
   const fileInputRef = useRef(null);
+
+  // Fetch categories from the API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('https://rmrbdapi.somee.com/odata/BookCategory', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Token': '123-abc',
+          },
+        });
+        setCategories(response.data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Retrieve the logged-in user data from cookies
   const userName = Cookies.get('UserName');  // Get userName from cookies
@@ -58,6 +79,7 @@ const EbookCustomer = () => {
     if (newEbook.Price === null || newEbook.Price === undefined) missingFields.push('Price');
     if (!newEbook.image) missingFields.push('Image');
     if (!newEbook.Pdf) missingFields.push('PDF Document');
+    if (!newEbook.CategoryId) missingFields.push('Category');  // Check if category is selected
     
     // Ensure the user is logged in and UserId is available
     if (!userName || !UserId) {
@@ -76,7 +98,8 @@ const EbookCustomer = () => {
     ebookData.append('ebookName', newEbook.EbookName); 
     ebookData.append('description', newEbook.Description); 
     ebookData.append('price', parseInt(newEbook.Price, 10));
-
+    ebookData.append('categoryId', newEbook.CategoryId);  // Append the selected category
+    
     // Append UserId as createById
     ebookData.append('createById', UserId);  // Use UserId, not userName
     
@@ -120,7 +143,7 @@ const EbookCustomer = () => {
         toast.error(`Error adding ebook: ${error.message}`);
       }
     }
-};
+  };
 
   // Reset form after submission
   const resetForm = () => {
@@ -131,6 +154,7 @@ const EbookCustomer = () => {
       Status: 1,
       Pdf: null,
       image: null, // Reset image
+      CategoryId: '',  // Reset category selection
     });
   };
 
@@ -184,6 +208,28 @@ const EbookCustomer = () => {
             </Col>
           </Row>
 
+          {/* Category Selection */}
+          <Row className="mb-4">
+            <Col>
+              <Form.Group controlId="CategoryId">
+                <Form.Label>Category</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={newEbook.CategoryId}
+                  onChange={(e) => setNewEbook({ ...newEbook, CategoryId: e.target.value })}
+                  required
+                >
+                  <option value="">Select a Category</option>
+                  {categories.map((category) => (
+                    <option key={category.categoryId} value={category.categoryId}>
+                      {category.name}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+          </Row>
+
           {/* File Uploads */}
           <Row className="mb-4">
             <Col>
@@ -203,7 +249,7 @@ const EbookCustomer = () => {
           <Row className="mb-4">
             <Col>
               <Form.Group controlId="imageFile">
-                <Form.Label>Upload Image</Form.Label>
+                <Form.Label>Upload Ebook Image</Form.Label>
                 <Form.Control
                   type="file"
                   accept="image/*"
@@ -215,7 +261,10 @@ const EbookCustomer = () => {
             </Col>
           </Row>
 
-          <Button variant="primary" type="submit">Add Ebook</Button>
+          {/* Submit Button */}
+          <Button variant="primary" type="submit">
+            Add Ebook
+          </Button>
         </Form>
       </Container>
       <Footer />

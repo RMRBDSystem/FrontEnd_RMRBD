@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const TestEbook = () => {
   const [ebooks, setEbooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]); // To store users (creators)
   const [newEbook, setNewEbook] = useState({
     EbookName: '',
     Description: '',
@@ -21,7 +23,7 @@ const TestEbook = () => {
 
   const fileInputRef = useRef(null);
 
-  // Fetch ebooks and log response for debugging
+  // Fetch ebooks and categories
   const fetchEbooks = async () => {
     try {
       const response = await axios.get('https://rmrbdapi.somee.com/odata/ebook', {
@@ -40,6 +42,36 @@ const TestEbook = () => {
       }
     } catch (error) {
       console.error('Error fetching ebooks:', error.response ? error.response.data : error.message);
+    }
+  };
+
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('https://rmrbdapi.somee.com/odata/BookCategory', {
+        headers: {
+          'Token': '123-abc',
+        },
+      });
+      console.log("Fetched categories:", response.data);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  // Fetch users (creators)
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('https://rmrbdapi.somee.com/odata/Account', {
+        headers: {
+          'Token': '123-abc',
+        },
+      });
+      console.log("Fetched users:", response.data);
+      setUsers(response.data); // Store users here
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -88,12 +120,10 @@ const TestEbook = () => {
     ebookData.append('createById', newEbook.CreateById);
     ebookData.append('ebookId', selectedEbookId);
   
-    // Append image if provided
     if (newEbook.Image[0]) {
       ebookData.append('image', newEbook.Image[0]);
     }
   
-    // Only append new PDF if it was changed
     if (newEbook.Pdf) {
       ebookData.append('document', newEbook.Pdf);
     }
@@ -121,7 +151,7 @@ const TestEbook = () => {
       alert(`Error updating ebook: ${error.response ? error.response.data.message : error.message}`);
     }
   };
-  
+
   const handleEditButtonClick = (ebook) => {
     setEditMode(true);
     setSelectedEbookId(ebook.ebookId);
@@ -173,7 +203,16 @@ const TestEbook = () => {
 
   useEffect(() => {
     fetchEbooks();
+    fetchCategories();  // Fetch categories when the component mounts
+    fetchUsers(); // Fetch users for creator names
   }, []);
+
+  const getCreatorName = (createById) => {
+    const creatorId = Number(createById);
+    const user = users.find(user => Number(user.accountId) === creatorId);
+    console.log(`Matching CreateById: ${createById} with AccountID: ${user ? user.accountId : 'No Match'}`);
+    return user ? user.userName : 'Unknown';
+  };
 
   return (
     <div className="flex flex-col min-h-screen font-roboto">
@@ -193,23 +232,36 @@ const TestEbook = () => {
                 <th className="py-2 px-4 border-b text-left">Ebook Name</th>
                 <th className="py-2 px-4 border-b text-left">Description</th>
                 <th className="py-2 px-4 border-b text-left">Price</th>
+                <th className="py-2 px-4 border-b text-left">Category</th>
+                <th className="py-2 px-4 border-b text-left">Created By</th> {/* New Column */}
                 <th className="py-2 px-4 border-b text-left">PDF Link</th>
                 <th className="py-2 px-4 border-b text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
               {ebooks.length > 0 ? (
-                ebooks.map(ebook => {
+                ebooks.map((ebook) => {
+                  const category = categories.find(
+                    (cat) => cat.categoryId === ebook.categoryId
+                  );
                   return (
                     <tr key={ebook.ebookId}>
                       <td className="py-2 px-4 border-b">
                         {ebook.imageUrl && (
-                          <img src={ebook.imageUrl} alt={ebook.ebookName} className="w-16 h-16 object-cover rounded" />
+                          <img
+                            src={ebook.imageUrl}
+                            alt={ebook.ebookName}
+                            className="w-16 h-16 object-cover rounded"
+                          />
                         )}
                       </td>
                       <td className="py-2 px-4 border-b">{ebook.ebookName}</td>
                       <td className="py-2 px-4 border-b">{ebook.description}</td>
                       <td className="py-2 px-4 border-b">{ebook.price}</td>
+                      <td className="py-2 px-4 border-b">
+                        {category ? category.name : 'No Category'}
+                      </td>
+                      <td className="py-2 px-4 border-b">{getCreatorName(ebook.createById)}</td>
                       <td className="py-2 px-4 border-b">
                         {ebook.pdfurl && ebook.pdfurl !== "" ? (
                           <a 
@@ -237,13 +289,12 @@ const TestEbook = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center py-4">No ebooks available</td>
+                  <td colSpan="8" className="text-center py-4">No ebooks available</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-
         {/* Modal for adding/editing ebook */}
         {modalOpen && (
           <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
@@ -253,12 +304,12 @@ const TestEbook = () => {
                 {/* Ebook Name */}
                 <div className="mb-4">
                   <label htmlFor="ebookName" className="block text-gray-700">Ebook Name</label>
-                  <input 
-                    id="ebookName" 
-                    type="text" 
-                    value={newEbook.EbookName} 
-                    onChange={(e) => setNewEbook({...newEbook, EbookName: e.target.value})} 
-                    required 
+                  <input
+                    id="ebookName"
+                    type="text"
+                    value={newEbook.EbookName}
+                    onChange={(e) => setNewEbook({ ...newEbook, EbookName: e.target.value })}
+                    required
                     className="w-full border p-2 rounded"
                   />
                 </div>
@@ -266,11 +317,11 @@ const TestEbook = () => {
                 {/* Description */}
                 <div className="mb-4">
                   <label htmlFor="description" className="block text-gray-700">Description</label>
-                  <textarea 
-                    id="description" 
-                    value={newEbook.Description} 
-                    onChange={(e) => setNewEbook({...newEbook, Description: e.target.value})} 
-                    required 
+                  <textarea
+                    id="description"
+                    value={newEbook.Description}
+                    onChange={(e) => setNewEbook({ ...newEbook, Description: e.target.value })}
+                    required
                     className="w-full border p-2 rounded"
                   ></textarea>
                 </div>
@@ -278,22 +329,42 @@ const TestEbook = () => {
                 {/* Price */}
                 <div className="mb-4">
                   <label htmlFor="price" className="block text-gray-700">Price</label>
-                  <input 
-                    id="price" 
-                    type="number" 
-                    value={newEbook.Price} 
-                    onChange={(e) => setNewEbook({...newEbook, Price: e.target.value})} 
-                    required 
+                  <input
+                    id="price"
+                    type="number"
+                    value={newEbook.Price}
+                    onChange={(e) => setNewEbook({ ...newEbook, Price: e.target.value })}
+                    required
                     className="w-full border p-2 rounded"
                   />
                 </div>
+
+                {/* Category */}
+                <div className="mb-4">
+                  <label htmlFor="category" className="block text-gray-700">Category</label>
+                  <select
+                    id="category"
+                    value={newEbook.CategoryId}
+                    onChange={(e) => setNewEbook({ ...newEbook, CategoryId: e.target.value })}
+                    required
+                    className="w-full border p-2 rounded"
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((category) => (
+                      <option key={category.categoryId} value={category.categoryId}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* PDF File Upload */}
                 <div className="mb-4">
                   <label htmlFor="pdfFile" className="block text-gray-700">Upload PDF</label>
-                  <input 
-                    id="pdfFile" 
-                    type="file" 
-                    accept=".pdf" 
+                  <input
+                    id="pdfFile"
+                    type="file"
+                    accept=".pdf"
                     onChange={handlePdfChange}
                     className="w-full border p-2 rounded"
                   />
@@ -312,9 +383,9 @@ const TestEbook = () => {
                 {/* Image File Upload */}
                 <div className="mb-4">
                   <label htmlFor="imageFile" className="block text-gray-700">Upload Image</label>
-                  <input 
-                    id="imageFile" 
-                    type="file" 
+                  <input
+                    id="imageFile"
+                    type="file"
                     accept="image/*"
                     onChange={handleImageChange}
                     className="w-full border p-2 rounded"
@@ -327,15 +398,15 @@ const TestEbook = () => {
                 </div>
 
                 <div className="flex justify-between">
-                  <button 
-                    type="button" 
-                    onClick={resetForm} 
+                  <button
+                    type="button"
+                    onClick={resetForm}
                     className="bg-gray-400 text-white px-4 py-2 rounded"
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="bg-blue-500 text-white px-4 py-2 rounded"
                   >
                     {editMode ? 'Update Ebook' : 'Add Ebook'}
