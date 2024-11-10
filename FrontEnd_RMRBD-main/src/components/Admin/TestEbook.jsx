@@ -69,7 +69,7 @@ const TestEbook = () => {
         },
       });
       console.log("Fetched users:", response.data);
-      setUsers(response.data); // Store users here
+      setUsers(response.data); 
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -160,12 +160,12 @@ const TestEbook = () => {
       Description: ebook.description,
       Price: ebook.price,
       Status: ebook.status,
-      Pdf: null, // Keep the current PDF unchanged
+      Pdf: null,
       Image: ebook.imageUrl ? [ebook.imageUrl] : [],
       CategoryId: ebook.categoryId,
       CreateById: ebook.createById,
       CensorId: ebook.censorId,
-      pdfurl: ebook.pdfurl || '', // Set existing PDF URL for edit mode
+      pdfurl: ebook.pdfurl || '', 
     });
     setModalOpen(true);
   };
@@ -203,8 +203,8 @@ const TestEbook = () => {
 
   useEffect(() => {
     fetchEbooks();
-    fetchCategories();  // Fetch categories when the component mounts
-    fetchUsers(); // Fetch users for creator names
+    fetchCategories();  
+    fetchUsers(); 
   }, []);
 
   const getCreatorName = (createById) => {
@@ -257,7 +257,7 @@ const TestEbook = () => {
                       </td>
                       <td className="py-2 px-4 border-b">{ebook.ebookName}</td>
                       <td className="py-2 px-4 border-b">{ebook.description}</td>
-                      <td className="py-2 px-4 border-b">{ebook.price}</td>
+                      <td className="py-2 px-4 border-b">{ebook.price === 0 ? 'Free' : ebook.price}</td>
                       <td className="py-2 px-4 border-b">
                         {category ? category.name : 'No Category'}
                       </td>

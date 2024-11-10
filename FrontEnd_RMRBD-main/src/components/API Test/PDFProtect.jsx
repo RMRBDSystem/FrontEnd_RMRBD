@@ -122,22 +122,23 @@ const PDFProtect = () => {
           <p>No ebooks found for this user.</p>
         )}
 
-        {selectedpdfurl && (
-          <div style={{ marginTop: '30px' }}>
-            <h3>Viewing PDF</h3>
-            {error ? (
-              <div>
-                <p style={{ color: 'red' }}>Failed to load PDF file. Resetting...</p>
-                <span>Page 1 of 1</span> {/* Fallback page info when error occurs */}
-              </div>
-            ) : (
-              <div onContextMenu={handleRightClick}>
-                <Worker workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`}>
-                  <Viewer fileUrl={selectedpdfurl} />
-                </Worker>
-              </div>
-            )}
-          </div>
+      {selectedpdfurl && (
+        <div style={{ marginTop: '30px' }}>
+          <h3>Viewing PDF</h3>
+          {error ? (
+            <div>
+              <p style={{ color: 'red' }}>Failed to load PDF file. Resetting...</p>
+              <span>Page 1 of 1</span> {/* Fallback page info when error occurs */}
+            </div>
+          ) : (
+            <div onContextMenu={handleRightClick}>
+              {/* Use the correct version of the PDF.js worker */}
+              <Worker workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`}>
+                <Viewer fileUrl={selectedpdfurl} />
+              </Worker>
+            </div>
+          )}
+        </div>
         )}
       </div>
 
