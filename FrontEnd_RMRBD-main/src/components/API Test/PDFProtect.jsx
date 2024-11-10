@@ -8,12 +8,14 @@ import Cookies from 'js-cookie';
 import { Table, Button } from 'react-bootstrap';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 
-
 const PDFProtect = () => {
   const [userEbooks, setUserEbooks] = useState([]);
   const [selectedpdfurl, setSelectedpdfurl] = useState(null);
   const [currentEbookIndex, setCurrentEbookIndex] = useState(0);
   const [error, setError] = useState(false); // To track if there is an error loading the PDF
+  const [numPages, setNumPages] = useState(null); // Track number of pages
+  const [currentPage, setCurrentPage] = useState(1); // Track the current page number
+  const [hiddenTextAreas, setHiddenTextAreas] = useState([]); // Areas to hide text
 
   const getUserIdFromCookie = () => {
     const userId = Cookies.get('UserId');
@@ -55,6 +57,11 @@ const PDFProtect = () => {
   const handleViewPdf = (pdfurl) => {
     setSelectedpdfurl(pdfurl);
     setError(false); // Reset any previous error state when starting to view a new PDF
+    setCurrentPage(1); // Reset to the first page
+    setHiddenTextAreas([
+      { page: 1, x: 100, y: 200, width: 150, height: 20 }, // Example: Coordinates to cover
+      { page: 1, x: 250, y: 400, width: 100, height: 30 }, // Another area to cover
+    ]); // Example areas to hide
   };
 
   const nextEbook = () => {
@@ -69,14 +76,30 @@ const PDFProtect = () => {
     }
   };
 
+  const nextPage = () => {
+    if (currentPage < numPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   const handleRightClick = (e) => {
     e.preventDefault(); // Disable right-click
   };
 
+  const onLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
+
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: '20px', flexGrow: 1 }}>
         <h1>Your Ebooks</h1>
         {userEbooks.length > 0 ? (
           <div style={{ textAlign: 'center' }}>
@@ -126,13 +149,63 @@ const PDFProtect = () => {
                 <span>Page 1 of 1</span> {/* Fallback page info when error occurs */}
               </div>
             ) : (
-              <div onContextMenu={handleRightClick}>
-                {/* Use the correct version of the PDF.js worker */}
-                <Worker workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`}>
-                  <Viewer fileUrl={selectedpdfurl} onError={() => setError(true)} />
-                </Worker>
+              <div
+                onContextMenu={handleRightClick}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center', // Centers the PDF horizontally
+                  alignItems: 'center', // Centers the PDF vertically
+                  height: 'calc(100vh - 250px)', // Adjust the height to leave space for other elements
+                  overflowY: 'auto',
+                  margin: '0 auto',
+                }}
+              >
+                <div
+                  style={{
+                    width: '80%',
+                    maxHeight: '80vh',
+                    overflow: 'auto',
+                    border: '1px solid #ddd',
+                    position: 'relative',
+                    padding: '10px',
+                    userSelect: 'none',
+                  }}
+                >
+                  <Worker workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`}>
+                    {/* Render only the current page */}
+                    <Viewer
+                      fileUrl={selectedpdfurl}
+                      onError={() => setError(true)}
+                      initialPage={currentPage - 1} // Start at the current page (zero-indexed)
+                      onLoadSuccess={onLoadSuccess}
+                      renderMode="canvas"
+                    />
+                  </Worker>
+
+                  {/* Transparent overlay to hide text */}
+                  {hiddenTextAreas.map((area, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        position: 'absolute',
+                        top: `${area.y}px`,
+                        left: `${area.x}px`,
+                        width: `${area.width}px`,
+                        height: `${area.height}px`,
+                        backgroundColor: 'white',
+                        zIndex: 10,
+                        pointerEvents: 'none', // Make sure the overlay does not block interactions
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             )}
+            <div>
+              <button onClick={prevPage} disabled={currentPage === 1}>Previous Page</button>
+              <span>Page {currentPage} of {numPages}</span>
+              <button onClick={nextPage} disabled={currentPage === numPages}>Next Page</button>
+            </div>
           </div>
         )}
       </div>
