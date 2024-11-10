@@ -75,6 +75,21 @@ const TestEbook = () => {
     }
   };
 
+  // Function to format the price with commas
+  const formatPrice = (price) => {
+    if (price === '') return '';
+    return new Intl.NumberFormat().format(price);
+  };
+
+  // Handle Price change with formatting
+  const handlePriceChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    setNewEbook((prev) => ({
+      ...prev,
+      Price: value ? parseInt(value, 10) : 0,
+    }));
+  };
+
   // Add new ebook with PDF
   const addEbook = async (e) => {
     e.preventDefault();
@@ -112,22 +127,22 @@ const TestEbook = () => {
   // Edit ebook with existing PDF or new file
   const editEbook = async (e) => {
     e.preventDefault();
-  
+
     const ebookData = new FormData();
     ebookData.append('ebookName', newEbook.EbookName);
     ebookData.append('description', newEbook.Description);
     ebookData.append('price', parseInt(newEbook.Price, 10));
     ebookData.append('createById', newEbook.CreateById);
     ebookData.append('ebookId', selectedEbookId);
-  
+
     if (newEbook.Image[0]) {
       ebookData.append('image', newEbook.Image[0]);
     }
-  
+
     if (newEbook.Pdf) {
       ebookData.append('document', newEbook.Pdf);
     }
-  
+
     try {
       const response = await axios.put(
         `http://rmrbdapi.somee.com/odata/Ebook/${selectedEbookId}`,
@@ -174,7 +189,7 @@ const TestEbook = () => {
     setNewEbook({
       EbookName: '',
       Description: '',
-      Price: '',
+      Price: '', // Reset Price field
       Pdf: null,  // Reset PDF field
       Image: [],  // Reset image field
       CategoryId: '',
@@ -257,7 +272,7 @@ const TestEbook = () => {
                       </td>
                       <td className="py-2 px-4 border-b">{ebook.ebookName}</td>
                       <td className="py-2 px-4 border-b">{ebook.description}</td>
-                      <td className="py-2 px-4 border-b">{ebook.price === 0 ? 'Free' : ebook.price}</td>
+                      <td className="py-2 px-4 border-b">{ebook.price === 0 ? 'Free' : formatPrice(ebook.price)}</td>
                       <td className="py-2 px-4 border-b">
                         {category ? category.name : 'No Category'}
                       </td>
@@ -331,9 +346,9 @@ const TestEbook = () => {
                   <label htmlFor="price" className="block text-gray-700">Price</label>
                   <input
                     id="price"
-                    type="number"
-                    value={newEbook.Price}
-                    onChange={(e) => setNewEbook({ ...newEbook, Price: e.target.value })}
+                    type="text"
+                    value={formatPrice(newEbook.Price)}  // Format the price value here
+                    onChange={handlePriceChange}  // Use the new handlePriceChange function
                     required
                     className="w-full border p-2 rounded"
                   />

@@ -7,12 +7,7 @@ import Footer from '../Footer/Footer';
 import Cookies from 'js-cookie';
 import { Table, Button } from 'react-bootstrap';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
-import '@react-pdf-viewer/core/lib/styles/index.css'; // Core styles for PDF viewer
-import { pdfjs } from 'react-pdf';
-import { pdfjsWorker } from '@react-pdf-viewer/default-layout';
-import { pdfjsTheme } from '@react-pdf-viewer/core';
 
-import '@react-pdf-viewer/default-layout/lib/styles/index.css'; // Default Layout styles
 
 const PDFProtect = () => {
   const [userEbooks, setUserEbooks] = useState([]);
@@ -122,23 +117,23 @@ const PDFProtect = () => {
           <p>No ebooks found for this user.</p>
         )}
 
-      {selectedpdfurl && (
-        <div style={{ marginTop: '30px' }}>
-          <h3>Viewing PDF</h3>
-          {error ? (
-            <div>
-              <p style={{ color: 'red' }}>Failed to load PDF file. Resetting...</p>
-              <span>Page 1 of 1</span> {/* Fallback page info when error occurs */}
-            </div>
-          ) : (
-            <div onContextMenu={handleRightClick}>
-              {/* Use the correct version of the PDF.js worker */}
-              <Worker workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`}>
-                <Viewer fileUrl={selectedpdfurl} />
-              </Worker>
-            </div>
-          )}
-        </div>
+        {selectedpdfurl && (
+          <div style={{ marginTop: '30px' }}>
+            <h3>Viewing PDF</h3>
+            {error ? (
+              <div>
+                <p style={{ color: 'red' }}>Failed to load PDF file. Resetting...</p>
+                <span>Page 1 of 1</span> {/* Fallback page info when error occurs */}
+              </div>
+            ) : (
+              <div onContextMenu={handleRightClick}>
+                {/* Use the correct version of the PDF.js worker */}
+                <Worker workerUrl={`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`}>
+                  <Viewer fileUrl={selectedpdfurl} onError={() => setError(true)} />
+                </Worker>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
