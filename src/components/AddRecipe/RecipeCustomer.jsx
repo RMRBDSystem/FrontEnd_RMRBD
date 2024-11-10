@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
@@ -6,6 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../Navbar/Navbar";
 import Footer from '../Footer/Footer';
+import Cookies from "js-cookie";
+
 const RecipeCustomer = () => {
 
   const [recipeName, setRecipeName] = useState("");
@@ -14,8 +16,21 @@ const RecipeCustomer = () => {
   const [tags, setTags] = useState([]);
   const [recipeImage, setRecipeImage] = useState([]);
   const [selectedTagIds, setSelectedTagIds] = useState([]);
-  const [tagsVisible, setTagsVisible] = useState(false)
+  const [tagsVisible, setTagsVisible] = useState(false);
+  const [nutrition , setNutrition] = useState("");
+  const [tutorial, setTutorial] = useState("");
+  const [ingredient, setIngredient] = useState("");
+  const [createDate, setCreateDate] = useState("");
+  const [totalTime,setTotalTime] = useState();
+  const [createById, setcreateById] = useState("");
+
+
   useEffect(() => {
+    const storedUserId = Cookies.get("UserId");
+    console.log("Stored UserId:", storedUserId);
+    if (storedUserId) {
+      setcreateById(storedUserId);
+    }
     fetchActiveTags();
   }, []);
 
@@ -88,7 +103,15 @@ const RecipeCustomer = () => {
       recipeName,
       numberOfService,
       price,
+      createById,
+      nutrition,
+      tutorial,
+      ingredient,
+      totalTime,
+      createDate,
     };
+
+    console.log("Recipe data:", recipeData);
 
     try {
       // Step 1: Save the recipe data
@@ -203,6 +226,62 @@ const RecipeCustomer = () => {
 
         <Row className="mb-4">
           <Col>
+            <Form.Group controlId="nutrition">
+              <Form.Label>Nutrition</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Nutrition"
+                value={nutrition}
+                onChange={(e) => setNutrition(e.target.value)}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-4">
+          <Col>
+            <Form.Group controlId="tutorial">
+              <Form.Label>Tutorial</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Tutorial"
+                value={tutorial}
+                onChange={(e) => setTutorial(e.target.value)}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-4">
+          <Col>
+            <Form.Group controlId="ingredient">
+              <Form.Label>Ingredient</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Ingredient"
+                value={ingredient}
+                onChange={(e) => setIngredient(e.target.value)}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-4">
+          <Col>
+            <Form.Group controlId="createDate">
+              <Form.Label>Create Date</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Create Date"
+                value={createDate}
+                onChange={(e) => setCreateDate(e.target.value)}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-4">
+          <Col>
             <Form.Group controlId="tags">
               <Form.Label>Tags</Form.Label>
               <Button variant="link" onClick={toggleTagsVisibility}>
@@ -247,6 +326,21 @@ const RecipeCustomer = () => {
           </Col>
         </Row>
         <Row>
+
+        <Row className="mb-4">
+          <Col>
+            <Form.Group controlId="totaltime">
+              <Form.Label>Total Time</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="totaltime"
+                value={totalTime}
+                onChange={(e) => setTotalTime(e.target.value)}
+              />
+            </Form.Group>
+          </Col>
+        </Row>      
+
           <Col className="d-flex align-items-end">
             <Button variant="primary" onClick={handleSave} className="w-100">
               Submit

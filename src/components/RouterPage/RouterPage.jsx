@@ -14,7 +14,7 @@ import IncomeManagement from '../Admin/IncomeManagement';
 import Reports from '../Admin/Reports';
 import CategoryManagement from '../Admin/CategoryManagement';
 import RecipeManagement from '../Admin/Recipe';
-
+import UpdateProfile from '../AccountProfile/AccountProfile'; 
 export default function RouterPage() {
   return (
     <AuthProvider>
@@ -24,12 +24,13 @@ export default function RouterPage() {
           <Route path="/admin/income-management" element={<IncomeManagement />} />
           <Route path="/admin/reports" element={<Reports />} />
           <Route path="/admin/category-management" element={<CategoryManagement />} />
-          <Route path="/admin/recipemanagement" element={<RecipeManagement />} />
+          <Route path="/admin/recipe-management" element={<RecipeManagement />} />
           <Route path="/" element={<LandingPage />} />
           <Route path="/homepageDashboard" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/meals" element={<MealsPage />} />
+          <Route path="/update-account" element={<UpdateProfile />} />
           <Route
             path="/add-recipe"
             element={

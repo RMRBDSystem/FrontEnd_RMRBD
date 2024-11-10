@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink,useNavigate } from "react-router-dom";
 import LogoA from "../../assets/LogoA.png";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -17,7 +17,24 @@ export function StickyNavbar() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef(null); // Khởi tạo ref
+//Sửa dropdowwn trên avater
+  const toggleDropdown = () => {
+    setIsDropdownOpen(prevState => !prevState);
+  };
 
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsDropdownOpen(false);
+    }
+  };
+  React.useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  const navigate = useNavigate();
   const userRole = Cookies.get("UserRole");
   React.useEffect(() => {
     const handleScroll = () => {
@@ -52,7 +69,10 @@ export function StickyNavbar() {
       setIsLoggedIn(false);
       Cookies.remove("UserRole");
       Cookies.remove("UserName");
+      Cookies.remove("UserId");
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("UserRole");
+      navigate("/homepageDashboard");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -113,11 +133,12 @@ export function StickyNavbar() {
           <div className="relative flex items-center gap-x-1">
             {isLoggedIn ? (
               <div
-                onMouseEnter={() => setIsDropdownOpen(true)}
-                onMouseLeave={() => setIsDropdownOpen(false)}
+              ref={dropdownRef}
+                // onMouseEnter={() => setIsDropdownOpen(true)}
+                // onMouseLeave={() => setIsDropdownOpen(false)}
                 className="relative"
               >
-                <div className="flex items-center cursor-pointer">
+                <div onClick ={toggleDropdown} className="flex items-center cursor-pointer">
                   <img
                     src="https://via.placeholder.com/50" // Hình ảnh mặc định
                     alt="User Avatar"

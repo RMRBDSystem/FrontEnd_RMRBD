@@ -39,16 +39,6 @@ const Login = () => {
 
   const getDashboardPath = (role) => {
     switch (role) {
-      case "Moderator":
-        return "/homepageDashboard";
-      case "Order Distributor":
-        return "/homepageDashboard";
-      case "Admin":
-        return "/homepageDashboard";
-      case "Customer":
-        return "/homepageDashboard";
-      case "Seller":
-        return "/homepageDashboard";
       default:
         return "/homepageDashboard";
     }
@@ -68,7 +58,7 @@ const Login = () => {
           Token: "123-abc",
         },
       });
-      const { role } = response.data;
+      const { role,userId } = response.data;
 
       // Nếu người dùng đã có một vai trò, không cho phép đăng nhập với vai trò khác
       const existingRole = Cookies.get("UserRole");
@@ -81,6 +71,7 @@ const Login = () => {
       Cookies.set("UserRole", role, { expires: 1 });
       localStorage.setItem("UserRole", role); // Lưu vào localStorage
       Cookies.set("UserName", userName, { expires: 1 });
+      Cookies.set("UserId", userId, { expires: 1 });
       setIsLoggedIn(true);
       // Điều hướng đến dashboard tương ứng
       navigate(getDashboardPath(role));
