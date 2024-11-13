@@ -1,0 +1,95 @@
+.rating-container {
+  width           : 100%;
+  padding         : 20px;
+  border          : 1px solid #ddd;
+  border-radius   : 8px;
+  background-color: #fff;
+  font-family     : Arial, sans-serif;
+}
+
+.rating-header h3 {
+  margin   : 0 0 10px;
+  font-size: 18px;
+}
+
+.rating-summary {
+  display    : flex;
+  align-items: center;
+  gap        : 15px;
+}
+
+.rating-score {
+  font-size  : 36px;
+  font-weight: bold;
+  color      : #333;
+}
+
+.score {
+  font-size: 48px;
+  color    : #333;
+}
+
+.out-of {
+  font-size: 24px;
+  color    : #999;
+}
+
+.rating-stars {
+  display    : flex;
+  align-items: center;
+}
+
+.stars {
+  font-size: 24px;
+  color    : #ccc;
+}
+
+.rating-count {
+  margin-left: 10px;
+  font-size  : 14px;
+  color      : #666;
+}
+
+.rating-bars {
+  margin-top: 20px;
+}
+
+.rating-bar {
+  display      : flex;
+  align-items  : center;
+  gap          : 10px;
+  margin-bottom: 5px;
+}
+
+.bar {
+  width           : 200px;
+  height          : 8px;
+  background-color: #f0f0f0;
+  border-radius   : 4px;
+  overflow        : hidden;
+}
+
+.fill {
+  height          : 100%;
+  background-color: #ff6f61;
+}
+
+.write-review-button {
+  margin-top   : 20px;
+  padding      : 10px 20px;
+  color        : #ff6f61;
+  border       : 1px solid #ff6f61;
+  background   : none;
+  border-radius: 8px;
+  cursor       : pointer;
+  font-size    : 16px;
+}
+
+.write-review-button:hover {
+  background-color: #ff6f61;
+  color           : #fff;
+}
+
+.star {
+  cursor: pointer;
+}
