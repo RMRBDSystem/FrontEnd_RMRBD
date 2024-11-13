@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.post("/create-payment-link", async (req, res) => {
-  const YOUR_DOMAIN = `http://localhost:5173`;
+  const YOUR_DOMAIN = `https://fe-rmrbd.vercel.app/`;
   const { coins } = req.body;
 
   if (!coins || isNaN(coins) || coins <= 0) {
