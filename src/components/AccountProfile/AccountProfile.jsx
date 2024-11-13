@@ -1,5 +1,4 @@
 import { React, useEffect, useState } from "react";
-import { useAuth } from "../RouterPage/AuthContext";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify"; // Đảm bảo toast được import đúng
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
@@ -44,13 +43,13 @@ const AccountProfile = () => {
       });
       console.log("Response from server", result);
       clear();
-      toast.success("Account Profile has been added successfully"); // Sử dụng toast.success thay vì toast.Success
+      toast.success("Account Profile has been added successfully"); 
     } catch (error) {
       if (error.response && error.response.data) {
-        // Truy xuất thông báo lỗi từ backend
-        toast.error(error.response.data.message); // Hiển thị thông báo lỗi từ backend
+        
+        toast.error(error.response.data.message); 
       } else {
-        // Trường hợp không có thông báo lỗi từ backend
+        
         toast.error("Error submitting profile.");
       }
     }
