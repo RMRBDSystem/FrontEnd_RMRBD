@@ -2,7 +2,7 @@ import axios from 'axios';
 // import Cookies from 'js-cookie';
 // const userId = Cookies.get("UserId");
 // API lấy danh sách sách
-export const getRecipeRates = async () => {
+export const getBookRates = async () => {
     try {
         const response = await axios.get(`https://rmrbdapi.somee.com/odata/RecipeRate`, {
             headers: {

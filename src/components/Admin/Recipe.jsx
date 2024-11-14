@@ -42,7 +42,7 @@ const CRUD = () => {
 
   const getData = async () => {
     try {
-      const result = await axios.get("https://localhost:7220/odata/Recipe", {
+      const result = await axios.get("https://rmrbdapi.somee.com/odata/Recipe", {
         headers: {
           "Content-Type": "application/json",
           Token: "123-abc",
@@ -59,7 +59,7 @@ const CRUD = () => {
     for (const recipe of recipes) {
       try {
         const response = await fetch(
-          `https://localhost:7220/odata/UploadImage/firstImage/${recipe.recipeId}`,
+          `https://rmrbdapi.somee.com/odata/UploadImage/firstImage/${recipe.recipeId}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -81,7 +81,7 @@ const CRUD = () => {
 
   const fetchActiveTags = async () => {
     try {
-      const response = await axios.get("https://localhost:7220/odata/Tag", {
+      const response = await axios.get("https://rmrbdapi.somee.com/odata/Tag", {
         params: {
           "$filter": "status eq 1",
         },
@@ -98,7 +98,7 @@ const CRUD = () => {
   };
 
   const uploadImage = async (image, recipeId) => {
-    const url = `https://localhost:7220/odata/UploadImage/Recipe/${recipeId}`;
+    const url = `https://rmrbdapi.somee.com/odata/UploadImage/Recipe/${recipeId}`;
     const formData = new FormData();
     formData.append("image", image);
     formData.append("recipeId", recipeId);
@@ -121,7 +121,7 @@ const CRUD = () => {
     }
   };
   const saveRecipeTag = async (tagId, recipeId) => {
-    const urlRecipeTag = "https://localhost:7220/odata/RecipeTag";
+    const urlRecipeTag = "https://rmrbdapi.somee.com/odata/RecipeTag";
     const RecipeTagData = {
       tagId,
       recipeId,
@@ -142,7 +142,7 @@ const CRUD = () => {
   };
 
   const handleSave = async () => {
-    const url = "https://localhost:7220/odata/Recipe";
+    const url = "https://rmrbdapi.somee.com/odata/Recipe";
     const recipeData = {
       recipeName,
       numberOfService,
@@ -193,7 +193,7 @@ const CRUD = () => {
     try {
       // Fetch recipe details
       const recipeResponse = await axios.get(
-        `https://localhost:7220/odata/Recipe/${recipeId}`,
+        `https://https://rmrbdapi.somee.com/Recipe/${recipeId}`,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -221,7 +221,7 @@ const CRUD = () => {
   const fetchFullImageUrls = async (recipeId) => {
     try {
       const imagesResponse = await axios.get(
-        `https://localhost:7220/odata/UploadImage/allImages/${recipeId}`,
+        `https://rmrbdapi.somee.com/odata/UploadImage/allImages/${recipeId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -232,7 +232,7 @@ const CRUD = () => {
       console.log("Raw images response:", imagesResponse);
 
       // Assuming the API response contains an array of image paths
-      const baseURL = "https://localhost:7220";
+      const baseURL = "https://rmrbdapi.somee.com/";
       const fullImageUrls = imagesResponse.data.map((path) => baseURL + path);
 
       return fullImageUrls; // Return the full image URLs
@@ -242,7 +242,7 @@ const CRUD = () => {
     }
   };
   const handleUpdate = async () => {
-    const url = `https://localhost:7220/odata/Recipe/${editId}`;
+    const url = `https://rmrbdapi.somee.com/odata/Recipe/${editId}`;
     const updatedData = {
       recipeId: editId,
       recipeName: editRecipeName,

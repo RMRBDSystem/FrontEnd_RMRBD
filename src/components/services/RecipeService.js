@@ -18,10 +18,10 @@ export const getRecipes = async () => {
         // Lấy tất cả recipe
         const response = await axios.get('https://rmrbdapi.somee.com/odata/Recipe', {
             headers: {
-              token: '123-abc',
-              mode: 'no-cors'
+                token: '123-abc',
+                mode: 'no-cors'
             }
-          });
+        });
         return response.data;
     } catch (error) {
         console.error("Error fetching Recipe:", error);
@@ -32,9 +32,9 @@ export const getRecipes = async () => {
 // API lấy chi tiết sách theo bookId
 export const getRecipeById = async (recipeId) => {
     try {
-        // Gọi API với URL mới `/Recipe/{recipeId}`
         const response = await apiInstance.get(`/Recipe/${recipeId}`);
-        return response.data; // Trả về dữ liệu sách
+        const recipe = response.data;
+        return recipe; // Trả về dữ liệu sách
     } catch (error) {
         console.error(`Error fetching Recipe with ID ${recipeId}:`, error);
         throw error;
@@ -46,13 +46,13 @@ export const getImagesByRecipeId = async (recipeId) => {
     try {
         const response = await axios.get("https://rmrbdapi.somee.com/odata/Image?$filter=RecipeId eq" + recipeId + "&$top=1", {
             headers: {
-              'token': '123-abc'
+                'token': '123-abc'
             }
         });
-        
+
         // Kiểm tra phản hồi từ API và cấu trúc dữ liệu
         if (response.data && response.data.length > 0) {
-            
+
             return response.data[0].imageUrl.Value; // Trả về URL của ảnh đầu tiên nếu có
         } else {
             console.warn(`No images found for Recipe ID ${recipeId}`);
@@ -68,11 +68,11 @@ export const getImagesByRecipeId = async (recipeId) => {
 
 export const getFirstImageByRecipeId = async (recipeId) => {
     try {
-        const response = await axios.get(`https://rmrbdapi.somee.com/odata/Image?$filter=RecipeId eq ${recipeId}&$top=1&$Select=ImageUrl`,{
+        const response = await axios.get(`https://rmrbdapi.somee.com/odata/Image?$filter=RecipeId eq ${recipeId}&$top=1&$Select=ImageUrl`, {
             headers: {
                 token: '123-abc',
                 mode: 'no-cors'
-              }
+            }
         });
         const imageUrl = response.data;
         return imageUrl; // Trả về URL của ảnh đầu tiên           

@@ -38,7 +38,7 @@ const SearchWrapper = () => {
               <input
                 type="search"
                 name="search"
-                placeholder="Type any keywords..."
+                placeholder="Nhập tên món ăn, nguyên liệu hoặc sách.."
                 className="w-[10%] md:w-[80%] h-[10px] border-2 border-white text-custom-orange text-[24px] italic p-4 mt-4 mb-4"
               />
               <button

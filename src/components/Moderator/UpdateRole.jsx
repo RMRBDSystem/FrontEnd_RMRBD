@@ -19,7 +19,7 @@ const AccountProfile = () => {
 
   const getData = async () => {
     try {
-      const result = await axios.get("https://localhost:7220/odata/AccountProfile", {
+      const result = await axios.get("https://rmrbdapi.somee.com/odata/AccountProfile", {
         headers: { "Content-Type": "application/json", token: "123-abc" },
       });
 
@@ -28,7 +28,7 @@ const AccountProfile = () => {
       // Lấy dữ liệu của từng Account từ API Account
       const accountDataPromises = accountProfiles.map(async (profile) => {
         try {
-          const accountResult = await axios.get(`https://localhost:7220/odata/Account/${profile.accountId}`, {
+          const accountResult = await axios.get(`https://rmrbdapi.somee.com/odata/Account/${profile.accountId}`, {
             headers: { "Content-Type": "application/json", token: "123-abc" },
           });
 
@@ -69,7 +69,7 @@ const AccountProfile = () => {
 
     // 1. Cập nhật status ở bảng AccountProfile
     const accountProfileUpdatePromise = axios.put(
-      `https://localhost:7220/odata/AccountProfile/${accountId}`,
+      `https://rmrbdapi.somee.com/odata/AccountProfile/${accountId}`,
       updateAccountProfileData,
       {
         headers: { "Content-Type": "application/json", Token: "123-abc" },
@@ -80,7 +80,7 @@ const AccountProfile = () => {
     // 2. Cập nhật roleId trong bảng Account nếu status = 1
     if (newStatus === 1) {
       const accountUpdatePromise = axios.put(
-        `https://localhost:7220/odata/Account/${accountId}`,
+        `https://rmrbdapi.somee.com/odata/Account/${accountId}`,
         updatedItem.Account,
         {
           headers: { "Content-Type": "application/json", Token: "123-abc" },

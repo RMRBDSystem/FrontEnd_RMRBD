@@ -20,7 +20,7 @@ function RecipeCard({ recipe }) {
             />
             <h3 className="font-semibold text-sm">{recipe.recipeName}</h3>
             <div className="text-gray-700 mb-2">
-                <span className="text-red-500 font-bold">{recipe.price.toLocaleString()} đ</span>
+                <span className="text-red-500 font-bold">{recipe.price ? recipe.price+' đ': 'Free'}</span>
             </div>
         </div>
     );
