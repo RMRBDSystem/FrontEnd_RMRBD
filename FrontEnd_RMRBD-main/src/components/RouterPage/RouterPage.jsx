@@ -21,6 +21,10 @@ import EBookTest from '../Admin/TestEbook';
 import Feedback from '../Admin/Feedback';
 import Dashboard from '../Admin/Dashboard';
 import PDFProtect from '../API Test/PDFProtect';
+import Address from '../AddressPage/Address';
+import AddressEdit from '../AddressPage/AddressEdit';
+import AddBook from '../AddItems/AddBook';
+import TestBook from '../Admin/TestBook';
 
 
 export default function RouterPage() {
@@ -39,6 +43,10 @@ export default function RouterPage() {
           <Route path="/admin//feedback" element={<Feedback />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/pdf-protect" element={<PDFProtect />} />
+          <Route path="/address" element={<Address />} />
+          <Route path="/addressedit" element={<AddressEdit />} />
+          <Route path="/add-book" element={<AddBook />} />
+          <Route path="/testbook" element={<TestBook />} />
           <Route
               path="/add-recipe"
               element={

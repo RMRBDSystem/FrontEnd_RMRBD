@@ -70,10 +70,10 @@ const EbookCustomer = () => {
   // Handle form submission to add ebook
   const addEbook = async (e) => {
     e.preventDefault();
-
+  
     // Check for missing fields
     const missingFields = [];
-
+  
     if (!newEbook.EbookName) missingFields.push('Ebook Name');
     if (!newEbook.Description) missingFields.push('Description');
     if (newEbook.Price === null || newEbook.Price === undefined) missingFields.push('Price');
@@ -85,12 +85,12 @@ const EbookCustomer = () => {
     if (!userName || !UserId) {
       missingFields.push("User not logged in or missing UserId");
     }
-
+  
     if (missingFields.length > 0) {
       toast.error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       return;
     }
-
+  
     // Prepare FormData to send the file along with other fields
     const ebookData = new FormData();
     
@@ -105,17 +105,17 @@ const EbookCustomer = () => {
     
     // Append the status, if required
     ebookData.append('status', newEbook.Status || 1);
-
+  
     // Append image if provided
     if (newEbook.image) {
       ebookData.append('image', newEbook.image); 
     }
-
+  
     // Append PDF file if provided
     if (newEbook.Pdf) {
       ebookData.append('document', newEbook.Pdf); 
     }
-
+  
     // Log the FormData being sent to the server
     console.log('FormData being sent to the API:', ebookData);
     
@@ -127,12 +127,15 @@ const EbookCustomer = () => {
           'Token': '123-abc', 
         },
       });
-
+  
+      // Log the response for successful ebook addition
+      console.log('Ebook successfully added:', response.data);
+  
       toast.success("Ebook added successfully!");
       resetForm();
     } catch (error) {
       console.error('Error adding ebook:', error.response ? error.response.data : error.message);
-
+  
       if (error.response && error.response.data) {
         const errorMessage = error.response.data.errors
           ? Object.values(error.response.data.errors).join(", ")

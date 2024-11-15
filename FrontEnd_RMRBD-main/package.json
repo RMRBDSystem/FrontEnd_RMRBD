@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
     "@fortawesome/free-regular-svg-icons": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
@@ -33,6 +34,7 @@
     "front-end-rmrbd": "file:",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
+    "latest": "^0.2.0",
     "payos-checkout": "^1.0.9",
     "pdfjs-dist": "^2.16.105",
     "phosphor-react": "^1.4.1",
