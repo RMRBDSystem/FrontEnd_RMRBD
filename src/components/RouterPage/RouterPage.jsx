@@ -8,6 +8,7 @@ import Login from "../LoginPage/LoginPage";
 import HomePage from "../HomePage/HomePage";
 import Landing from "../LandingPage/Landing";
 import FAQPage from "../Pages/FAQ";
+import Menu from '../Menu/Menu';
 //Customer
 import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import AddEbookPageForCustomer from "../AddItems/EbookCustomer";
@@ -57,6 +58,7 @@ export default function RouterPage() {
           <Route element={<Layout />}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/faq" element={<FAQPage />} />
+            <Route path="/menu" element={<Menu />} />
             <Route path="/recipe" element={<Recipe />} />
             <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
             <Route path="/book" element={<Book />} />

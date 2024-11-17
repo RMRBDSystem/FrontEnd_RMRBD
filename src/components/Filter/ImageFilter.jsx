@@ -60,7 +60,7 @@ const ImageFilter = () => {
           <Button
             key={filter}
             onClick={() => handleFilterClick(filter)}
-            className={`focus:outline-none border-2 border-orange-600 hover:bg-orange-700 font-medium rounded-lg text-sm px-5 text-black py-2.5 mb-2 capitalize ${
+            className={`focus:outline-none border-2 border-orange-600 hover:bg-orange-700 font-medium rounded-lg text-sm px-5 text-white py-2.5 mb-2 capitalize ${
               activeFilter === filter ? "bg-orange-600" : ""
             }`}
           >

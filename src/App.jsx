@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import "./App.css";
 import LoadingPage from './components/Loader/LoadingPage.jsx';
 import RouterPage from './components/RouterPage/RouterPage.jsx';
 import './assets/styles/Global.scss';

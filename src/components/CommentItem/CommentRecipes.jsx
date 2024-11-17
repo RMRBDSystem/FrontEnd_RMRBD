@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react"
+import { useState, useEffect } from "react"
 import Comment from "./Comment";
 import CommentForm from "./CommentForm";
 import Cookies from 'js-cookie';
@@ -6,41 +6,36 @@ import { createComment, UpdateComment, RemoveComment } from "../services/Comment
 import "../../assets/styles/Components/commentstyle.css"
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {getCommentsbyRecipeId} from "../services/CommentService"
-const Comments = ({recipeId}) => {
+import { getCommentsbyRecipeId } from "../services/CommentService"
+const Comments = ({ recipeId }) => {
     const accountId = Cookies.get("UserId");
-    const [backendcomment, setbackendcomment] = useState([]); // All comments
+    const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
     const [activeComment, setActiveComment] = useState(null); //  Tracks active comment for editing
-    const Comments = backendcomment
+    const backgroundPromise = [];
+    const Comments = backendComments
         .filter((comment) => comment.rootCommentId === null)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
     const getReplies = (commentId) => {
-        const replies = backendcomment
+        const replies = backendComments
             .filter((comment) => comment.rootCommentId === commentId)
             .sort(
                 (a, b) =>
                     new Date(a.date).getTime() - new Date(b.date).getTime()
             );
-        //console.log('Replies is: ', replies)
         return replies;
     }
 
-    const deleteComment = (commentId) => {
+    const deleteComment = async  (commentId) => {
         if (window.confirm("Are you sure that you want to remove comment?")) {
-            RemoveComment(commentId).then(() => {
-                const updatebackendComments = backendcomment.filter(
-                    (comment) => comment.id !== commentId
-                );
-                setbackendcomment(updatebackendComments);
-            })
-
+            await RemoveComment(commentId);
+            setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
+            backgroundPromise.push(backendComments)
         }
     };
 
 
-    const updateComment = (text, commentId, rootcommentId) => {
+    const updateComment = async  (text, commentId, rootcommentId) => {
         const updateCommentData = {
             rootcommentId,
             content: text,
@@ -51,16 +46,12 @@ const Comments = ({recipeId}) => {
             customerId: accountId,
             recipeId,
         };
-        UpdateComment(updateCommentData, commentId).then(() => {
-            const updatedBackendComments = backendcomment.map((backendComment) => {
-                if (backendComment.id === commentId) {
-                    return { ...backendComment, content: text };
-                }
-                return backendComment;
-            });
-            setbackendcomment(updatedBackendComments);
-            setActiveComment(null);
-        });
+        await UpdateComment(updateCommentData, commentId);
+        setBackendComments(backendComments.map((comment) =>
+            comment.id === commentId ? { ...comment, content: text } : comment
+        ));
+        backgroundPromise.push(backendComments)
+        setActiveComment(null);
     }
     const handleWriteClick = (text) => {
         if (!accountId) {
@@ -73,19 +64,19 @@ const Comments = ({recipeId}) => {
     useEffect(() => {
         const fetchComment = async () => {
             try {
-                getCommentsbyRecipeId(recipeId).then((data) => {
-                    setbackendcomment(data);
-                  });
+                await Promise.all(backgroundPromise)
+                const data = await getCommentsbyRecipeId(recipeId);
+                setBackendComments(data);
             } catch (err) {
                 console.error(err);
             }
         };
-        fetchComment();    
-    }, [recipeId]);
-    const addComment = ((text, rootcommentId = null) => {
+        fetchComment();
+    }, [recipeId,backgroundPromise]);
 
+    const addComment = async (text, rootCommentId = null) => {
         const newCommentData = {
-            rootcommentId,
+            rootCommentId,
             content: text,
             date: new Date().toISOString(),
             status: 1,
@@ -94,11 +85,11 @@ const Comments = ({recipeId}) => {
             customerId: accountId,
             recipeId,
         };
-        createComment(newCommentData).then((comment) => {
-            setbackendcomment([comment, ...backendcomment]);
-            setActiveComment(null);
-        })
-    });
+        const comment = await createComment(newCommentData);
+        setBackendComments([comment, ...backendComments]);
+        backgroundPromise.push(backendComments)
+        setActiveComment(null);
+    };
     return (
         <>
             <ToastContainer />
@@ -107,7 +98,7 @@ const Comments = ({recipeId}) => {
                 <div className="comment-form-title">Write comment</div>
                 <CommentForm submitLabel="Write" handleSubmit={handleWriteClick} />
                 <div className="comments-container">
-                    {Comments.map((comment) => {
+                    {Comments.slice(0, visibleComments).map((comment) => {
                         return (
                             <Comment
                                 key={comment.commentId}
@@ -127,7 +118,7 @@ const Comments = ({recipeId}) => {
                 </div>
                 {visibleComments < Comments.length && (
                     <button
-                        className="see-more-button"
+                        className="see-more-button text-white"
                         onClick={() => setVisibleComments(visibleComments + 3)}
                     >
                         See more

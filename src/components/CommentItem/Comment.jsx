@@ -46,7 +46,7 @@ const Comment = ({
         fetcAccountData();
     }, [comment.customerId]);
     return (
-        <div className="comment" style={{ display: 'flex' }}>
+        <div className="comment text-white" style={{ display: 'flex' }}>
             <div className="comment-image-container">
                 <img src='../../../public/images/avatar.png' />
             </div>

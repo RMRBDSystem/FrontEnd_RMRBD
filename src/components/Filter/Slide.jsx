@@ -84,10 +84,10 @@ const Slide = () => {
                     </SwiperSlide>
                 ))}
                 <div className='slider-controler'>
-                    <div className='swiper-button-prev'>
+                    <div className='swiper-button-prev text-white'>
                         <ArrowLeft size={30} />
                     </div>
-                    <div className='swiper-button-next'>
+                    <div className='swiper-button-next text-white'>
                         <ArrowRight size={30} />
                     </div>
                 </div>

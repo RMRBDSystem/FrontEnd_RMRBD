@@ -12,15 +12,7 @@ function Recipe() {
                 // Lấy danh sách sách
                 const recipesData = await getRecipes();
 
-                // Dùng Promise.all để lấy ảnh của từng sách song song
-                const recipesWithImages = await Promise.all(
-                    recipesData.map(async (recipe) => {
-                        const imageUrl = await getImagesByRecipeId(recipe.recipeId);
-                        return { ...recipe, imageUrl }; // Kết hợp `imageUrl` vào đối tượng `book`
-                    })
-                );
-
-                setRecipes(recipesWithImages); // Đặt danh sách sách với URL ảnh vào state
+                setRecipes(recipesData); // Đặt danh sách sách với URL ảnh vào state
             } catch (error) {
                 console.error("Failed to fetch books or images", error);
             }

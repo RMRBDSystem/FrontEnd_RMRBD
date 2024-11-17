@@ -21,7 +21,7 @@ export default withMT({
         'gradient-end': '#6B21A8', // Màu kết thúc (tím)
       },
       fontFamily: {
-        roboto: ['Roboto', 'sans-serif'],
+        'sans': '"Proxima Nova", system-ui, sans-serif',
       },
       keyframes: {
         blink: {

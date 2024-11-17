@@ -2,21 +2,22 @@ import { useState, useEffect} from "react"
 import Comment from "./Comment";
 import CommentForm from "./CommentForm";
 import Cookies from 'js-cookie';
-import { createComment, UpdateComment, RemoveComment,getCommentsbyEBookId } from "../services/CommentService"
+import { createComment, UpdateComment, RemoveComment,getCommentsbyBookId } from "../services/CommentService"
 import "../../assets/styles/Components/commentstyle.css"
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const Comments = ({bookId}) => {
     const accountId = Cookies.get("UserId");
-    const [backendcomment, setbackendcomment] = useState([]); // All comments
+    const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
     const [activeComment, setActiveComment] = useState(null); //  Tracks active comment for editing
-    const Comments = backendcomment
+    const backgroundPromise = [];
+    const Comments = backendComments
         .filter((comment) => comment.rootCommentId === null)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const getReplies = (commentId) => {
-        const replies = backendcomment
+        const replies = backendComments
             .filter((comment) => comment.rootCommentId === commentId)
             .sort(
                 (a, b) =>
@@ -26,20 +27,17 @@ const Comments = ({bookId}) => {
         return replies;
     }
 
-    const deleteComment = (commentId) => {
+    const deleteComment = async (commentId) => {
         if (window.confirm("Are you sure that you want to remove comment?")) {
-            RemoveComment(commentId).then(() => {
-                const updatebackendComments = backendcomment.filter(
-                    (comment) => comment.id !== commentId
-                );
-                setbackendcomment(updatebackendComments);
-            })
+            await RemoveComment(commentId);
+            setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
+            backgroundPromise.push(backendComments)
 
         }
     };
 
 
-    const updateComment = (text, commentId, rootcommentId) => {
+    const updateComment = async (text, commentId, rootcommentId) => {
         const updateCommentData = {
             rootcommentId,
             content: text,
@@ -50,16 +48,12 @@ const Comments = ({bookId}) => {
             customerId: accountId,
             recipeId: null,
         };
-        UpdateComment(updateCommentData, commentId).then(() => {
-            const updatedBackendComments = backendcomment.map((backendComment) => {
-                if (backendComment.id === commentId) {
-                    return { ...backendComment, content: text };
-                }
-                return backendComment;
-            });
-            setbackendcomment(updatedBackendComments);
-            setActiveComment(null);
-        });
+        await UpdateComment(updateCommentData, commentId);
+        setBackendComments(backendComments.map((comment) =>
+            comment.id === commentId ? { ...comment, content: text } : comment
+        ));
+        backgroundPromise.push(backendComments)
+        setActiveComment(null);
     }
     const handleWriteClick = (text) => {
         if (!accountId) {
@@ -72,16 +66,16 @@ const Comments = ({bookId}) => {
     useEffect(() => {
         const fetchComment = async () => {
             try {
-                getCommentsbyEBookId(bookId).then((data) => {
-                    setbackendcomment(data);
-                  });
+                await Promise.all(backgroundPromise)
+                const data = await getCommentsbyBookId(bookId);
+                setBackendComments(data);
             } catch (err) {
                 console.error(err);
             }
         };
         fetchComment();    
-    }, [bookId]);
-    const addComment = ((text, rootcommentId = null) => {
+    }, [bookId,backgroundPromise]);
+    const addComment = async (text, rootcommentId = null) => {
 
         const newCommentData = {
             rootcommentId,
@@ -93,11 +87,11 @@ const Comments = ({bookId}) => {
             customerId: accountId,
             recipeId: null,
         };
-        createComment(newCommentData).then((comment) => {
-            setbackendcomment([comment, ...backendcomment]);
-            setActiveComment(null);
-        })
-    });
+        const comment = await createComment(newCommentData);
+        setBackendComments([comment, ...backendComments]);
+        backgroundPromise.push(backendComments)
+        setActiveComment(null);
+    };
     return (
         <>
             <ToastContainer />
@@ -106,7 +100,7 @@ const Comments = ({bookId}) => {
                 <div className="comment-form-title">Write comment</div>
                 <CommentForm submitLabel="Write" handleSubmit={handleWriteClick} />
                 <div className="comments-container">
-                    {Comments.map((comment) => {
+                    {Comments.slice(0, visibleComments).map((comment) => {
                         return (
                             <Comment
                                 key={comment.commentId}
