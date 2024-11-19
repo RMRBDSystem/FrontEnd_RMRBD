@@ -43,7 +43,7 @@ const Breadcrumb = () => {
         <li className="inline-flex items-center">
           <Link
             to="/home"
-            className="inline-flex items-center text-sm font-medium text-gray-900 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
+            className="inline-flex items-center text-sm font-medium text-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
           >
             <svg
               className="w-3 h-3 me-2.5"
@@ -91,7 +91,7 @@ const Breadcrumb = () => {
                 ) : (
                   <Link
                     to={to}
-                    className="ms-1 text-sm font-medium text-gray-900 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
+                    className="ms-1 text-sm font-medium text-gray-300 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                   >
                     {name}
                   </Link>

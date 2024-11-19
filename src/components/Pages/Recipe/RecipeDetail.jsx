@@ -179,6 +179,7 @@ const RecipeDetail = () => {
                                         name="rating"
                                         value={index + 1}
                                         disabled // Disable không cho click
+                                        style={{ display: "none" }}
                                     />
                                     <FaStar className="star" size={20}
                                         color={starColor}
@@ -269,6 +270,7 @@ const RecipeDetail = () => {
                                                 name="rating"
                                                 value={index + 1}
                                                 disabled // Disable không cho click
+                                                style={{ display: "none" }}
                                             />
                                             <FaStar className="star" size={20}
                                                 color={starColor}
@@ -307,6 +309,7 @@ const RecipeDetail = () => {
                                                     value={currentRating}
                                                     //onClick={() => setRatepoint(currentRating)}
                                                     onChange={(e) => setRatepoint(e.target.value)}
+                                                    style={{ display: "none" }}
                                                 />
                                                 <FaStar className="star" size={50}
                                                     color={currentRating <= (hover || ratepoint) ? "#ffc107" : "#e4e5e9"}

@@ -65,6 +65,11 @@ const displayComments = (mealComments) => {
 
 const displayPopUpCommentWindow = async (dishIdMeal) => {
   const loadingPopupCard = document.getElementById(`card-${dishIdMeal}`);
+  const popUpCommentWindow = document.getElementById("popup-comments-window");
+  if (!popUpCommentWindow) {
+    console.error("popup-comments-window element is not found");
+    return;
+  }
   loadingPopupCard.insertAdjacentHTML(
     "afterbegin",
     `<div id="loading-${dishIdMeal}" class="loading-popup">
@@ -99,7 +104,7 @@ const displayPopUpCommentWindow = async (dishIdMeal) => {
       <img src="${dish.strMealThumb}" alt="${dish.strMeal}" class="popup-image" width=300;>
       <h3> ${dish.strMeal} </h3>
   </header>
-  <div class="container">
+  <div class="container__main">
   <ul class="container__list">
     <li class="container__item container__item_active">
       <span class="container__link">Instructions</span>

@@ -8,7 +8,7 @@ import Login from "../LoginPage/LoginPage";
 import HomePage from "../HomePage/HomePage";
 import Landing from "../LandingPage/Landing";
 import FAQPage from "../Pages/FAQ";
-import Menu from '../Menu/Menu';
+import Menu from "../Menu/Menu";
 //Customer
 import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import AddEbookPageForCustomer from "../AddItems/EbookCustomer";

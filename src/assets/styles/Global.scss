@@ -1,6 +1,5 @@
 @use './Components/Slide';
 @use './Components/LoadingPage';
-@use './Components/popUpWindow';
 @import url("https://fonts.cdnfonts.com/css/countryside");
 html {
   scroll-behavior: smooth;
@@ -13,7 +12,7 @@ html {
     --secondary-color: #f9f9f9;
     --gradient-color: #024d83;
     --light-color: #fff;
-    --main-font: "Roboto", arial, helvetica, sans-serif;
+    --main-font: "Poppins", arial, helvetica, sans-serif;
     --title-font: "Countryside", sans-serif;
     --layout-max-width: 1350px;
 }
@@ -37,11 +36,3 @@ body {
 .opacity-0 {
     opacity: 0;
 }
-.card {
-    background-color: var(--light-color);
-    padding: 1rem;
-    margin: 40px 2% 2% 2%;
-    width: 300px;
-    border: 2px solid #dfe1e6;
-    border-radius: 24px;
-  }

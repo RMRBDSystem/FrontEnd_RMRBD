@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import BackgroundImage from "/images/Background.jpg";
+// import BackgroundImage from "/images/Background.jpg";
 import ImageFilter from "../Filter/ImageFilter";
 import Slide from '../Filter/Slide';
+import Menu from '../Menu/Menu';
 const HomePage = () => {
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -19,9 +20,10 @@ const HomePage = () => {
 
   return (
     <div className="w-full min-h-screen">
+      <Menu/>
       <div className='home-styled'>
-          <Slide />
-        </div>
+        <Slide />
+      </div>
       <div className="flex flex-col items-center">
         <ImageFilter />
         <div className="container mx-auto px-4 lg:px-8">
@@ -58,8 +60,8 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* E-Books Section */}
-        <div className="container mx-auto px-4 lg:px-8 mt-10">
+        {/* E-Books Section*/}
+        {/* <div className="container mx-auto px-4 lg:px-8 mt-10">
           <h3 className="text-2xl font-semibold mb-5 text-gray-100 text-center">
             Featured E-Books
           </h3>
@@ -83,9 +85,9 @@ const HomePage = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
         {/* Book Recipes Section */}
-        <div className="container mx-auto px-4 lg:px-8 mt-10">
+        {/* <div className="container mx-auto px-4 lg:px-8 mt-10">
           <h3 className="text-2xl font-semibold mb-5 text-gray-100 text-center">
             Popular Book Recipes
           </h3>
@@ -109,9 +111,8 @@ const HomePage = () => {
               </div>
             ))}
           </div>
-        </div>
+      </div>  */}
       </div>
-
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

@@ -5,14 +5,20 @@ import { resetCategoriesAndCountDishes } from "./resetCategoriesAndCountDishes.j
 const setEventListeners = (dishes) => {
   dishes.forEach((dish) => {
     const likeButton = document.getElementById(`like-${dish.idMeal}`);
-    likeButton.addEventListener("click", () => {
-      postLikes(dish.idMeal);
-    });
-
     const commentButton = document.getElementById(dish.idMeal);
-    commentButton.addEventListener("click", () => {
-      displayPopUpCommentWindow(dish.idMeal);
-    });
+
+    // Kiểm tra sự tồn tại của các nút trước khi gán sự kiện
+    if (likeButton) {
+      likeButton.addEventListener("click", () => {
+        postLikes(dish.idMeal);
+      });
+    }
+
+    if (commentButton) {
+      commentButton.addEventListener("click", () => {
+        displayPopUpCommentWindow(dish.idMeal);
+      });
+    }
   });
 };
 
@@ -40,6 +46,7 @@ const renderDishesInDOM = (dishes, likes) => {
   }
 
   const foodDishes = document.getElementById("foodDishes");
+  foodDishes.innerHTML = ""; // Xóa danh sách cũ
 
   dishes.forEach((dish) => {
     likes.forEach((like) => {
@@ -106,9 +113,7 @@ const getDishesFromCategory = async (categories, id) => {
   foodDishes.innerHTML = "";
 
   const loading = document.getElementById("loading");
-
-  loading.style.display = "flex";
-
+  
   const selectedID = id - 1;
   renderIntro(categories[selectedID]);
 
