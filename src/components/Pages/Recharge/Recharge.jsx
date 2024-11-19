@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import { getAccountById } from '../../services/AccountService';
 //import { AddCoin } from '../../services/AddCoin.js';
 
 
@@ -15,12 +16,15 @@ const RechargePage = () => {
   ];
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState('');
+  const [userName, setUserName] = useState('');
+  const [coin, setCoin] = useState('');
   const [selectedOption, setSelectedOption] = useState(null);
   const [total, setTotal] = useState(0);
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customCoins, setCustomCoins] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(''); // Lưu phương thức thanh toán
   const conversionRate = 1 / 1; // Tỷ lệ quy đổi: 100 xu = 10,500 đồng
+
 
 
 
@@ -58,11 +62,22 @@ const RechargePage = () => {
 
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('UserId');
-    if (storedUserId) {
-      setUserId(storedUserId);
-    }
-  })
+    const fetchUserData = async () => {
+      const storedUserId = localStorage.getItem('UserId');
+      if (storedUserId) {
+        setUserId(storedUserId);
+      }
+      const storedUserName = localStorage.getItem('UserName');
+      if (storedUserName) {
+        setUserName(storedUserName);
+      }
+      const storedCoin = await getAccountById(Cookies.get("UserId"));
+      if (storedCoin) {
+        setCoin(storedCoin.coin);
+      }
+    };
+    fetchUserData();
+  }, []);
   // Xử lý khi người dùng chọn một gói xu
   const handleSelect = (option) => {
     setSelectedOption(option.coins);
@@ -112,11 +127,11 @@ const RechargePage = () => {
             className="w-10 h-10 rounded-full mr-3"
           />
           <div>
-            <p className="font-medium text-gray-800">Customer Name</p>
-            <p className="text-sm text-gray-500">0 coins</p>
+            <p className="font-medium text-gray-800">{userName}</p>
+            <p className="text-sm text-gray-500">{coin} coins</p>
           </div>
         </div>
-        <a href="#" className="text-blue-600 text-sm hover:underline">
+        <a href="/coinTransaction" className="text-blue-600 text-sm hover:underline">
           View transaction history
         </a>
       </div>

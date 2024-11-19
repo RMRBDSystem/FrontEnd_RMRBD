@@ -16,7 +16,7 @@ import Book from '../Pages/Book/Book';
 import BookDetail from '../Pages/Book/BookDetail';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
-import RechargePage from '../Pages/Recharge/Recharge'; // Import thêm RechargePage
+import RechargePage from '../Pages/Recharge/Recharge'; 
 import PaymentSuccess from '../Pages/Recharge/PaymentSuccess'
 import PaymentFailed from '../Pages/Recharge/PaymentFailed'
 //Admin
@@ -63,7 +63,7 @@ export default function RouterPage() {
             <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
             <Route path="/book" element={<Book />} />
             <Route path="/book/:bookId" element={<BookDetail />} />
-            <Route path="/recharge" element={<RechargePage />} /> {/* Thêm route cho RechargePage */}
+            <Route path="/recharge" element={<RechargePage />} />
             <Route
               path="/add-recipe"
               element={
