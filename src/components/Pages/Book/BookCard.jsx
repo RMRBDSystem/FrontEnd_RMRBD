@@ -1,72 +1,81 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar } from '@fortawesome/free-solid-svg-icons';
-import { faStar as faStarOutline } from '@fortawesome/free-regular-svg-icons';
-import { useNavigate } from 'react-router-dom';
-//import { getFirstImageByBookId} from '../../services/BookService';
+import React from "react";
+import PropTypes from "prop-types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as faStarOutline } from "@fortawesome/free-regular-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 function BookCard({ book }) {
-    //const [imageUrl, setImageUrl] = useState([]);
-    const navigate = useNavigate();
-    const maxStars = 5;
-    const filledStars = Math.round(book.bookRate || 0);
-  
-    // useEffect(() => {
-    //   const fetchImage = async () => {
-    //     try {
-    //       const url = await getFirstImageByBookId(book.bookId);
-    //       if (url) {
-    //         setImageUrl(url);
-    //       } else {
-    //         console.log(`No image found for book ID ${book.bookId}`);
-    //         console.warn(`No image found for book ID ${book.bookId}`);
-    //       }
-    //     } catch (error) {
-    //       console.error(`Error fetching image for book ID ${book.bookId}:`, error);
-    //     }
-    //   };
-  
-    //   fetchImage();
-    // }, [book.bookId, getFirstImageByBookId, setImageUrl]);
-  const handleCardClick = async () => {
+  const navigate = useNavigate();
+  const maxStars = 5;
+  const filledStars = Math.round(book.bookRate || 0);
+
+  const handleCardClick = () => {
     navigate(`/book/${book.bookId}`);
   };
 
   return (
     <div
-      className="bg-white p-4 rounded-lg shadow-md cursor-pointer"
+      className="block p-px bg-gradient-to-br from-blueGray-800 via-blueGray-800 to-blueGray-800 hover:from-yellow-500 hover:via-green-400 hover:to-blue-500 cursor-pointer"
       onClick={handleCardClick}
     >
-      <img
-        src={book.images && book.images.length > 0 ? book.images[0].imageUrl : ''}
-        alt={book.bookName}
-        className="w-full h-40 object-cover object-center rounded-lg mb-2"
-      />
-      <h3 className="font-semibold text-sm">{book.bookName}</h3>
-      <div className="text-gray-700 mb-2">
-        <span className="text-red-500 font-bold">{book.price.toLocaleString()} đ</span>
-      </div>
-      <div className="flex items-center mt-2">
-        {[...Array(maxStars)].map((_, index) => (
-          <FontAwesomeIcon
-            key={index}
-            icon={index < filledStars ? faStar : faStarOutline}
-            className={index < filledStars ? 'text-yellow-500' : 'text-gray-400'}
-          />
-        ))}
+      <div className="p-5 rounded-lg shadow-m border">
+        {/* Book Image */}
+        <img
+          src={
+            book.images && book.images.length > 0
+              ? book.images[0].imageUrl
+              : "default-image-url.jpg" // Thay bằng URL ảnh mặc định nếu cần
+          }
+          alt={book.bookName}
+          className="block w-full h-60 mb-4 object-cover object-center rounded-lg"
+        />
+
+        {/* Book Title */}
+        <h3 className="font-bold text-white text-lg text-center mb-2">
+          {book.bookName}
+        </h3>
+
+        {/* Book Price */}
+        <div className="text-center text-gray-300 text-lg font-semibold mb-4">
+          <span className="text-yellow-400">{book.price.toLocaleString()} đ</span>
+        </div>
+
+        {/* Book Rating */}
+        <div className="flex justify-center items-center mb-3">
+          {[...Array(maxStars)].map((_, index) => (
+            <FontAwesomeIcon
+              key={index}
+              icon={index < filledStars ? faStar : faStarOutline}
+              className={`${
+                index < filledStars ? "text-yellow-500" : "text-gray-500"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Button */}
+        <div className="flex justify-center">
+          <button className="text-white bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 px-6 py-2 rounded font-semibold hover:scale-105 transform transition">
+            Xem chi tiết
+          </button>
+        </div>
       </div>
     </div>
   );
-};
+}
 
 BookCard.propTypes = {
   book: PropTypes.shape({
-    images: PropTypes.string.isRequired,
     bookId: PropTypes.number.isRequired,
     bookName: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
     bookRate: PropTypes.number,
+    images: PropTypes.arrayOf(
+      PropTypes.shape({
+        imageUrl: PropTypes.string.isRequired,
+      })
+    ),
   }).isRequired,
 };
 

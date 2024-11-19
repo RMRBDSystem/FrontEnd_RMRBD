@@ -189,7 +189,7 @@ export function StickyNavbar() {
     <Navbar
       className={`sticky top-0 z-10 h-max max-w-full rounded-none border-0 px-4 transition-all duration-300 lg:px-4 ${isScrolled
           ? "bg-transparent backdrop-blur-md"
-          : "bg-gradient-to-r from-indigo-700 to-blue-700"
+          : "bg-gradient-to-r from-indigo-700 to-blue-900"
         }`}
     >
       <div className={`flex items-center justify-between ${isScrolled ? "text-black" : "text-white"} px-4`}>

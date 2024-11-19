@@ -37,7 +37,7 @@ const Breadcrumb = () => {
       style={{ backgroundImage: `url('${backgroundImage}')` }}
     >
     </header>
-    <nav className="flex justify-center items-center w-full lg:w-1/2 p-4" aria-label="Breadcrumb">
+    <nav className="flex justify-center items-center w-full lg:w-1/2 p-4 bg-" aria-label="Breadcrumb">
       <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
         {/* Link đầu tiên luôn là Home */}
         <li className="inline-flex items-center">

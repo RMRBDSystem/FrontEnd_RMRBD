@@ -1,57 +1,137 @@
-import React, { useEffect, useState } from 'react';
-import Sidebar from './Sidebar.jsx';
-import Banner from './Banner.jsx';
-import BookCard from './BookCard.jsx';
-import { getBooks, getImagesByBookId } from '../../services/BookService.js';
+import React, { useEffect, useState } from "react";
+import Sidebar from "./Sidebar.jsx";
+import Banner from "./Banner.jsx";
+import BookCard from "./BookCard.jsx";
+import { getBooks } from "../../services/BookService.js";
 
 function Book() {
-    const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const booksPerPage = 6;
 
-    useEffect(() => {
-        const fetchBooks = async () => {
-            try {
-                // Lấy danh sách sách
-                const booksData = await getBooks();
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const booksData = await getBooks();
+        setBooks(booksData);
+      } catch (error) {
+        console.error("Failed to fetch books", error);
+      }
+    };
+    fetchBooks();
+  }, []);
 
-                // Dùng Promise.all để lấy ảnh của từng sách song song
-                const booksWithImages = await Promise.all(
-                    booksData.map(async (book) => {
-                        const imageUrl = await getImagesByBookId(book.bookId);
-                        return { ...book, imageUrl }; // Kết hợp `imageUrl` vào đối tượng `book`
-                    })
-                );
+  const totalPages = Math.ceil(books.length / booksPerPage);
+  const displayedBooks = books.slice(
+    (currentPage - 1) * booksPerPage,
+    currentPage * booksPerPage
+  );
 
-                setBooks(booksWithImages); // Đặt danh sách sách với URL ảnh vào state
-            } catch (error) {
-                console.error("Failed to fetch books or images", error);
-            }
-        };
-        fetchBooks();
-    }, []);
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
-    return (
-        <div className="flex justify-center p-4">
-            {/* Giới hạn độ rộng tối đa và căn giữa nội dung */}
-            <div className="max-w-screen-lg w-full flex flex-col lg:flex-row">
-                {/* Sidebar */}
-                <div className="w-full lg:w-1/4 p-4">
-                    <Sidebar />
+  return (
+    <section className="py-20">
+      <div className="container px-4 mx-auto">
+        <div className="flex flex-wrap -mx-4">
+          {/* Sidebar */}
+          <div className="w-full lg:w-4/12 xl:w-3/12 px-4">
+            <Sidebar />
+          </div>
+
+          {/* Main Content */}
+          <div className="w-full lg:w-8/12 xl:w-9/12 px-4">
+            <Banner />
+
+            {/* Book List */}
+            <div className="flex flex-wrap mb-20">
+              {displayedBooks.map((book) => (
+                <div
+                  key={book.bookId}
+                  className="w-full sm:w-1/2 xl:w-1/3 mb-4 p-2"
+                >
+                  <BookCard book={book} />
                 </div>
-
-                {/* Main Content */}
-                <div className="w-full lg:w-3/4 p-4">
-                    <Banner />
-
-                    {/* Danh sách sách nấu ăn */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {books.map((book) => (
-                            <BookCard key={book.bookId} book={book} />
-                        ))}
-                    </div>
-                </div>
+              ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <nav>
+                <ul className="flex items-center justify-center">
+                  <li>
+                    <button
+                      onClick={() =>
+                        handlePageChange(Math.max(currentPage - 1, 1))
+                      }
+                      className="flex w-9 h-9 items-center justify-center border border-gray-800 text-gray-400 hover:text-yellow-300"
+                      aria-label="Previous"
+                    >
+                      <svg
+                        width="7"
+                        height="12"
+                        viewBox="0 0 7 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M6 10.6666L1.33333 5.99992L6 1.33325"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </li>
+                  {[...Array(totalPages)].map((_, index) => (
+                    <li key={index + 1}>
+                      <button
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`flex w-9 h-9 items-center justify-center ${
+                          currentPage === index + 1
+                            ? "bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 text-black font-bold"
+                            : "text-gray-400 hover:text-yellow-300 border border-gray-800 font-bold"
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    </li>
+                  ))}
+                  <li>
+                    <button
+                      onClick={() =>
+                        handlePageChange(Math.min(currentPage + 1, totalPages))
+                      }
+                      className="flex w-9 h-9 items-center justify-center border border-gray-800 text-gray-400 hover:text-yellow-300"
+                      aria-label="Next"
+                    >
+                      <svg
+                        width="7"
+                        height="12"
+                        viewBox="0 0 7 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1 1.33341L5.66667 6.00008L1 10.6667"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            )}
+          </div>
         </div>
-    );
+      </div>
+    </section>
+  );
 }
 
 export default Book;
