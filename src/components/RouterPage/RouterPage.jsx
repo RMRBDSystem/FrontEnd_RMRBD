@@ -8,7 +8,6 @@ import Login from "../LoginPage/LoginPage";
 import HomePage from "../HomePage/HomePage";
 import Landing from "../LandingPage/Landing";
 import FAQPage from "../Pages/FAQ";
-import Menu from "../Menu/Menu";
 //Customer
 import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import AddEbookPageForCustomer from "../AddItems/EbookCustomer";
@@ -17,6 +16,7 @@ import BookDetail from '../Pages/Book/BookDetail';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
 import RechargePage from '../Pages/Recharge/Recharge'; 
+import CoinTransaction from "../Pages/Recharge/CoinTransaction";
 import PaymentSuccess from '../Pages/Recharge/PaymentSuccess'
 import PaymentFailed from '../Pages/Recharge/PaymentFailed'
 //Admin
@@ -58,12 +58,12 @@ export default function RouterPage() {
           <Route element={<Layout />}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/faq" element={<FAQPage />} />
-            <Route path="/menu" element={<Menu />} />
             <Route path="/recipe" element={<Recipe />} />
             <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
             <Route path="/book" element={<Book />} />
             <Route path="/book/:bookId" element={<BookDetail />} />
             <Route path="/recharge" element={<RechargePage />} />
+            <Route path="/coinTransaction" element={<CoinTransaction />} />
             <Route
               path="/add-recipe"
               element={
