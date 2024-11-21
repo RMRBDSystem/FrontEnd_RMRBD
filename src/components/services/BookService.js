@@ -14,7 +14,7 @@ const apiInstance = axios.create({
 // API lấy danh sách sách
 export const getBooks = async () => {
     try {
-        const response = await axios.get(`https://rmrbdapi.somee.com/odata/Book`, {
+        const response = await axios.get(`https://rmrbdapi.somee.com/odata/Book?$filter=status eq 1`, {
             headers: {
               token: '123-abc',
               mode: 'no-cors'
@@ -109,3 +109,15 @@ export const deleteBook = async (bookId) => {
         throw error;
     }
 };
+// Lấy sách theo categoryId
+export const getBooksByCategory = async (categoryId) => {
+    try {
+      const response = await axios.get(`${API_URL}/Book?$filter=categoryId eq ${categoryId} and status eq 1`, {
+        headers: { token: TOKEN },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching books for category ${categoryId}:`, error);
+      throw error;
+    }
+  };

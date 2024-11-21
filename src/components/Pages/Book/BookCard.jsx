@@ -16,16 +16,16 @@ function BookCard({ book }) {
 
   return (
     <div
-      className="block p-px bg-gradient-to-br from-blueGray-800 via-blueGray-800 to-blueGray-800 hover:from-yellow-500 hover:via-green-400 hover:to-blue-500 cursor-pointer"
+      className="block p-px bg-gradient-to-br from-blueGray-800 via-blueGray-800 to-blueGray-800 hover:from-yellow-500 hover:via-green-400 hover:to-blue-500 cursor-pointer rounded-lg"
       onClick={handleCardClick}
     >
-      <div className="p-5 rounded-lg shadow-m border">
+      <div className="p-5 rounded-lg shadow-md">
         {/* Book Image */}
         <img
           src={
             book.images && book.images.length > 0
               ? book.images[0].imageUrl
-              : "default-image-url.jpg" // Thay bằng URL ảnh mặc định nếu cần
+              : "https://via.placeholder.com/150?text=No+Image" // URL ảnh mặc định
           }
           alt={book.bookName}
           className="block w-full h-60 mb-4 object-cover object-center rounded-lg"
@@ -49,14 +49,20 @@ function BookCard({ book }) {
               icon={index < filledStars ? faStar : faStarOutline}
               className={`${
                 index < filledStars ? "text-yellow-500" : "text-gray-500"
-              }`}
+              } text-lg`}
             />
           ))}
         </div>
 
         {/* Button */}
         <div className="flex justify-center">
-          <button className="text-white bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 px-6 py-2 rounded font-semibold hover:scale-105 transform transition">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/book/${book.bookId}`);
+            }}
+            className="text-white bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 px-6 py-2 rounded font-semibold hover:scale-105 transform transition shadow-lg"
+          >
             Xem chi tiết
           </button>
         </div>
