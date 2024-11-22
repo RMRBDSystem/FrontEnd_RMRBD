@@ -1,7 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Reset mặc định */
 body {
   margin: 0;
   padding: 0;
+}
+
+/* Thanh cuộn tùy chỉnh áp dụng cho toàn bộ body */
+body::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #727272;
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar {
+  width: 12px;
+  background-color: #727272;
+}
+
+body::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+  background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.44, rgb(255, 0, 0)),
+    color-stop(0.72, rgb(251, 255, 0)),
+    color-stop(0.86, rgb(255, 110, 110))
+  );
 }
