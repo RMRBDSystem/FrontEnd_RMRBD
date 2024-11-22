@@ -5,9 +5,8 @@ function Sidebar({ onFilterChange }) {
   const [categories, setCategories] = useState([]); // Danh mục loại sách
   const [filters, setFilters] = useState({
     categories: null, // Chỉ lưu trữ một category
-    priceRanges: [],
-    publishers: [],
-    ratings: [],
+    priceRanges: [], // Lọc theo giá
+    ratings: [], // Lọc theo đánh giá
   });
 
   // Fetch danh mục sách từ API
@@ -38,10 +37,8 @@ function Sidebar({ onFilterChange }) {
       const updatedFilters = { ...prevFilters };
 
       if (filterType === "categories") {
-        // Chỉ cho phép chọn một danh mục
         updatedFilters.categories = updatedFilters.categories === value ? null : value;
       } else {
-        // Xử lý các bộ lọc khác (đa chọn)
         if (updatedFilters[filterType].includes(value)) {
           updatedFilters[filterType] = updatedFilters[filterType].filter(
             (item) => item !== value
@@ -51,9 +48,18 @@ function Sidebar({ onFilterChange }) {
         }
       }
 
-      // Gửi bộ lọc được cập nhật về trang cha
+      // Gửi bộ lọc được cập nhật về component cha
       onFilterChange(updatedFilters);
 
+      return updatedFilters;
+    });
+  };
+
+  // Hàm xử lý "Bỏ chọn" category
+  const clearCategoryFilter = () => {
+    setFilters((prevFilters) => {
+      const updatedFilters = { ...prevFilters, categories: null };
+      onFilterChange(updatedFilters); // Gửi lại bộ lọc
       return updatedFilters;
     });
   };
@@ -74,7 +80,7 @@ function Sidebar({ onFilterChange }) {
             <li key={category.categoryId} className="flex items-center">
               <input
                 type="radio"
-                name="category" // Đảm bảo chỉ chọn một
+                name="category"
                 className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
                 checked={filters.categories === category.categoryId}
                 onChange={() =>
@@ -85,6 +91,13 @@ function Sidebar({ onFilterChange }) {
             </li>
           ))}
         </ul>
+        {/* Nút Bỏ chọn */}
+        <button
+          className="mt-4 px-4 py-2 text-sm font-medium text-black bg-gradient-to-r from-yellow-500 via-red-300 to-blue-500 rounded"
+          onClick={clearCategoryFilter}
+        >
+          Clear Selection
+        </button>
       </div>
 
       {/* Giá */}
@@ -93,43 +106,22 @@ function Sidebar({ onFilterChange }) {
           Giá
         </label>
         <ul className="space-y-3">
-          {["0đ - 150,000đ", "150,000đ - 300,000đ", "300,000đ - 500,000đ"].map(
-            (priceRange, index) => (
-              <li key={index} className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
-                  onChange={() =>
-                    handleFilterChange("priceRanges", priceRange)
-                  }
-                />
-                <span className="text-gray-300">{priceRange}</span>
-              </li>
-            )
-          )}
-        </ul>
-      </div>
-
-      {/* Nhà Xuất Bản */}
-      <div className="mb-6">
-        <label className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-green-300 to-blue-500 mb-5">
-          Nhà Xuất Bản
-        </label>
-        <ul className="space-y-3">
-          {["NXB Trẻ", "NXB Kim Đồng", "NXB Lao Động", "NXB Tổng Hợp"].map(
-            (publisher, index) => (
-              <li key={index} className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
-                  onChange={() =>
-                    handleFilterChange("publishers", publisher)
-                  }
-                />
-                <span className="text-gray-300">{publisher}</span>
-              </li>
-            )
-          )}
+          {[
+            { label: "0đ - 150,000đ", value: "0-150000" },
+            { label: "150,000đ - 300,000đ", value: "150000-300000" },
+            { label: "300,000đ - 500,000đ", value: "300000-500000" },
+          ].map((priceRange, index) => (
+            <li key={index} className="flex items-center">
+              <input
+                type="checkbox"
+                className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
+                onChange={() =>
+                  handleFilterChange("priceRanges", priceRange.value)
+                }
+              />
+              <span className="text-gray-300">{priceRange.label}</span>
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -139,14 +131,14 @@ function Sidebar({ onFilterChange }) {
           Đánh Giá
         </label>
         <ul className="space-y-3">
-          {["5 sao", "4 sao", "3 sao", "2 sao", "1 sao"].map((rating, index) => (
-            <li key={index} className="flex items-center">
+          {[5, 4, 3, 2, 1].map((rating) => (
+            <li key={rating} className="flex items-center">
               <input
                 type="checkbox"
                 className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
                 onChange={() => handleFilterChange("ratings", rating)}
               />
-              <span className="text-gray-300">{rating}</span>
+              <span className="text-gray-300">{rating} sao</span>
             </li>
           ))}
         </ul>

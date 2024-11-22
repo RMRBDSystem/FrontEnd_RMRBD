@@ -17,17 +17,44 @@ function Book() {
     const fetchBooks = async () => {
       setLoading(true);
       setError(null);
-
+  
       try {
         let booksData;
+  
         if (selectedFilters.categories) {
-          // Nếu có bộ lọc danh mục, lấy sách theo danh mục
           booksData = await getBooksByCategory(selectedFilters.categories);
         } else {
-          // Nếu không có bộ lọc, lấy tất cả sách
           booksData = await getBooks();
         }
-        setBooks(booksData || []); // Đảm bảo booksData là mảng
+  
+        // Kiểm tra xem booksData có phải là mảng
+        if (Array.isArray(booksData)) {
+          const filteredBooks = booksData.filter((book) => {
+            // Đảm bảo các trường luôn là mảng, kể cả khi chưa chọn gì
+            const priceRanges = selectedFilters.priceRanges || [];
+            const ratings = selectedFilters.ratings || [];
+  
+            // Lọc theo giá
+            const matchesPrice =
+              priceRanges.length === 0 ||
+              priceRanges.some((range) => {
+                const [min, max] = range.split("-").map(Number);
+                return book.price >= min && book.price <= max;
+              });
+  
+            // Lọc theo đánh giá
+            const matchesRating =
+              ratings.length === 0 ||
+              ratings.includes(Math.round(book.bookRate || 0));
+  
+            return matchesPrice && matchesRating;
+          });
+  
+          setBooks(filteredBooks);
+        } else {
+          console.error("Dữ liệu không hợp lệ:", booksData);
+          setError("Dữ liệu không hợp lệ.");
+        }
       } catch (err) {
         console.error("Failed to fetch books:", err);
         setError("Không thể tải danh sách sách. Vui lòng thử lại.");
@@ -35,9 +62,12 @@ function Book() {
         setLoading(false);
       }
     };
-
+  
     fetchBooks();
   }, [selectedFilters]);
+  
+  
+  
 
   // Tính tổng số trang và sách hiển thị trên trang hiện tại
   const totalPages = Math.ceil(books.length / booksPerPage);
