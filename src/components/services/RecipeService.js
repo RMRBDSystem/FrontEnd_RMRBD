@@ -82,3 +82,34 @@ export const getFirstImageByRecipeId = async (recipeId) => {
     }
 };
 
+export const getRecipesByTags = async (tagId) => {
+    try {
+      const response = await axios.get(`${API_URL}/recipeTag`, {
+        params: {
+          $filter: `TagId eq ${tagId}`,
+        },
+        headers: {
+          token: '123-abc',
+          mode: 'no-cors',
+        },
+      });
+  
+      const recipes = await Promise.all(
+        response.data.map(async (tag) => {
+          const response2 = await axios.get(`${API_URL}/recipe/${tag.recipeId}`, {
+            headers: {
+              token: '123-abc',
+              mode: 'no-cors',
+            },
+          });
+          return response2.data;
+        })
+      );
+  
+      return recipes;
+    } catch (error) {
+      console.error(`Error fetching recipes for tag ${tagId}:`, error);
+      throw error;
+    }
+  };
+

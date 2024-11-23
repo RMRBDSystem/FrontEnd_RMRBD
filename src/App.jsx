@@ -20,7 +20,7 @@ const App = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    const newSocket = io("http://localhost:3000");
+    const newSocket = io("https://backend-socket-jbwq.onrender.com");
     setSocket(newSocket);
     // Show loading for 1 second
     setTimeout(() => setIsLoading(false), 1000);
