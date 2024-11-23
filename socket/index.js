@@ -1,13 +1,13 @@
-import { createServer } from "https";
+import { createServer } from "http";
 import { Server } from "socket.io"
 const httpServer = createServer();
 const io = new Server(httpServer, {
     cors: {
-        origin: "https://fe-rmrbd.vercel.app/",
+        origin: "https://fe-rmrbd.vercel.app",
         methods: ["GET", "POST"], // Ensure CORS methods are allowed
     },
 });
-const PORT = process.env.PORT || 3000; // Lấy cổng từ môi trường, nếu không có sẽ dùng cổng 3000
+const PORT = process.env.PORT; // Lấy cổng từ môi trường, nếu không có sẽ dùng cổng 3000
 
 
 let databaseUsers = [];
