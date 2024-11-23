@@ -24,6 +24,7 @@ const RecipeDetail = () => {
     const maxStars = 5;
 
     //rating
+    const [createById, setCreateById] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [ratepoint, setRatepoint] = useState("");
     const [averageRate, setAverageRate] = useState(0);
@@ -88,6 +89,7 @@ const RecipeDetail = () => {
                 //console.log('Đã rated: ', checkRatedStatus);
                 setAverageRate(rateData[0]?.AvgRatePoint);
                 setCountRate(countrate || 0);
+                setCreateById(data.createById);
                 setRecipe(data);
                 //console.log('Đã rated: ', data);
                 setAccountName(createbyName.userName);
@@ -355,7 +357,7 @@ const RecipeDetail = () => {
                     </button>
                 </div>
             </div>
-            <CommentRecipes recipeId={recipeId} />
+            <CommentRecipes recipeId={recipeId} createById={createById} />
         </>
 
     );

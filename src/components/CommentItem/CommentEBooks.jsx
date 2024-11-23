@@ -6,12 +6,18 @@ import { createComment, UpdateComment, RemoveComment,getCommentsbyEBookId } from
 import "../../assets/styles/Components/commentstyle.css"
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-const Comments = ({ebookId}) => {
+import {useSocket} from "../../App"
+import {createNotification} from "../services/NotificationService"
+import {getAccountById} from "../services/AccountService"
+import {getEbookById} from "../services/BookService"
+const Comments = ({ebookId,createById}) => {
     const accountId = Cookies.get("UserId");
     const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
     const [activeComment, setActiveComment] = useState(null); //  Tracks active comment for editing
     const backgroundPromise = [];
+    const [createbyName,setCreatebyName] =useState(null);
+    const [ebook, setEbook] = useState(null)
     const Comments = backendComments
         .filter((comment) => comment.rootCommentId === null)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -63,18 +69,42 @@ const Comments = ({ebookId}) => {
             addComment(text); // Call your addComment function if logged in
         }
     };
+
+    const { socket, accountOnline } = useSocket();
+    const handleNotification = (text) => {
+        socket.emit("sendNotification", {
+            senderName: accountOnline,
+            receiverName: createbyName,
+            content:text,
+        });
+        const addNotification = () => {
+            const newNotificationData = {
+                accountId: createById,
+                content: text,
+                date: new Date().toISOString(),
+                status: 1,
+            };
+            createNotification(newNotificationData); // Không cần await
+        };
+        addNotification();
+    };
+
     useEffect(() => {
         const fetchComment = async () => {
             try {
                 await Promise.all(backgroundPromise)
                 const data = await getCommentsbyEBookId(ebookId);
+                const receiverName = await getAccountById(createById);
+                const ebookdata = await getEbookById(ebookId);
+                setEbook(ebookdata)
+                setCreatebyName(receiverName.userName);
                 setBackendComments(data);
             } catch (err) {
                 console.error(err);
             }
         };
         fetchComment();    
-    }, [ebookId,backgroundPromise]);
+    }, [ebookId,backgroundPromise,createById]);
     const addComment = async (text, rootcommentId = null) => {
 
         const newCommentData = {
@@ -98,7 +128,11 @@ const Comments = ({ebookId}) => {
             <div className="comments">
                 <h3 className="comments-title">Comments</h3>
                 <div className="comment-form-title">Write comment</div>
-                <CommentForm submitLabel="Write" handleSubmit={handleWriteClick} />
+                <CommentForm 
+                submitLabel="Write" 
+                handleSubmit={handleWriteClick} 
+                onClick={() => handleNotification(`${accountOnline} commented on your ${ebook.ebookName} recipe`)} 
+                />
                 <div className="comments-container">
                     {Comments.slice(0, visibleComments).map((comment) => {
                         return (
@@ -113,7 +147,7 @@ const Comments = ({ebookId}) => {
                                 deleteComment={deleteComment}
                                 rootCommentId={comment.rootCommentId}
                                 currentUserId={Number(accountId)}
-
+                                createByUserId= {Number(createById)}
                             />
                         );
                     })}

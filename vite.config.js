@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  base: '/',
   plugins: [react()],
   server: {
     proxy: {
@@ -10,10 +11,6 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-      '/create-payment-link': {
-        target: 'http://localhost:3030',
-        changeOrigin: true,
       },
     },
   },

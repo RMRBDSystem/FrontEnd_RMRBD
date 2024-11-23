@@ -1,11 +1,12 @@
 import { useState } from "react";
-const CommentForm = ({ handleSubmit, submitLabel, hasCancelButton = false, initialText = "", handleCancel }) => {
+const CommentForm = ({ handleSubmit , submitLabel,onClick, hasCancelButton = false, initialText = "", handleCancel }) => {
     const [text, setText] = useState(initialText);
     const isTextareaDisabled = text.length === 0;
     const onSubmit = event => {
         event.preventDefault();
         handleSubmit(text);
         setText("");
+        if (onClick) onClick(); // Call the notification handler
     }
     return (
         <form onSubmit={onSubmit}>
