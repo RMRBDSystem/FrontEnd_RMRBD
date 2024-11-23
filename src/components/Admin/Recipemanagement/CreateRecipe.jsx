@@ -5,7 +5,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
-
+import { useNavigate } from "react-router-dom";
 const RecipeCustomer = () => {
   const [recipeName, setRecipeName] = useState("");
   const [numberOfService, setNumberOfService] = useState("");
@@ -23,6 +23,8 @@ const RecipeCustomer = () => {
   const [totalTime, setTotalTime] = useState();
   const [createById, setcreateById] = useState("");
   const [errors, setErrors] = useState({});
+
+  const navigate = useNavigate();
   useEffect(() => {
     const storedUserId = Cookies.get("UserId");
     console.log("Stored UserId:", storedUserId);
@@ -74,6 +76,9 @@ const RecipeCustomer = () => {
     }
     if (recipeImage.length === 0) {
       newErrors.recipeImage = "At least one image is required.";
+    }
+    if (selectedTagIds.length === 0) {
+      newErrors.selectedTagIds = "Please select at least one tag.";
     }
     if (selectedTagIds.length === 0) {
       newErrors.selectedTagIds = "Please select at least one tag.";
@@ -145,6 +150,7 @@ const RecipeCustomer = () => {
       createDate,
       description,
       video,
+      status,
     };
 
     console.log("Recipe data:", recipeData);
@@ -213,6 +219,10 @@ const RecipeCustomer = () => {
     setRecipeImage((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
+  const handleBack = () => {
+    navigate(-1); // This will navigate back to the previous page
+  };
+
   // Sử dụng renderImageInputs để hiển thị hình ảnh đã chọn
   const renderImageInputs = () => {
     return recipeImage.map((file, index) => (
@@ -253,7 +263,7 @@ const RecipeCustomer = () => {
       <Container className="my-5">
         <h2 className="text-center mb-4">Create a New Recipe</h2>
         <Form>
-        <Row className="mb-4">
+          <Row className="mb-4">
             <Col>
               <Form.Group controlId="recipeName">
                 <Form.Label>Recipe Name</Form.Label>
@@ -299,7 +309,6 @@ const RecipeCustomer = () => {
               </Form.Group>
             </Col>
           </Row>
-          
 
           <Row className="mb-4">
             <Col>
@@ -480,10 +489,34 @@ const RecipeCustomer = () => {
                 </Form.Group>
               </Col>
             </Row>
-
+            <Row className="mb-4">
+              <Col>
+                <Form.Group controlId="totaltime">
+                  <Form.Label>Status</Form.Label>
+                  {errors.setTags && (
+                    <p className="text-danger">{errors.status}</p>
+                  )}
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(Number(e.target.value))}
+                  >
+                    <option value={1}>Censored</option>
+                    <option value={-1}>Uncensored</option>
+                    <option value={0}>Blocked</option>
+                  </select>
+                </Form.Group>
+              </Col>
+            </Row>
             <Col className="d-flex align-items-end">
               <Button variant="primary" onClick={handleSave} className="w-100">
                 Submit
+              </Button>
+              <Button
+                variant="secondary" // style it differently for "Back"
+                onClick={handleBack}
+                className="me-3"
+              >
+                Back
               </Button>
             </Col>
           </Row>
