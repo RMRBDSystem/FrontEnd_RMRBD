@@ -19,6 +19,7 @@ import RechargePage from '../Pages/Recharge/Recharge';
 import CoinTransaction from "../Pages/Recharge/CoinTransaction";
 import PaymentSuccess from '../Pages/Recharge/PaymentSuccess'
 import PaymentFailed from '../Pages/Recharge/PaymentFailed'
+import UpdateProfile from '../AccountProfile/AccountProfile';
 //Admin
 import AdminDashboard from "../Admin/Dashboard";
 import AccountManagement from '../Admin/AccountManagement';
@@ -47,6 +48,7 @@ export default function RouterPage() {
           <Route path="/admin/ebooktest" element={<EBookTest />} />
           <Route path="/admin//feedback" element={<Feedback />} />
           <Route path="/pdf-protect" element={<PDFProtect />} />
+          <Route path="/update-account" element={<UpdateProfile />} />
           <Route
             path="/admin-dashboard"
             element={

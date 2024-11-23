@@ -67,7 +67,7 @@ const Login = () => {
           Token: "123-abc",
         },
       });
-      const { role, userId } = response.data;
+      const { role, userId, coin } = response.data;
 
       // Nếu người dùng đã có một vai trò, không cho phép đăng nhập với vai trò khác
       const existingRole = Cookies.get("UserRole");
@@ -81,6 +81,7 @@ const Login = () => {
       localStorage.setItem("UserRole", role); // Lưu vào localStorage
       Cookies.set("UserName", userName, { expires: 1 });
       Cookies.set("UserId", userId, { expires: 1 });
+      Cookies.set("Coin", coin, { expires: 1 });
       localStorage.setItem("UserName", userName);
       localStorage.setItem("UserId", userId);
 

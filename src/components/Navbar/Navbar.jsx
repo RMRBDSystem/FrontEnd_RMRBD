@@ -208,6 +208,7 @@ export function StickyNavbar() {
       Cookies.remove("UserRole");
       Cookies.remove("UserName");
       Cookies.remove("UserId");
+      Cookies.remove("Coin");
       localStorage.removeItem("isLoggedIn");
     } catch (error) {
       console.error("Logout failed:", error);

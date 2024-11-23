@@ -7,6 +7,9 @@ const io = new Server(httpServer, {
         methods: ["GET", "POST"], // Ensure CORS methods are allowed
     },
 });
+const PORT = process.env.PORT || 3000; // Lấy cổng từ môi trường, nếu không có sẽ dùng cổng 3000
+
+
 let databaseUsers = [];
 
 // Adds a new user to the databaseUsers array, ensuring no duplicates based on username
@@ -55,4 +58,7 @@ io.on("connection", (socket) => {
     });
 });
 
-httpServer.listen(3000);
+
+httpServer.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

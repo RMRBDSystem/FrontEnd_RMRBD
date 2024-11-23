@@ -130,7 +130,6 @@ const RecipeCustomer = () => {
   };
 
   const handleSave = async () => {
-    toast.info("Đang lưu công thức...");
     if (!validateFields()) return;
     // const url = "https://localhost:7220/odata/Recipe";
     const url = "https://rmrbdapi.somee.com/odata/Recipe";
