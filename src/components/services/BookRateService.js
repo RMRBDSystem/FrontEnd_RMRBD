@@ -4,7 +4,7 @@ import axios from 'axios';
 // API lấy danh sách sách
 export const getBookRates = async () => {
     try {
-        const response = await axios.get(`https://rmrbdapi.somee.com/odata/RecipeRate`, {
+        const response = await axios.get(`https://rmrbdapi.somee.com/odata/BookRate`, {
             headers: {
                 token: '123-abc',
                 mode: 'no-cors'
@@ -12,55 +12,53 @@ export const getBookRates = async () => {
         });
         return response.data;
     } catch (error) {
-        console.error("Error fetching Recipe Rate:", error);
+        console.error("Error fetching Book Rate:", error);
         throw error;
     }
 };
-export const saveRecipeRate = async (recipeId,accountId, ratepoint) => {
-    const urlRecipeRate = "https://rmrbdapi.somee.com/odata/RecipeRate";
-    const RecipeRateData = {
-        recipeId,
-        accountId,
-        ratepoint,
+export const saveBookRate = async (ratepoint, accountId,bookId) => {
+    const urlBookRate = "https://rmrbdapi.somee.com/odata/BookRate";
+    const BookRateData = {
+        ratepoint, accountId,bookId
     };
 
     try {
-        const response = await axios.post(urlRecipeRate, RecipeRateData, {
+        const response = await axios.post(urlBookRate, BookRateData, {
             headers: {
                 Token: "123-abc"
             },
         });
         return response.data;
     } catch (error) {
-        console.error("Error saving Recipe Rate:", error);
-        throw new Error("Failed to save Recipe Rate.");
+        console.error("Error saving Book Rate:", error);
+        throw new Error("Failed to save Book Rate.");
     }
 };
 
 
-// API lấy trung bình cộng ratepoint Recipe Rate
-export const getRecipeRatePoint = async (recipeId) => {
+// API lấy trung bình cộng ratepoint Book Rate
+export const getBookRatePoint = async (bookId) => {
     try {
-        // Gọi API với URL mới `/RecipeRate/{recipeId}`
-        const response = await axios.get(`https://rmrbdapi.somee.com/odata/RecipeRate?$apply=filter(RecipeID eq ${recipeId})/aggregate(RATEPOINT with average as AvgRatePoint)`, {
+        // Gọi API với URL mới `/BookRate/{bookId}`
+        const response = await axios.get(`https://rmrbdapi.somee.com/odata/BookRate?$apply=filter(bookId eq ${bookId})/aggregate(RATEPOINT with average as AvgRatePoint)`, {
             headers: {
                 token: '123-abc'
             }
         });
-        return response.data; // Trả về dữ liệu RecipeRate
+        return response.data; // Trả về dữ liệu BookRate
     } catch (error) {
-        console.error(`Error fetching RecipeRate with ID ${recipeId}:`, error);
+        console.error(`Error fetching BookRate with ID ${bookId}:`, error);
         throw error;
     }
 };
-// API lấy số lượng Recipe Rate theo recipeId
-export const getCountRecipeRateByRecipeId = async (recipeId) => {
+// API lấy số lượng Book Rate theo bookId
+export const getCountBookRateBybookId = async (bookId) => {
 
-    if (!recipeId) {
-        console.error('Invalid recipeId:', recipeId);
+    if (!bookId) {
+        console.error('Invalid bookId:', bookId);
         return 0;
     }
-    const apiUrl = `https://rmrbdapi.somee.com/odata/RecipeRate?$filter=RecipeID eq ${recipeId}`;
+    const apiUrl = `https://rmrbdapi.somee.com/odata/BookRate?$filter=bookId eq ${bookId}`;
     const headers = { token: '123-abc' };
     let attempts = 0;
     const maxAttempts = 3;
@@ -71,11 +69,11 @@ export const getCountRecipeRateByRecipeId = async (recipeId) => {
             return response.data.length || 0;
         } catch (error) {
             attempts++;
-            console.error(`Error fetching RecipeRate with ID ${recipeId}, Attempt ${attempts}:`, error);
+            console.error(`Error fetching BookRate with ID ${bookId}, Attempt ${attempts}:`, error);
 
             // Nếu đã hết số lần thử thì ném ra lỗi
             if (attempts === maxAttempts) {
-                throw new Error(`Failed to fetch RecipeRate after ${attempts} attempts.`);
+                throw new Error(`Failed to fetch BookRate after ${attempts} attempts.`);
             }
 
             // Tạm dừng trước khi thử lại (ví dụ 500ms)
@@ -84,35 +82,33 @@ export const getCountRecipeRateByRecipeId = async (recipeId) => {
     }
 };
 
-// API cập nhật công thưc dựa theo Recipeid và AccountId
-export const updateRecipeRate = async (recipeId, accountId,ratePoint) => {
-    const urlRecipeRate = `https://rmrbdapi.somee.com/odata/RecipeRate/${recipeId}/${accountId}`;
-    const RecipeRateData = {
-        recipeId,
-        accountId,
-        ratePoint,
+// API cập nhật công thưc dựa theo bookId và AccountId
+export const updateBookRate = async (ratepoint, accountId,bookId) => {
+    const urlBookRate = `https://rmrbdapi.somee.com/odata/BookRate/${accountId}/${bookId}`;
+    const BookRateData = {
+        ratepoint, accountId,bookId
     };
     try {
-        const response = await axios.put(urlRecipeRate,RecipeRateData,{
+        const response = await axios.put(urlBookRate,BookRateData,{
             headers: {
                 token: '123-abc'
             }
         });
         return response.data;
     } catch (error) {
-        console.error(`Error updating ratepoint with Recipeid ${recipeId} and AccountId ${accountId}:`, error);
+        console.error(`Error updating ratepoint with bookId ${bookId} and AccountId ${accountId}:`, error);
         throw error;
     }
 };
 // API kiểm tra đã rate hay chưa
-export const checkRated = async (recipeId, accountId) => {
+export const checkRated = async (accountId,bookId ) => {
     if (!accountId) {
         console.error('Invalid accountId:', accountId);
         return false;
     }
     try {
-        // Gọi API với URL mới `/RecipeRate/{recipeId}/{accountId}`
-        const response = await axios.get(`https://rmrbdapi.somee.com/odata/RecipeRate/${recipeId}/${accountId}`, {
+        // Gọi API với URL mới `/BookRate/{bookId}/{accountId}`
+        const response = await axios.get(`https://rmrbdapi.somee.com/odata/BookRate/${accountId}/${bookId}`, {
             headers: {
                 token: '123-abc'
             }
@@ -126,10 +122,10 @@ export const checkRated = async (recipeId, accountId) => {
         // return ratepoint !== null ? ratepoint : 0;
     } catch (error) {
         if (error.response && error.response.status === 404) {
-            console.warn(`Data not found for RecipeId ${recipeId} and AccountId ${accountId}. Returning 0.`);
+            console.warn(`Data not found for bookId ${bookId} and AccountId ${accountId}. Returning 0.`);
             return 0;
         } else {
-            console.error(`Error fetching data with RecipeId ${recipeId} and AccountId ${accountId}:`, error);
+            console.error(`Error fetching data with bookId ${bookId} and AccountId ${accountId}:`, error);
             throw error;
         }
     }

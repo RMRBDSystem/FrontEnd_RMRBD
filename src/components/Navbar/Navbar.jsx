@@ -6,7 +6,10 @@ import { Widgets, ArrowDropDown } from "@mui/icons-material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "../RouterPage/AuthContext";
-
+import Notification from "/images/recipe/iconsnotification.png";
+import "./navbar.css"
+import { useSocket } from "../../App"
+import { getNotificationbyAccountId } from "../services/NotificationService"
 const categoriesContent = {
   "Công Thức Nấu Ăn": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
@@ -121,6 +124,7 @@ export function StickyNavbar() {
   const [activeCategory, setActiveCategory] = useState("Sách Trong Nước");
   const navigate = useNavigate();
   const userRole = Cookies.get("UserRole");
+  const accountonlineId = Cookies.get("UserId");
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     const handleResize = () => window.innerWidth >= 960 && setOpenNav(false);
@@ -133,6 +137,48 @@ export function StickyNavbar() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  //Notification
+  const { socket } = useSocket(); // Access `socket` and `user` from context
+  const [notifications, setNotifications] = useState([]);
+  const [dbnotifications, setDbNotifications] = useState([]);
+  //const [lengthnotifications, setLengthnotifications] = useState(0);
+  const [open, setOpen] = useState(null);
+  useEffect(() => {
+    const fetchNotification = async () => {
+      try {
+        // Lấy dữ liệu từ API
+        const notificationdata = await getNotificationbyAccountId(accountonlineId);
+        setDbNotifications(notificationdata);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+
+    fetchNotification();
+  }, [accountonlineId]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("getNotification", (data) => {
+        setNotifications((prev) => [data,...prev]);
+      });
+    }
+  }, [socket])
+
+
+  const displayNotification = ({ content }) => {
+    return (
+      <div className="notification-item">
+        <span className="notification-content">{`${content}`}</span>
+        <hr style={{ margin: "10px 0", borderColor: "black", borderStyle: "solid" }} />
+      </div>
+    )
+  }
+  const handleRead = () => {
+    setNotifications([]);
+    setOpen(false);
+  }
 
   const handleCategoryClick = (category) => {
     setActiveCategory(category);
@@ -161,6 +207,7 @@ export function StickyNavbar() {
       setIsLoggedIn(false);
       Cookies.remove("UserRole");
       Cookies.remove("UserName");
+      Cookies.remove("UserId");
       localStorage.removeItem("isLoggedIn");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -183,13 +230,20 @@ export function StickyNavbar() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  const navItems = ["home", "pages", "meals", "recharge", "faq", "features"];
+  const navItems = [
+    "home",
+    "pages",
+    "meals",
+    "recharge",
+    "faq",
+    "features"
+  ];
 
   return (
     <Navbar
       className={`sticky top-0 z-10 h-max max-w-full rounded-none border-0 px-4 transition-all duration-300 lg:px-4 ${isScrolled
-          ? "bg-transparent backdrop-blur-md"
-          : "bg-gradient-to-r from-indigo-700 to-blue-900"
+        ? "bg-transparent backdrop-blur-md"
+        : "bg-gradient-to-r from-indigo-700 to-blue-700"
         }`}
     >
       <div className={`flex items-center justify-between ${isScrolled ? "text-black" : "text-white"} px-4`}>
@@ -265,13 +319,52 @@ export function StickyNavbar() {
                   </NavLink>
                 </Typography>
               ))}
+
             </ul>
           </div>
+          {accountonlineId && (
+            <div className="icons">
+              <div className="icon" onClick={() => setOpen((prev) => !prev)}>
+                <img src={Notification} alt="Notification Icon" />
+                {notifications.length > 0 && (
+                  <div className="counter">{notifications.length}</div>
+                )}
+              </div>
+              {open && (
+                <div className="notifications">
+                  {notifications.map((n) => displayNotification(n))}
+                  {dbnotifications
+                    .map((notification) => {
+                      const notificationDate = new Date(notification.date); // Chuyển chuỗi thành đối tượng Date
+                      const now = Date.now(); // Lấy thời gian hiện tại
+                      const differenceInMs = now - notificationDate.getTime(); // Hiệu thời gian
+                      const minutesPassed = Math.floor(differenceInMs / (1000 * 60)); // Chuyển đổi ms sang phút
+                      const hoursPassed = Math.floor(minutesPassed / 60); // Chuyển đổi phút sang giờ
+
+                      return { ...notification, minutesPassed, hoursPassed }; // Gắn thêm `hoursPassed` vào thông báo
+                    })
+                    .sort((a, b) => a.minutesPassed - b.minutesPassed) // Sắp xếp theo `hoursPassed` tăng dần
+                    .map((notification, index) => (
+                      <div key={index} className="notification-item" style={{ fontWeight: 300 }}>
+                        <div className="notification-content">{notification.content}</div>
+                        <div className="notification-time">
+                          {notification.hoursPassed >= 1
+                            ? `${notification.hoursPassed} giờ trước`  // Nếu trên 1 giờ
+                            : `${notification.minutesPassed} phút trước`} {/* Nếu dưới 1 giờ */}
+                        </div>
+                        <hr style={{ margin: "10px 0", borderColor: "black", borderStyle: "solid" }} />
+                      </div>
+                    ))}
+                  <button className="nButton" onClick={handleRead}>
+                    Mark as read
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           <SearchWrapper />
           {isLoggedIn ? (
             <div
-              // onMouseEnter={() => setIsDropdownOpen(true)}
-              // onMouseLeave={() => setIsDropdownOpen(false)}
               ref={dropdownRef}
               className="relative"
             >

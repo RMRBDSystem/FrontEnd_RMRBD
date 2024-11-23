@@ -3,23 +3,25 @@ import { Server } from "socket.io"
 const httpServer = createServer();
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173", // Remove "/home" to allow the entire origin
+        origin: "http://localhost:5173",
         methods: ["GET", "POST"], // Ensure CORS methods are allowed
     },
 });
 let databaseUsers = [];
 
+// Adds a new user to the databaseUsers array, ensuring no duplicates based on username
 const addNewUser = (username, socketId) => {
-    // Tìm index của username trong danh sách
-    const userIndex = databaseUsers.findIndex((user) => user.username === username);
-
-    // Nếu username đã tồn tại, xóa user cũ
-    if (userIndex !== -1) {
-        databaseUsers.splice(userIndex, 1);
+    // Check if the user already exists
+    const existingUser = databaseUsers.find(user => user.username === username);
+    
+    if (existingUser) {
+        // Update the existing user's socketId if needed
+        existingUser.socketId = socketId;
+    } else {
+        // Add new user if not found
+        databaseUsers.push({ username, socketId });
+        console.log("db:",databaseUsers)
     }
-
-    // Thêm user mới
-    databaseUsers.push({ username, socketId });
 };
 
 const removeUser = (socketId) => {
@@ -40,7 +42,6 @@ io.on("connection", (socket) => {
         if (receiver) {
             const targetSocketId = receiver.socketId;
             io.to(targetSocketId).emit("getNotification", {
-                senderName,
                 content,
             });
             console.log(`Notification sent from ${senderName} to ${receiverName}`);

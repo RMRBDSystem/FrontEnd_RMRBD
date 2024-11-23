@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getBookById, getFirstImageByBookId } from '../../services/BookService';
 import { FaShippingFast, FaRedo, FaUsers, FaShoppingCart, FaCreditCard, FaTag, FaCheckCircle } from 'react-icons/fa';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar } from '@fortawesome/free-solid-svg-icons';
-import { faStar as faStarOutline } from '@fortawesome/free-regular-svg-icons';
 import { Button } from '@material-tailwind/react';
 import { Tooltip } from '@mui/material';
 import { BsFillPatchCheckFill } from 'react-icons/bs';
-
+import CommentBooks from "../../CommentItem/CommentBooks";
+import Cookies from 'js-cookie';
+import { FaStar } from 'react-icons/fa'
+import "../../../assets/styles/Components/Rating.css"
+import { saveBookRate, updateBookRate, getBookRatePoint, getCountBookRateBybookId, checkRated } from '../../services/BookRateService';
+import { getAccountById } from "../../services/AccountService"
 const BookDetail = () => {
     const { bookId } = useParams();
     const [book, setBook] = useState(null);
@@ -18,12 +20,56 @@ const BookDetail = () => {
     const [showFullDescription, setShowFullDescription] = useState(false);
     const maxStars = 5;
 
+    //new update 17/11/2024
+    const [createById, setCreateById] = useState(null);
+    const accountId = Cookies.get("UserId");
+    //rating
+    const [showModal, setShowModal] = useState(false);
+    const [ratepoint, setRatepoint] = useState("");
+    const [averageRate, setAverageRate] = useState(0);
+    const [countRate, setCountRate] = useState(0);
+    const [hover, setHover] = useState(null);
+    const [checkRatedStatus, setcheckRated] = useState("");
+    const [accountName, setAccountName] = useState("")
+    const handleOpenModal = () => {
+        setShowModal(true);
+    };
+    const handleSaveRecipeRate = async () => {
+        try {
+            await saveBookRate(ratepoint, accountId,bookId );
+            setShowModal(false); // Đóng modal khi lưu thành công
+            window.location.reload();
+        } catch (error) {
+            console.error("Failed to save recipe rate:", error);
+        }
+    };
+
+    const handleUpdateRecipeRate = async () => {
+        try {
+            await updateBookRate(ratepoint, accountId,bookId);
+            setShowModal(false); // Đóng modal khi lưu thành công
+            window.location.reload();
+        } catch (error) {
+            console.error("Failed to save recipe rate:", error);
+        }
+    };
+
     useEffect(() => {
         const fetchBookData = async () => {
             try {
                 const data = await getBookById(bookId);
                 const imageData = await getFirstImageByBookId(bookId);
+                const rateData = await getBookRatePoint(bookId);
+                const countrate = await getCountBookRateBybookId(bookId);
+                const checkrateddata = await checkRated(accountId,bookId);
+                const createbyName = await getAccountById(data.createById);
+                setcheckRated(checkrateddata?.ratePoint);
+                setCreateById(data.createById);
+                //console.log('Đã rated: ', checkRatedStatus);
+                setAverageRate(rateData[0]?.AvgRatePoint);
+                setCountRate(countrate || 0);
                 setBook(data);
+                setAccountName(createbyName.userName);
                 setImageUrl(imageData);
             } catch (err) {
                 setError('Có lỗi xảy ra khi tải dữ liệu sách');
@@ -34,17 +80,23 @@ const BookDetail = () => {
         };
 
         fetchBookData();
-    }, [bookId]);
+    }, [bookId,accountId]);
+
+    // Calculate how many stars are filled based on averageRate
+    let roundedAverageRate = 0;
+    if (averageRate > 0) { roundedAverageRate = parseFloat(averageRate.toFixed(2)) }
+    const fullStars = Math.floor(roundedAverageRate);
+    const halfStar = averageRate % 1 >= 0.5 ? 1 : 0;
 
     if (loading) return <p>Đang tải dữ liệu...</p>;
     if (error) return <p>{error}</p>;
     if (!book) return <p>Không tìm thấy thông tin sách.</p>;
 
-    const filledStars = Math.round(book.bookRate || 0);
     const isLongDescription = book.description.length > 300;
     const displayDescription = showFullDescription ? book.description : book.description.slice(0, 300) + '...';
 
     return (
+        <>
         <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg grid grid-cols-2 gap-8">
             {/* Phần bên trái với lớp nền */}
             <div className="relative">
@@ -89,20 +141,34 @@ const BookDetail = () => {
             {/* Right Section */}
             <div>
                 <h1 className="text-4xl font-bold text-gray-800">{book.bookName}</h1>
-                <p className="text-xl text-gray-600 mt-1">Nhà cung cấp: {book.createById}</p>
+                <p className="text-xl text-gray-600 mt-1">Nhà cung cấp: {accountName}</p>
                 <div className="flex items-baseline mt-4 mb-4">
                     <span className="text-3xl font-bold text-red-600">{book.price.toLocaleString()} đ</span>
                     <span className="text-xl text-gray-500 line-through ml-2">{book.price.toLocaleString()} đ</span>
                     <span className="text-lg text-white bg-red-600 px-2 py-1 ml-4 rounded">-{book.discount}0%</span>
                 </div>
                 <div className="flex items-center mt-2">
-                    {[...Array(maxStars)].map((_, index) => (
-                        <FontAwesomeIcon
-                            key={index}
-                            icon={index < filledStars ? faStar : faStarOutline}
-                            className={index < filledStars ? 'text-yellow-500' : 'text-gray-400'}
-                        />
-                    ))}
+                {[...Array(maxStars)].map((_, index) => {
+                            let starColor = "#e4e5e9"; // Màu sao chưa được đánh giá
+                            if (index < fullStars) {
+                                starColor = "#ffc107"; // Màu sao đầy
+                            } else if (index === fullStars && halfStar) {
+                                starColor = "#ffc107"; // Màu sao nửa
+                            }
+                            return (
+                                <label key={index}>
+                                    <input
+                                        type="radio"
+                                        name="rating"
+                                        value={index + 1}
+                                        style={{ display: "none" }}
+                                    />
+                                    <FaStar className="star" size={20}
+                                        color={starColor}
+                                    />
+                                </label>
+                            );
+                        })}
                 </div>
 
                 {/* Shipping Information */}
@@ -178,7 +244,119 @@ const BookDetail = () => {
                     )}
                 </div>
             </div>
+            {/* <Rating /> */}
+            <div className="rating-container">
+                    <div className="rating-header">
+                        <h3>Đánh giá sản phẩm</h3>
+                    </div>
+                    <div className="rating-summary">
+                        <div className="rating-score">
+                            <span className="score">{roundedAverageRate}</span>
+                            <span className="out-of">/5</span>
+                        </div>
+                        <div className="rating-stars">
+                            <div className="stars">
+                                {[...Array(maxStars)].map((_, index) => {
+                                    let starColor = "#e4e5e9"; // Màu sao chưa được đánh giá
+                                    if (index < fullStars) {
+                                        starColor = "#ffc107"; // Màu sao đầy
+                                    } else if (index === fullStars && halfStar) {
+                                        starColor = "#ffc107"; // Màu sao nửa
+                                    }
+                                    return (
+                                        <label key={index}>
+                                            <input
+                                                type="radio"
+                                                name="rating"
+                                                value={index + 1}
+                                                style={{ display: "none" }}
+                                            />
+                                            <FaStar className="star" size={20}
+                                                color={starColor}
+                                            />
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                            <div className="rating-count">({countRate} đánh giá)</div>
+                        </div>
+                    </div>
+                    <div className="rating-bars">
+                        {[5, 4, 3, 2, 1].map((star) => (
+                            <div key={star} className="rating-bar">
+                                <span>{star} sao</span>
+                                <div className="bar">
+                                    <div className="fill" style={{ width: "0%" }}></div>
+                                </div>
+                                <span>0%</span>
+                            </div>
+                        ))}
+                    </div>
+                    {showModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                                <h2 className="text-2xl font-bold mb-4 text-center">Let us know how you liked this recipe</h2>
+                                <div className="text-center">
+
+                                    {[...Array(5)].map((star, index) => {
+                                        const currentRating = index + 1;
+                                        return (
+                                            <label key={index}>
+                                                <input
+                                                    type="radio"
+                                                    name="rating"
+                                                    value={currentRating}
+                                                    //onClick={() => setRatepoint(currentRating)}
+                                                    onChange={(e) => setRatepoint(e.target.value)}
+                                                    style={{ display: "none" }}
+                                                />
+                                                <FaStar className="star" size={50}
+                                                    color={currentRating <= (hover || ratepoint) ? "#ffc107" : "#e4e5e9"}
+                                                    onMouseEnter={() => setHover(currentRating)}
+                                                    onMouseLeave={() => setHover(null)}
+                                                />
+                                            </label>
+                                        );
+                                    })}
+                                    {!checkRatedStatus ? (
+                                        <p>Your star rating is {ratepoint}</p>
+                                    ) : (
+                                        <>
+                                            <p style={{ display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                                Your last star rating was {checkRatedStatus} <FaStar color="#ffc107" style={{ marginLeft: '2px', marginBottom: '1.5px' }} />
+                                            </p>
+                                            <p>Your star rating this time is {ratepoint}</p>
+                                        </>
+                                    )}
+
+                                </div>
+                                <div className="flex justify-end mt-4">
+                                    <button
+                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+                                        onClick={() => setShowModal(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        className="bg-custom-orange hover:bg-orange-500 text-white font-bold py-2 px-4 rounded"
+                                        onClick={checkRatedStatus ? handleUpdateRecipeRate : handleSaveRecipeRate}
+                                    >
+                                        {checkRatedStatus ? "Update Ratepoint" : "Save Ratepoint"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <button className="write-review-button" style={{ width: " 100%", height: "70px" }} onClick={handleOpenModal}>
+                        <span role="img" aria-label="write">✏️</span> Give your stars for this recipe
+                    </button>
+                </div>
         </div>
+        <CommentBooks bookId={bookId} createById={createById}/>
+        </>
+        
     );
 };
 

@@ -48,7 +48,7 @@ const Comment = ({
     return (
         <div className="comment text-white" style={{ display: 'flex' }}>
             <div className="comment-image-container">
-                <img src='../../../public/images/avatar.png' />
+                <img src='/images/avatar.png' />
             </div>
             <div className="comment-right-part" >
                 <div className="comment-content" style={{ display: 'flex' }}>

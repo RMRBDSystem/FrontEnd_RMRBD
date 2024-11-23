@@ -1,0 +1,37 @@
+.icons .notifications{
+    position: absolute;
+    top:70px;
+    right: 350px;
+    background-color: white;
+    color: black;
+    font-weight: 300;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    max-Height: 300px;
+    max-width: 400px;
+    overflow-y: auto; /*Kích hoạt cuộn dọc */
+    border: 1px solid #ccc; /* Viền vùng thông báo */
+    padding: 10px;
+  }
+  .notification{
+    padding: 5px;
+    font-size: 14px;
+  }
+  .notifications .nButton{
+    padding: 5px;
+    margin-top: 10px;
+  }
+  .notifications .notification-item{
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+  }
+  .notification-item .notification-content{
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .notification-item .notification-time{
+    font-size: 12px;
+    align-self: flex-end;
+  }
