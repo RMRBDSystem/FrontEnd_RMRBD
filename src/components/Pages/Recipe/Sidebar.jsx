@@ -15,7 +15,7 @@ function Sidebar({ onFilterChange }) {
     const fetchtags = async () => {
       try {
         const response = await axios.get(
-          "https://rmrbdapi.somee.com/odata/Tag",
+          "https://rmrbdapi.somee.com/odata/Tag?$filter=status eq 1",
           {
             headers: { token: "123-abc" },
           }
@@ -107,60 +107,20 @@ function Sidebar({ onFilterChange }) {
           Giá
         </label>
         <ul className="space-y-3">
-          {["0đ - 150,000đ", "150,000đ - 300,000đ", "300,000đ - 500,000đ"].map(
-            (priceRange, index) => (
-              <li key={index} className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
-                  onChange={() =>
-                    handleFilterChange("priceRanges", priceRange)
-                  }
-                />
-                <span className="text-gray-300">{priceRange}</span>
-              </li>
-            )
-          )}
-        </ul>
-      </div>
-
-      {/* Nhà Xuất Bản */}
-      <div className="mb-6">
-        <label className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-green-300 to-blue-500 mb-5">
-          Nhà Xuất Bản
-        </label>
-        <ul className="space-y-3">
-          {["NXB Trẻ", "NXB Kim Đồng", "NXB Lao Động", "NXB Tổng Hợp"].map(
-            (publisher, index) => (
-              <li key={index} className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
-                  onChange={() =>
-                    handleFilterChange("publishers", publisher)
-                  }
-                />
-                <span className="text-gray-300">{publisher}</span>
-              </li>
-            )
-          )}
-        </ul>
-      </div>
-
-      {/* Đánh Giá */}
-      <div className="mb-6">
-        <label className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-green-300 to-blue-500 mb-5">
-          Đánh Giá
-        </label>
-        <ul className="space-y-3">
-          {["5 sao", "4 sao", "3 sao", "2 sao", "1 sao"].map((rating, index) => (
+          {[
+            { label: "0đ - 150,000đ", value: "0-150000" },
+            { label: "150,000đ - 300,000đ", value: "150000-300000" },
+            { label: "300,000đ - 500,000đ", value: "300000-500000" },
+          ].map((priceRange, index) => (
             <li key={index} className="flex items-center">
               <input
                 type="checkbox"
                 className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
-                onChange={() => handleFilterChange("ratings", rating)}
+                onChange={() =>
+                  handleFilterChange("priceRanges", priceRange.value)
+                }
               />
-              <span className="text-gray-300">{rating}</span>
+              <span className="text-gray-300">{priceRange.label}</span>
             </li>
           ))}
         </ul>

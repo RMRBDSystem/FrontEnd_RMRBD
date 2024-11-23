@@ -3,6 +3,7 @@ import Sidebar from '../Recipe/Sidebar.jsx';
 import Banner from '../Book/Banner.jsx';
 import RecipeCard from './RecipeCard.jsx';
 import { getRecipes, getRecipesByTags } from '../../services/RecipeService.js';
+
 function Recipe() {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(false); // Trạng thái đang tải dữ liệu
@@ -25,7 +26,34 @@ function Recipe() {
                     // Nếu không có bộ lọc, lấy tất cả sách
                     recipesData = await getRecipes();
                 }
-                setRecipes(recipesData || []); // Đảm bảo booksData là mảng
+
+                if (Array.isArray(recipesData)) {
+                    const filteredRecipes = recipesData.filter((recipe) => {
+                        // Đảm bảo các trường luôn là mảng, kể cả khi chưa chọn gì
+                        const priceRanges = selectedFilters.priceRanges || [];
+                        const ratings = selectedFilters.ratings || [];
+
+                        // Lọc theo giá
+                        const matchesPrice =
+                            priceRanges.length === 0 ||
+                            priceRanges.some((range) => {
+                                const [min, max] = range.split("-").map(Number);
+                                return recipe.price >= min && recipe.price <= max;
+                            });
+
+                        // Lọc theo đánh giá
+                        const matchesRating =
+                            ratings.length === 0 ||
+                            ratings.includes(Math.round(recipe.recipeRate || 0));
+
+                        return matchesPrice && matchesRating;
+                    });
+
+                    setRecipes(filteredRecipes); // Đảm bảo booksData là mảng
+                } else {
+                    console.error("Dữ liệu không hợp lệ:", booksData);
+                    setError("Dữ liệu không hợp lệ.");
+                }
             } catch (err) {
                 console.error("Failed to fetch books:", err);
                 setError("Không thể tải danh sách sách. Vui lòng thử lại.");
@@ -54,16 +82,16 @@ function Recipe() {
 
     return (
         <section className="py-20">
-            <div className="flex justify-center p-4">
+            <div className="container px-4 mx-auto">
                 {/* Giới hạn độ rộng tối đa và căn giữa nội dung */}
-                <div className="max-w-screen-lg w-full flex flex-col lg:flex-row">
+                <div className="flex flex-wrap -mx-4">
                     {/* Sidebar */}
-                    <div className="w-full lg:w-1/4 p-4">
+                    <div className="w-full lg:w-4/12 xl:w-3/12 px-4">
                         <Sidebar onFilterChange={applyFilters} />
                     </div>
 
                     {/* Main Content */}
-                    <div className="w-full lg:w-3/4 p-4">
+                    <div className="w-full lg:w-8/12 xl:w-9/12 px-4">
                         <Banner />
 
                         {loading ? (
@@ -72,7 +100,7 @@ function Recipe() {
                             <p className="text-center text-red-500">{error}</p>
                         ) : recipes.length === 0 ? (
                             <p className="text-center text-gray-500">
-                                Không tìm thấy sách nào.
+                                Không tìm thấy công thức nào.
                             </p>
                         ) : (
                             <div className="flex flex-wrap mb-20">
