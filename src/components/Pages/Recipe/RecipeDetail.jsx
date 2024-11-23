@@ -1,12 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { getRecipeById, getFirstImageByRecipeId } from '../../services/RecipeService';
+import { getRecipeById } from '../../services/RecipeService';
 import { saveRecipeRate, updateRecipeRate, getRecipeRatePoint, getCountRecipeRateByRecipeId, checkRated } from '../../services/RecipeRateService';
 import { getAccountById } from "../../services/AccountService"
-import { FaShippingFast, FaRedo, FaUsers, FaShoppingCart, FaCreditCard, FaTag, FaCheckCircle } from 'react-icons/fa';
-import { Button } from '@material-tailwind/react';
-import { Tooltip } from '@mui/material';
-import { BsFillPatchCheckFill } from 'react-icons/bs';
 import Cookies from 'js-cookie';
 import { FaStar } from 'react-icons/fa'
 import "../../../assets/styles/Components/Rating.css"
@@ -16,7 +12,7 @@ const RecipeDetail = () => {
     const accountId = Cookies.get("UserId");
     const { recipeId } = useParams();
     const [recipe, setRecipe] = useState(null)
-    const [imageUrl, setImageUrl] = useState(null);
+    const [imageUrl, setImageUrl] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
@@ -80,7 +76,7 @@ const RecipeDetail = () => {
         const fetchRecipeData = async () => {
             try {
                 const data = await getRecipeById(recipeId);
-                const imageData = await getFirstImageByRecipeId(recipeId);
+
                 const rateData = await getRecipeRatePoint(recipeId);
                 const countrate = await getCountRecipeRateByRecipeId(recipeId);
                 const checkrateddata = await checkRated(recipeId, accountId);
@@ -93,7 +89,7 @@ const RecipeDetail = () => {
                 setRecipe(data);
                 //console.log('Đã rated: ', data);
                 setAccountName(createbyName.userName);
-                setImageUrl(imageData[0]?.ImageUrl);
+                setImageUrl(data.images);
             } catch (err) {
                 alert('Lượng công thức hiện quá tải, Vui lòng tải lại trang')
                 console.error(err);
@@ -128,37 +124,25 @@ const RecipeDetail = () => {
                     <div className="absolute inset-0 bg-gray-100 rounded-lg shadow-inner p-6 -z-10"></div>
 
                     {/* Phần hình ảnh */}
-                    <div className="mb-4 z-10">
-                        <img src={imageUrl || 'https://via.placeholder.com/150'} alt={recipe.recipeName} className="w-full rounded-lg shadow-lg" />
+                    <div className="mb-4 z-10 flex flex-wrap gap-4">
+                        {imageUrl.map((image, index) => (
+                            <img
+                                key={index}
+                                src={image.imageUrl || 'https://via.placeholder.com/150'}
+                                alt={recipe.recipeName}
+                                className="w-full rounded-lg shadow-lg"
+                            />
+
+                        ))}
+
                     </div>
 
                     {/* Các nút */}
-                    <div className="flex gap-4 mb-4 z-10">
-                        <Button className="flex items-center justify-center bg-red-500 text-white py-2 px-4 rounded-lg w-1/2">
-                            <FaShoppingCart className="mr-2" /> Thêm vào giỏ hàng
-                        </Button>
-                        <Button className="flex items-center justify-center bg-green-500 text-white py-2 px-4 rounded-lg w-1/2">
-                            <FaCreditCard className="mr-2" /> Mua ngay
-                        </Button>
-                    </div>
+
 
                     {/* Các chính sách */}
                     <div className="space-y-2 z-10">
-                        <Tooltip title="Thời gian giao hàng">
-                            <p className="text-gray-700 font-semibold flex items-center">
-                                <FaShippingFast className="text-blue-500 mr-2" />Thời gian giao hàng: <span className="text-gray-500">Giao nhanh và uy tín</span>
-                            </p>
-                        </Tooltip>
-                        <Tooltip title="Chính sách đổi trả">
-                            <p className="text-gray-700 font-semibold flex items-center">
-                                <FaRedo className="text-green-500 mr-2" />Chính sách đổi trả: <span className="text-gray-500">Đổi trả miễn phí toàn quốc</span>
-                            </p>
-                        </Tooltip>
-                        <Tooltip title="Chính sách khách sỉ">
-                            <p className="text-gray-700 font-semibold flex items-center">
-                                <FaUsers className="text-yellow-500 mr-2" />Chính sách khách sỉ: <span className="text-gray-500">Ưu đãi khi mua số lượng lớn</span>
-                            </p>
-                        </Tooltip>
+
                     </div>
                 </div>
 
@@ -193,29 +177,7 @@ const RecipeDetail = () => {
                     </div>
 
                     {/* Shipping Information */}
-                    <div className="border-t border-gray-200 pt-6 mt-6">
-                        <div className="flex items-center gap-4 mb-4">
-                            <FaShippingFast className="text-2xl text-blue-500" />
-                            <div>
-                                <p className="text-xl text-gray-700 font-semibold">Giao hàng tiêu chuẩn</p>
-                                <p className="text-gray-500 text-base">Yêu cầu khi giao hàng: {recipe.requiredNote}</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-3 mt-4">
-                            <div className="bg-yellow-100 text-yellow-600 py-2 px-4 rounded-lg flex items-center">
-                                <FaTag className="mr-2" />
-                                <span>Mã giảm 10k - tối đa 1</span>
-                            </div>
-                            <div className="bg-blue-100 text-blue-600 py-2 px-4 rounded-lg flex items-center">
-                                <BsFillPatchCheckFill className="mr-2" />
-                                <span>Mã giảm 25k - tối đa 2</span>
-                            </div>
-                            <div className="bg-green-100 text-green-600 py-2 px-4 rounded-lg flex items-center">
-                                <FaCheckCircle className="mr-2" />
-                                <span>Voucher giảm 5%</span>
-                            </div>
-                        </div>
-                    </div>
+
 
                     {/* Detailed Information */}
                     <div className="border-t border-gray-200 pt-6 mt-6">
