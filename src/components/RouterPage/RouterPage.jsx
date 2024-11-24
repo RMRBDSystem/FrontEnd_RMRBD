@@ -73,6 +73,22 @@ export default function RouterPage() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/recipecustomer-list"
+            element={
+              <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                <RecipeListCustomer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-recipe/:id"
+            element={
+              <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                <EditRecipe />
+              </ProtectedRoute>
+            }
+          />
           <Route element={<Layout />}>
             <Route path="/recipe-detail/:recipeId" element={<RecipeDetails />} />
             <Route path="/recipe-customer-detail/:recipeId" element={<RecipeCustomerDetail />} />
@@ -99,6 +115,16 @@ export default function RouterPage() {
               element={
                 <ProtectedRoute allowedRoles={["Admin", "Moderator", "Customer"]}>
                   <AddRecipePageForCustomer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recipecustomer-list"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["Admin", "Moderator", "Customer"]}
+                >
+                  <AddEbookPageForCustomer />
                 </ProtectedRoute>
               }
             />
