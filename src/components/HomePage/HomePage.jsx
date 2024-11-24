@@ -4,6 +4,7 @@ import ImageFilter from "../Filter/ImageFilter";
 import Slide from '../Filter/Slide';
 import Hero from "./Hero";
 import About from './About';
+import Menu from '../Menu/Menu';
 const HomePage = () => {
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -23,9 +24,10 @@ const HomePage = () => {
     <div className="w-full min-h-screen">
       <Hero />
       <About />
-      {/* <div className='home-styled'>
+      <Menu />
+      <div className='home-styled'>
         <Slide />
-      </div> */}
+      </div>
       <div className="flex flex-col items-center">
         <ImageFilter />
         <div className="container mx-auto px-4 lg:px-8">
