@@ -111,6 +111,22 @@ export default function RouterPage() {
             <Route path="/list-saved-recipe" element={<GetListSaveRecipe />} />
             <Route path="/editrecipecustomer-recipe/:recipeId" element={<EditRecipeForCustomer />} />
             <Route
+              path="/recipecustomer-list"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <RecipeListCustomer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/edit-recipe/:id"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <EditRecipe />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/add-recipe"
               element={
                 <ProtectedRoute allowedRoles={["Admin", "Moderator", "Customer"]}>

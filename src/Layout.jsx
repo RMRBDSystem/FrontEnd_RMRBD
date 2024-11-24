@@ -10,7 +10,7 @@ function Layout() {
       <Navbar />
           <Breadcrumb/>
       <main>
-        <Outlet /> {/* Sẽ hiển thị các trang con tại đây */}
+        <Outlet />
       </main>
       <Footer />
     </>
