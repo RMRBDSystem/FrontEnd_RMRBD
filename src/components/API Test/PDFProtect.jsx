@@ -167,7 +167,7 @@ const PDFProtect = () => {
                     userSelect: 'none',
                   }}
                 >
-                  <Worker workerUrl="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js">
+                  <Worker workerUrl="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js">
                     <Viewer
                       fileUrl={selectedpdfurl}
                       onError={() => setError(true)}

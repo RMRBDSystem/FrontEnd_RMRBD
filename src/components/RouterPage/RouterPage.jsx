@@ -22,6 +22,7 @@ import CoinTransaction from "../Pages/Recharge/CoinTransaction";
 import TermsOfPurchase from '../Pages/Recharge/TermsOfPurchase';
 import PaymentSuccess from '../Pages/Recharge/PaymentSuccess'
 import PaymentFailed from '../Pages/Recharge/PaymentFailed'
+import Cart from '../Cart/ShoppingCart';
 
 //Admin
 import AdminDashboard from "../Admin/Dashboard";
@@ -70,6 +71,7 @@ export default function RouterPage() {
             <Route path="/recharge" element={<RechargePage />} />
             <Route path="/coinTransaction" element={<CoinTransaction />} />
             <Route path="/termsofpurchase" element={<TermsOfPurchase />} /> 
+            <Route path="/cart" element={<Cart />} />
             <Route
               path="/add-recipe"
               element={
