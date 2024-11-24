@@ -141,7 +141,7 @@ const EditRecipe = () => {
         {recipeName}
       </Typography>
 
-      <Box color="#024e85" display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" flexDirection="column" gap={2}>
         <TextField
           label="Ingredients"
           multiline
