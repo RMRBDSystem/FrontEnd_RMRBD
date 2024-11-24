@@ -10,7 +10,7 @@ import { Widgets, ArrowDropDown } from "@mui/icons-material";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "../RouterPage/AuthContext";
-import Notification from "/images/recipe/iconsnotification.png";
+import Notification from "/images/notification.svg";
 import "./navbar.css"
 import { useSocket } from "../../App"
 import { getNotificationbyAccountId } from "../services/NotificationService"
@@ -128,7 +128,7 @@ const Navbar = () => {
   const [stickyNavbar, setStickyNavbar] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("Sách Trong Nước");
+  const [activeCategory, setActiveCategory] = useState("Cooking Books");
   const navigate = useNavigate();
   const userRole = Cookies.get("UserRole");
   const accountonlineId = Cookies.get("UserId");
@@ -139,7 +139,7 @@ const Navbar = () => {
   }, [stickyNavbar]);
 
   const handleScroll = () => {
-    setStickyNavbar(window.pageYOffset > 600);
+    setStickyNavbar(window.pageYOffset > 800);
   };
   //Notification
   const { socket } = useSocket(); // Access `socket` and `user` from context
@@ -237,7 +237,7 @@ const Navbar = () => {
     <>
       <nav
         className={`text-center z-50 w-full absolute ${stickyNavbar
-          ? 'font-expletus animate-fade-in-down sticky top-0 bg-gray-50 shadow-sm'
+          ? 'font-expletus animate-fade-in-down sticky top-0 bg-gray-900 shadow-sm'
           : ''
           }`}
       >
@@ -287,11 +287,10 @@ const Navbar = () => {
                 </div>
               </div>
             )}
-          </ul>
-          {accountonlineId && (
-              <div className="icons">
+            {accountonlineId && (
+              <div className="icon">
                 <div className="icon" onClick={() => setOpen((prev) => !prev)}>
-                  <img src={Notification} alt="Notification Icon" />
+                  <img className="w-12 h-12" src={Notification} alt="Notification Icon" />
                   {notifications.length > 0 && (
                     <div className="counter">{notifications.length}</div>
                   )}
@@ -328,6 +327,7 @@ const Navbar = () => {
                 )}
               </div>
             )}
+          </ul>
           <Link
             to="/"
             aria-label="Recipe RMRBD"
@@ -346,7 +346,7 @@ const Navbar = () => {
               >
                 <div onClick={toggleDropdown} className="flex items-center cursor-pointer">
                   <img
-                    src="https://via.placeholder.com/50" // Hình ảnh mặc định
+                    src="/images/avatar.png" // Hình ảnh mặc định
                     alt="User Avatar"
                     className="w-12 h-12 object-cover rounded-full"
                   />
@@ -358,26 +358,54 @@ const Navbar = () => {
                 </div>
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md text-black z-10">
-                    {userRole === 'Admin' && (
-                      <NavLink
-                        to="/admin-dashboard" // Change to your admin page
-                        className="block px-4 py-2 hover:bg-gray-200"
-                      >
-                        Admin Dashboard
-                      </NavLink>
+                    {userRole === "Admin" && (
+                      <>
+                        <NavLink
+                          to="/admin-dashboard" // Change to your admin page
+                          className="block px-4 py-2 hover:bg-gray-200"
+                        >
+                          Admin Dashboard
+                        </NavLink>
+                      </>
                     )}
-                    <NavLink
-                      to="/add-recipe"
-                      className="block px-4 py-2 hover:bg-gray-200"
-                    >
-                      Add a recipe
-                    </NavLink>
-                    <NavLink
-                      to="/update-account"
-                      className="block px-4 py-2 hover:bg-gray-200"
-                    >
-                      My Profile
-                    </NavLink>
+                    {userRole === "Customer" && (
+                      <>
+                        <NavLink
+                          to="/update-account"
+                          className="block px-4 py-2 hover:bg-gray-200"
+                        >
+                          My Profile
+                        </NavLink>
+                        <NavLink
+                          to="/list-saved-recipe"
+                          className="block px-4 py-2 hover:bg-gray-200"
+                        >
+                          My Collection
+                        </NavLink>
+                      </>
+                    )}
+                    {userRole === "Seller" && (
+                      <>
+                        <NavLink
+                          to="/recipecustomer-list"
+                          className="block px-4 py-2 hover:bg-gray-200"
+                        >
+                          Seller Recipe
+                        </NavLink>
+                        <NavLink
+                          to="/add-recipe"
+                          className="block px-4 py-2 hover:bg-gray-200"
+                        >
+                          Add a Recipe
+                        </NavLink>
+                        <NavLink
+                          to="/list-saved-recipe"
+                          className="block px-4 py-2 hover:bg-gray-200"
+                        >
+                          My Collection
+                        </NavLink>
+                      </>
+                    )}
                     <div
                       className="block px-4 py-2 hover:bg-gray-200 cursor-pointer"
                       onClick={handleLogout}

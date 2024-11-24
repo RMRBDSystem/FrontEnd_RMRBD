@@ -31,37 +31,37 @@ const ShoppingCart = () => {
         const bookOrdersResponse = await axios.get('https://rmrbdapi.somee.com/odata/BookOrder', {
           headers: { 'Content-Type': 'application/json', 'Token': '123-abc' },
         });
-        
+    
         // Filter orders by customerId
         const userBookOrders = bookOrdersResponse.data.filter(order => order.customerId === parseInt(userId));
-        
+    
         // Fetch order details
         const bookOrderIds = userBookOrders.map(order => order.orderId);
         const orderDetailsResponse = await axios.get('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
           headers: { 'Content-Type': 'application/json', 'Token': '123-abc' },
         });
-        
+    
         // Flatten the order details into individual orders
         const flatOrders = orderDetailsResponse.data.map(detail => {
-          const order = userBookOrders.find(order => order.orderId === detail.orderId);  
+          const order = userBookOrders.find(order => order.orderId === detail.orderId);
           return {
             orderDetailId: detail.orderDetailId, 
             bookId: detail.bookId,
             quantity: detail.quantity,
             price: detail.price,
             totalPrice: detail.quantity * detail.price,
-            purchaseDate: order.purchaseDate,
-            clientAddressId: order.clientAddressId,
+            purchaseDate: order?.purchaseDate,  // Safe access with optional chaining
+            clientAddressId: order?.clientAddressId,  // Safe access with optional chaining
           };
         });
     
         // Log flattened orders for debugging
         console.log("Flattened Orders:", flatOrders);
-        
+    
         // Fetch book data
         const bookIds = [...new Set(flatOrders.map(order => order.bookId))];
         fetchBooks(bookIds);
-        
+    
         // Update the state with flattened orders
         setOrders(flatOrders);
       } catch (error) {
@@ -69,6 +69,7 @@ const ShoppingCart = () => {
         toast.error('Failed to load orders.');
       }
     };
+    
     
     const fetchBooks = async (bookIds) => {
       try {
@@ -155,8 +156,7 @@ const ShoppingCart = () => {
           // Step 3: Find the orderId associated with the deleted orderDetailId
           const orderToCheck = prevOrders.find(order => order.orderDetailId === orderToDelete);
           
-          // If the order has no remaining orderDetailId, we should delete the entire order (orderId)
-          if (orderToCheck) {
+          if (orderToCheck && orderToCheck.orderId)  {
             const remainingDetails = updatedOrders.filter(order => order.orderId === orderToCheck.orderId);
             
             // Step 4: If no remaining orderDetailId, delete the orderId (parent order)
@@ -178,7 +178,7 @@ const ShoppingCart = () => {
                 console.error("Failed to delete BookOrder:", err);
                 toast.error("Failed to delete the order.");
               });
-  
+              
               // Remove the orderId from the state (UI) as well
               return updatedOrders.filter(order => order.orderId !== orderToCheck.orderId);
             }
@@ -194,8 +194,10 @@ const ShoppingCart = () => {
         toast.error("Failed to remove order detail.");
       });
     }
+  
     setShowModal(false); // Close the modal after deletion
   };
+  
   
   const formatAddressLine = (address) => {
     if (!address) return 'Address details not available';
@@ -411,34 +413,6 @@ const handleQuantityChange = (orderDetailId, changeType) => {
     handleShowModal(orderToUpdate.orderId); // Show the delete modal if quantity is zero
   }
 };
-
-
-
-  // const getAddressFromClientId = (clientAddressId) => {
-  //   if (!clientAddressId) {
-  //     return 'No Address Assigned';  
-  //   }
-  
-  //   const address = addressDetails[clientAddressId];  
-  
-  //   if (!address) {
-  //     return 'Address not found'; 
-  //   }
-  
-  //   const addressLine = [
-  //     address.provinceName,
-  //     address.districtName,
-  //     address.wardName
-  //   ].filter(Boolean).join(', '); 
-  
-  //   // Return the formatted address with spacing using Tailwind
-  //   return (
-  //     <div>
-  //       <p className="mb-1">- {address.addressDetail}</p> 
-  //       <p className="mt-1">- {addressLine}</p>           
-  //     </div>
-  //   );
-  // };
 
   const handleDeleteOrder = (orderDetailId) => {
     const orderToDelete = orders.find(order => order.orderDetailId === orderDetailId);

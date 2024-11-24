@@ -5,6 +5,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 const RecipeCustomer = () => {
   const [recipeName, setRecipeName] = useState("");
   const [numberOfService, setNumberOfService] = useState("");
@@ -22,7 +23,8 @@ const RecipeCustomer = () => {
   const [totalTime, setTotalTime] = useState();
   const [createById, setcreateById] = useState("");
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState("");
+  const navigate = useNavigate();
   useEffect(() => {
     const storedUserId = Cookies.get("UserId");
     console.log("Stored UserId:", storedUserId);
@@ -74,6 +76,9 @@ const RecipeCustomer = () => {
     }
     if (recipeImage.length === 0) {
       newErrors.recipeImage = "At least one image is required.";
+    }
+    if (selectedTagIds.length === 0) {
+      newErrors.selectedTagIds = "Please select at least one tag.";
     }
     if (selectedTagIds.length === 0) {
       newErrors.selectedTagIds = "Please select at least one tag.";
@@ -145,10 +150,11 @@ const RecipeCustomer = () => {
       createDate,
       description,
       video,
+      status,
     };
 
     console.log("Recipe data:", recipeData);
-    setIsLoading(true);
+
     try {
       // Step 1: Save the recipe data
       const result = await axios.post(url, recipeData, {
@@ -178,7 +184,6 @@ const RecipeCustomer = () => {
     } catch (error) {
       console.error("Error saving recipe or uploading images:", error);
       toast.error(`Failed to add recipe or upload images: ${error.message}`);
-      setIsLoading(false);
     }
   };
 
@@ -197,7 +202,6 @@ const RecipeCustomer = () => {
     const today = new Date().toISOString().slice(0, 10);
     setCreateDate(today); // Reset createDate to today's date
     setErrors({});
-    setIsLoading(false);
   };
   const handleInputChange = (setter, field) => (e) => {
     setter(e.target.value);
@@ -213,6 +217,10 @@ const RecipeCustomer = () => {
   };
   const removeImage = (index) => {
     setRecipeImage((prevImages) => prevImages.filter((_, i) => i !== index));
+  };
+
+  const handleBack = () => {
+    navigate(-1); // This will navigate back to the previous page
   };
 
   // Sử dụng renderImageInputs để hiển thị hình ảnh đã chọn
@@ -238,7 +246,6 @@ const RecipeCustomer = () => {
               marginTop: "5px",
             }}
             onClick={() => removeImage(index)}
-            disabled={isLoading}
           >
             Remove
           </Button>
@@ -268,7 +275,6 @@ const RecipeCustomer = () => {
                   placeholder="Enter Recipe Name"
                   value={recipeName}
                   onChange={handleInputChange(setRecipeName, "recipeName")}
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -285,7 +291,6 @@ const RecipeCustomer = () => {
                   placeholder="Description"
                   value={description}
                   onChange={handleInputChange(setDescription, "description")}
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -300,7 +305,6 @@ const RecipeCustomer = () => {
                   placeholder="Video"
                   value={video}
                   onChange={handleInputChange(setVideo, "video")}
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -321,7 +325,6 @@ const RecipeCustomer = () => {
                     setNumberOfService,
                     "numberOfService"
                   )}
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -337,7 +340,6 @@ const RecipeCustomer = () => {
                   placeholder="Enter Price"
                   value={price}
                   onChange={handleInputChange(setPrice, "price")}
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -356,7 +358,6 @@ const RecipeCustomer = () => {
                   value={tutorial}
                   onChange={handleInputChange(setTutorial, "tutorial")}
                   rows={4} // Số dòng mặc định hiển thị
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -375,7 +376,6 @@ const RecipeCustomer = () => {
                   value={ingredient}
                   onChange={handleInputChange(setIngredient, "ingredient")}
                   rows={4} // Số dòng mặc định hiển thị
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -393,7 +393,6 @@ const RecipeCustomer = () => {
                   value={nutrition}
                   onChange={handleInputChange(setNutrition, "nutrition")}
                   rows={4} // Số dòng mặc định hiển thị
-                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -437,7 +436,6 @@ const RecipeCustomer = () => {
                       }
                       setSelectedTagIds(values);
                     }}
-                    disabled={isLoading}
                   >
                     {tags.map((tag) => (
                       <option key={tag.tagId} value={tag.tagId}>
@@ -461,7 +459,6 @@ const RecipeCustomer = () => {
                   type="file"
                   multiple
                   onChange={handleImageChange}
-                  disabled={isLoading}
                 />
                 <div
                   style={{
@@ -488,15 +485,38 @@ const RecipeCustomer = () => {
                     placeholder="totaltime"
                     value={totalTime}
                     onChange={handleInputChange(setTotalTime, "totaltime")}
-                    disabled={isLoading}
                   />
                 </Form.Group>
               </Col>
             </Row>
-
+            <Row className="mb-4">
+              <Col>
+                <Form.Group controlId="totaltime">
+                  <Form.Label>Status</Form.Label>
+                  {errors.setTags && (
+                    <p className="text-danger">{errors.status}</p>
+                  )}
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(Number(e.target.value))}
+                  >
+                    <option value={1}>Censored</option>
+                    <option value={-1}>Uncensored</option>
+                    <option value={0}>Blocked</option>
+                  </select>
+                </Form.Group>
+              </Col>
+            </Row>
             <Col className="d-flex align-items-end">
               <Button variant="primary" onClick={handleSave} className="w-100">
                 Submit
+              </Button>
+              <Button
+                variant="secondary" // style it differently for "Back"
+                onClick={handleBack}
+                className="me-3"
+              >
+                Back
               </Button>
             </Col>
           </Row>

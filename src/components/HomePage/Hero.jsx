@@ -17,16 +17,15 @@ const Hero = () => {
           </video>
     
           <div className="text-5xl z-40 text-center text-white mt-40">
-            <h2 className="text-3xl sm:text-5xl md:text-7xl font-expletus font-extrabold uppercase">
+            <h2 className="text-white text-3xl sm:text-5xl md:text-7xl font-expletus font-extrabold uppercase">
               Welcome To RMRBD
             </h2>
             <h3 className="text-2xl sm:text-3xl md:text-5xl my-2 sm:my-5 capitalize">
             Recipe Cook
             </h3>
-            <p className="max-w-2xl mx-auto my-2 sm:my-5 text-base sm:text-xl lg:text-2xl">
+            <p className="text-gray-100 max-w-2xl mx-auto my-2 sm:my-5 text-base sm:text-xl lg:text-2xl">
               Find the perfect recipes for your next meal, party, or event.
             </p>
-    
             <a
               href="#featured"
               className={`text-xs bg-white text-gray-800 py-2.5 px-7 mt-2.5 uppercase tracking-wider hover:tracking-widest transition duration-200 ease-in-out`}

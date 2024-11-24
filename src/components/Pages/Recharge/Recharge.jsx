@@ -106,11 +106,6 @@ const RechargePage = () => {
     }
   };
 
-  // Xử lý khi chọn phương thức thanh toán
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-  };
-
   // Gửi yêu cầu tạo link thanh toán hoặc xử lý đơn hàng khi nhận hàng
 
 
@@ -131,7 +126,7 @@ const RechargePage = () => {
             <p className="text-sm text-gray-500">&#11088;{coin}</p>
           </div>
         </div>
-        <a href="/coinTransaction" className="text-gray-900 text-xl hover:underline">
+        <a href="/coinTransaction" className="text-gray-900 text-xl cursor-pointer">
           View transaction history
         </a>
       </div>

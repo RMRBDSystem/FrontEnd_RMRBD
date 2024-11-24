@@ -2,8 +2,6 @@ import { React, useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import Navbar from "../Navbar/Navbar";
-import Footer from "../Footer/Footer";
 import Cookies from "js-cookie";
 import Tesseract from "tesseract.js";
 import DatePicker from "react-datepicker";
@@ -21,7 +19,7 @@ const AccountProfile = () => {
   const [backIDCardPreview, setBackIDCardPreview] = useState(null);
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [idCardNumber, setIdCardNumber] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // State lưu lỗi cho từng trường
   const [errors, setErrors] = useState({
     portrait: "",
@@ -40,8 +38,6 @@ const AccountProfile = () => {
   }, []);
 
   const handleSaveAccountProfile = async () => {
-    if (isSubmitting) return;
-    // Kiểm tra lỗi trước khi gửi
     let formErrors = {};
     if (!portrait) formErrors.portrait = "Vui lòng chọn ảnh chân dung.";
     if (!frontIDCard)
@@ -55,9 +51,7 @@ const AccountProfile = () => {
       toast.error("Vui lòng điền đầy đủ thông tin.");
       return;
     }
-
     if (!window.confirm("Bạn có chắc chắn muốn gửi thông tin không?")) return;
-    setIsSubmitting(true);
     const url = `https://rmrbdapi.somee.com/odata/AccountProfile/${accountID}`;
     const formData = new FormData();
     formData.append("portrait", portrait);
@@ -66,7 +60,7 @@ const AccountProfile = () => {
     formData.append("backIDCard", backIDCard);
     formData.append("dateOfBirth", dateOfBirth.toISOString().split("T")[0]);
     formData.append("iDCardNumber", idCardNumber);
-
+    setIsLoading(true);
     try {
       const result = await axios.post(url, formData, {
         headers: {
@@ -74,16 +68,17 @@ const AccountProfile = () => {
           Token: "123-abc",
         },
       });
+      console.log("API Response:", result.data);
       clear();
       toast.success("Account Profile đã được thêm thành công");
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(error.response.data.message);
+        setIsLoading(false);
       } else {
         toast.error("Lỗi khi gửi hồ sơ.");
+        setIsLoading(false);
       }
-    } finally {
-      setIsSubmitting(false); // Cho phép thao tác sau khi xử lý xong
     }
   };
 
@@ -97,7 +92,9 @@ const AccountProfile = () => {
     setDateOfBirth(new Date());
     setIdCardNumber("");
     setBankAccountQR(null);
+    setBankAccountQRPreview(null);
     setErrors({});
+    setIsLoading(false);
   };
 
   const handleFileChange = (e, setFile, setPreview) => {
@@ -185,7 +182,6 @@ const AccountProfile = () => {
   return (
     <>
       <ToastContainer />
-      <Navbar />
       <Container className="my-5">
         <h2 className="text-center mb-4">Cập nhật hồ sơ</h2>
         <Form>
@@ -197,6 +193,7 @@ const AccountProfile = () => {
                   type="file"
                   name="frontIDCard"
                   onChange={handlefrontIDCardFileChange}
+                  disabled={isLoading}
                 />
                 {errors.frontIDCard && (
                   <Form.Text className="text-danger">
@@ -220,6 +217,7 @@ const AccountProfile = () => {
                           setFrontIDCardPreview
                         )
                       }
+                      disabled={isLoading}
                       className="mt-2"
                     >
                       Xóa ảnh
@@ -240,6 +238,7 @@ const AccountProfile = () => {
                   onChange={(e) =>
                     handleFileChange(e, setBackIDCard, setBackIDCardPreview)
                   }
+                  disabled={isLoading}
                 />
                 {errors.backIDCard && (
                   <Form.Text className="text-danger">
@@ -263,6 +262,7 @@ const AccountProfile = () => {
                           setBackIDCardPreview
                         )
                       }
+                      disabled={isLoading}
                       className="mt-2"
                     >
                       Xóa ảnh
@@ -282,6 +282,7 @@ const AccountProfile = () => {
                   onChange={(date) => setDateOfBirth(date)}
                   dateFormat="dd/MM/yyyy"
                   className="form-control"
+                  disabled={isLoading}
                 />
                 {errors.dateOfBirth && (
                   <Form.Text className="text-danger">
@@ -302,6 +303,7 @@ const AccountProfile = () => {
                   onChange={(e) =>
                     handleFileChange(e, setPortrait, setPortraitPreview)
                   }
+                  disabled={isLoading}
                 />
                 {errors.portrait && (
                   <Form.Text className="text-danger">
@@ -325,6 +327,7 @@ const AccountProfile = () => {
                           setPortraitPreview
                         )
                       }
+                      disabled={isLoading}
                       className="mt-2"
                     >
                       Xóa ảnh
@@ -348,7 +351,8 @@ const AccountProfile = () => {
                       setBankAccountQR,
                       setBankAccountQRPreview
                     )
-                  } // Ensure state is correctly set
+                  }
+                  disabled={isLoading}
                 />
                 {errors.bankAccountQR && (
                   <Form.Text className="text-danger">
@@ -373,6 +377,7 @@ const AccountProfile = () => {
                         )
                       }
                       className="mt-2"
+                      disabled={isLoading}
                     >
                       Xóa ảnh
                     </Button>
@@ -390,6 +395,7 @@ const AccountProfile = () => {
                   type="text"
                   value={idCardNumber}
                   onChange={(e) => setIdCardNumber(e.target.value)}
+                  disabled={isLoading}
                 />
               </Form.Group>
             </Col>
@@ -400,7 +406,6 @@ const AccountProfile = () => {
           </Button>
         </Form>
       </Container>
-      <Footer />
     </>
   );
 };

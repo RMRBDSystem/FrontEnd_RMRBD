@@ -2,7 +2,8 @@ import React, { useState } from "react";
 // import BackgroundImage from "/images/Background.jpg";
 import ImageFilter from "../Filter/ImageFilter";
 import Slide from '../Filter/Slide';
-import Hero from './Hero'
+import Hero from "./Hero";
+import About from './About';
 const HomePage = () => {
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -21,9 +22,10 @@ const HomePage = () => {
   return (
     <div className="w-full min-h-screen">
       <Hero />
-      <div className='home-styled'>
+      <About />
+      {/* <div className='home-styled'>
         <Slide />
-      </div>
+      </div> */}
       <div className="flex flex-col items-center">
         <ImageFilter />
         <div className="container mx-auto px-4 lg:px-8">

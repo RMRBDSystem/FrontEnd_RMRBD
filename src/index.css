@@ -40,7 +40,7 @@ body::-webkit-scrollbar-thumb {
   }
 
   .nav-links-container {
-    @apply items-center hidden space-x-6 lg:flex uppercase text-xl;
+    @apply items-center hidden space-x-6 lg:flex text-xl;
   }
 
   .nav-link {

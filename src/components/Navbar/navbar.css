@@ -1,37 +1,59 @@
-.icons .notifications{
-    position: absolute;
-    top:70px;
-    right: 350px;
-    background-color: white;
-    color: black;
-    font-weight: 300;
-    display: flex;
-    flex-direction: column;
-    border-radius: 10px;
-    max-Height: 300px;
-    max-width: 400px;
-    overflow-y: auto; /*Kích hoạt cuộn dọc */
-    border: 1px solid #ccc; /* Viền vùng thông báo */
-    padding: 10px;
-  }
-  .notification{
-    padding: 5px;
-    font-size: 14px;
-  }
-  .notifications .nButton{
-    padding: 5px;
-    margin-top: 10px;
-  }
-  .notifications .notification-item{
-    padding: 5px;
-    display: flex;
-    flex-direction: column;
-  }
-  .notification-item .notification-content{
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
-  .notification-item .notification-time{
-    font-size: 12px;
-    align-self: flex-end;
-  }
+.notifications {
+  position: absolute;
+  background-color: #fff; /* Màu nền */
+  color: #000; /* Màu chữ */
+  font-weight: 300; /* Trọng lượng chữ */
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  max-height: 300px; /* Giới hạn chiều cao */
+  max-width: 400px; /* Giới hạn chiều rộng */
+  overflow-y: auto; /* Kích hoạt cuộn dọc */
+  border: 1px solid #ccc; /* Viền cho vùng thông báo */
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+}
+
+.notifications .notification {
+  padding: 5px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee; /* Đường viền dưới giữa các mục */
+  margin-bottom: 5px;
+}
+
+.notifications .nButton {
+  padding: 8px 12px; /* Kích thước nút */
+  margin-top: 10px;
+  background-color: #007bff; /* Màu nền nút */
+  color: #fff; /* Màu chữ nút */
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Hiệu ứng hover */
+}
+
+.notifications .nButton:hover {
+  background-color: #0056b3; /* Màu nền khi hover */
+}
+
+.notifications .notification-item {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9; /* Màu nền từng mục thông báo */
+  border-radius: 5px; /* Bo góc từng mục */
+  margin-bottom: 10px;
+}
+
+.notification-item .notification-content {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333; /* Màu chữ chính */
+}
+
+.notification-item .notification-time {
+  font-size: 12px;
+  align-self: flex-end; /* Canh phải thời gian */
+  color: #888; /* Màu chữ thời gian */
+}

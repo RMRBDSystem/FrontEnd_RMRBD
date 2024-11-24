@@ -108,9 +108,10 @@ function Sidebar({ onFilterChange }) {
         </label>
         <ul className="space-y-3">
           {[
-            { label: "0đ - 150,000đ", value: "0-150000" },
-            { label: "150,000đ - 300,000đ", value: "150000-300000" },
-            { label: "300,000đ - 500,000đ", value: "300000-500000" },
+            { label: "Free", value: "0" },
+            { label: ">0đ - 20,000đ", value: "0-20000.000" },
+            { label: "20,000đ - 50,000đ", value: "20000.000-50000.000" },
+            { label: ">50,000đ", value: "50000.000 - 1000000000.000" },
           ].map((priceRange, index) => (
             <li key={index} className="flex items-center">
               <input
