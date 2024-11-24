@@ -4,30 +4,58 @@
 
 /* Reset mặc định */
 body {
-  margin: 0;
+  margin : 0;
   padding: 0;
 }
 
 /* Thanh cuộn tùy chỉnh áp dụng cho toàn bộ body */
 body::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  background-color: #727272;
-  border-radius: 10px;
+  background-color  : #727272;
+  border-radius     : 10px;
 }
 
 body::-webkit-scrollbar {
-  width: 12px;
+  width           : 12px;
   background-color: #727272;
 }
 
 body::-webkit-scrollbar-thumb {
   border-radius: 12px;
-  background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.44, rgb(255, 0, 0)),
-    color-stop(0.72, rgb(251, 255, 0)),
-    color-stop(0.86, rgb(255, 110, 110))
-  );
+  background-image: -webkit-gradient(linear,
+      left bottom,
+      left top,
+      color-stop(0.44, rgb(0, 4, 255)),
+      color-stop(0.72, rgb(0, 132, 255)),
+      color-stop(0.86, rgb(110, 238, 255)));
+}
+
+@layer components {
+  .section {
+    @apply py-24 px-0;
+  }
+
+  .section-center {
+    @apply px-4 md:px-6 lg:px-8 py-6 lg:py-8 mx-auto sm:max-w-full lg:max-w-7xl;
+  }
+
+  .nav-links-container {
+    @apply items-center hidden space-x-6 lg:flex uppercase text-xl;
+  }
+
+  .nav-link {
+    @apply tracking-wide text-white font-extrabold transition-colors duration-200 hover:text-green-500 ;
+  }
+
+  .company-name {
+    @apply text-xl font-semibold tracking-wide uppercase;
+  }
+
+  .section-title {
+    @apply text-center mb-10 text-4xl uppercase font-extrabold;
+  }
+
+  .underline {
+    @apply w-20 h-1 mt-4 mx-auto;
+  }
 }

@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { filterableData } from "../../data/FilterableData";
+import { filterableData } from "../../data/data";
 
 const Button = ({ className, children, ...rest }) => {
   return (

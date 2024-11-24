@@ -85,7 +85,8 @@ const SearchWrapper = () => {
 
   return (
     <div>
-      <div className="search-btn ml-[80px] cursor-pointer duration-500 hover:text-custom-orange text-xl py-2 px-4" onClick={toggleSearch}>
+      <div className="search-btn cursor-pointer text-gray-50 text-xl py-2 px-4 hover:text-custom-orange" 
+      onClick={toggleSearch}>
         <FaSearch />
       </div>
 

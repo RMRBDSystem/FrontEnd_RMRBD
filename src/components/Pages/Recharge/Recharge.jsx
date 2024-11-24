@@ -18,11 +18,11 @@ const RechargePage = () => {
   const [userId, setUserId] = useState('');
   const [userName, setUserName] = useState('');
   const [coin, setCoin] = useState('');
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState('');
   const [total, setTotal] = useState(0);
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customCoins, setCustomCoins] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState(''); // Lưu phương thức thanh toán
+  const [paymentMethod, setPaymentMethod] = useState('PayOS'); // Lưu phương thức thanh toán
   const conversionRate = 1 / 1; // Tỷ lệ quy đổi: 100 xu = 10,500 đồng
 
 
@@ -115,8 +115,8 @@ const RechargePage = () => {
 
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Get Coins</h2>
+    <div className="max-w-[1140px] mx-auto p-6 bg-white rounded-lg shadow-md mb-10">
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Get Coins</h2>
 
       {/* Thông tin người dùng */}
       <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg mb-4">
@@ -127,32 +127,30 @@ const RechargePage = () => {
             className="w-10 h-10 rounded-full mr-3"
           />
           <div>
-            <p className="font-medium text-gray-800">{userName}</p>
-            <p className="text-sm text-gray-500">{coin} coins</p>
+            <p className="font-bold text-gray-800">{userName}</p>
+            <p className="text-sm text-gray-500">&#11088;{coin}</p>
           </div>
         </div>
-        <a href="/coinTransaction" className="text-blue-600 text-sm hover:underline">
+        <a href="/coinTransaction" className="text-gray-900 text-xl hover:underline">
           View transaction history
         </a>
       </div>
 
       {/* Thông báo khuyến mãi */}
-      <div className="bg-yellow-100 text-yellow-800 p-2 rounded-md mb-4">
-        <p className="font-semibold">Time-limited Cash Back Offer</p>
-        <p className="text-sm">October 9–November 9</p>
+      <div className="max-w-[450px] bg-yellow-100 p-2 rounded-md mb-4">
+        <p className="font-semibold">Time-limited Cash Back Offer</p><span className="text-sm font-bold">Recharge: <span className="font-semibold text-red-500">Save around 25% with a lower third-party service fee.</span></span>
       </div>
-
       {/* Lựa chọn số xu */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6">
         {coinOptions.map((option, index) => (
           <div
             key={index}
-            className={`p-4 border rounded-lg ${selectedOption === option.coins ? 'border-yellow-400' : 'border-gray-300'
+            className={`p-3 rounded-sm shadow-sm flex flex-col justify-between ${selectedOption === option.coins ? 'border-3 border-yellow-500' : 'border'
               } cursor-pointer`}
             onClick={() => handleSelect(option)}
           >
-            <div className="text-yellow-500 text-2xl mb-1">&#11088; {option.coins}</div>
-            <div className="text-gray-600 text-sm">
+            <div className="font-semibold text-gray-900 text-xl text-center mb-1">&#11088; {option.coins}</div>
+            <div className="text-gray-600 text-sm text-center">
               {typeof option.price === 'number' ? `₫${option.price.toLocaleString()}` : option.price}
             </div>
           </div>
@@ -160,30 +158,33 @@ const RechargePage = () => {
 
         {/* Tùy chọn Custom */}
         <div
-          className="p-4 border rounded-lg border-gray-300 cursor-pointer"
+          className="p-3 rounded-sm shadow-sm cursor-pointer border-3"
           onClick={handleOpenCustomModal}
         >
-          <div className="text-yellow-500 text-2xl mb-1">&#11088; Custom</div>
-          <div className="text-gray-600 text-sm">Large amount supported</div>
+          <div className="font-bold text-2xl mb-1">&#11088; Custom</div>
+          <div className="text-gray-600 font-bold text-sm">Large amount supported</div>
         </div>
       </div>
 
       {/* Chọn phương thức thanh toán */}
       <div className="mb-4">
-        <div>
+        <div className="font-bold">
           <label>
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="PayOS"
-              checked={paymentMethod === 'PayOS'}
-              onChange={handlePaymentMethodChange}
-              className="mr-2"
-            />Thanh toán qua
+            Payment method
             <img
-              src="/images/payos_crop.png" // Thay thế đường dẫn này bằng đường dẫn chính xác đến icon PayOS
+              src="/images/payos_crop.png" 
               alt="PayOS icon"
-              className="inline-block w-30 h-5 ml-1" // Điều chỉnh kích thước hình ảnh
+              className="inline w-30 h-4 ml-4" 
+            />
+            <img
+              src="/images/VietQR.png" 
+              alt="VietQR icon"
+              className="inline w-30 h-5 ml-1" 
+            />
+            <img
+              src="/images/Napas247.png"
+              alt="Napas247 icon"
+              className="inline w-30 h-7 ml-1"
             />
           </label>
 
@@ -191,9 +192,9 @@ const RechargePage = () => {
       </div>
 
       {/* Tổng tiền */}
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-lg font-medium text-gray-800">Total</p>
-        <p className="text-lg font-bold text-gray-800">{total ? `₫${total.toLocaleString()}` : '₫0'}</p>
+      <div className="flex justify-start mb-4">
+        <p className="text-lg font-medium text-gray-900 mr-4">Total</p>
+        <p className="text-xl font-bold text-gray-900">{total ? `₫${total.toLocaleString()}` : '₫0'}</p>
       </div>
 
       {/* Nút Recharge */}
@@ -203,7 +204,7 @@ const RechargePage = () => {
           event.preventDefault();
           handleGetPaymentLink(total, userId);
         }}
-        className="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
+        className="min-w-[200px] py-3 bg-red-500 text-white font-bold rounded-lg hover:bg-red-900 transition"
         disabled={!total || !paymentMethod}
       >
         Recharge
@@ -223,7 +224,7 @@ const RechargePage = () => {
             />
             <div className="flex justify-between items-center mb-4">
               <p className="text-lg font-medium text-gray-800">Total</p>
-              <p className="text-lg font-bold text-gray-800">{`₫${total.toLocaleString()}`}</p>
+              <p className="text-lg font-medium text-gray-800">{`₫${total.toLocaleString()}`}</p>
             </div>
             <div className="flex justify-end space-x-2">
               <button
@@ -241,7 +242,7 @@ const RechargePage = () => {
                 className="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
                 disabled={!total || !paymentMethod || isLoading}
               >
-                {isLoading ? "Đang tải..." : "Nạp"}
+                {isLoading ? "Waiting..." : "Recharge"}
               </button>
             </div>
           </div>
@@ -250,8 +251,6 @@ const RechargePage = () => {
     </div>
   );
 };
-
-
 
 
 export default function App() {

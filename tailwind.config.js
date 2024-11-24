@@ -24,6 +24,16 @@ export default withMT({
         'sans': '"Proxima Nova", system-ui, sans-serif',
       },
       keyframes: {
+        'fade-in-down': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(-10px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
         blink: {
           '0%, 100%': { opacity: '1' },   // Hiển thị hoàn toàn
           '50%': { opacity: '0' },        // Biến mất một nửa thời gian
@@ -41,6 +51,7 @@ export default withMT({
         },
       },
       animation: {
+        'fade-in-down': 'fade-in-down 0.7s ease-in',
         blink: 'blink 0.5s infinite',
         tada: 'tada 1s infinite',       // Animation lặp vô hạn mỗi 1 giây
       },

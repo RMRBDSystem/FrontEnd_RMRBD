@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Navbar, Collapse, Typography, Button, IconButton } from "@material-tailwind/react";
+import LogoA from '/images/LogoA.png';
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import NavLinks from './NavLinks';
+import { leftLinks } from '../../data/data';
+import { rightLinks } from '../../data/data';
+import { Button, IconButton } from "@material-tailwind/react";
 import SearchWrapper from "./SearchWrapper";
 import { Widgets, ArrowDropDown } from "@mui/icons-material";
 import axios from "axios";
@@ -11,133 +15,132 @@ import "./navbar.css"
 import { useSocket } from "../../App"
 import { getNotificationbyAccountId } from "../services/NotificationService"
 const categoriesContent = {
-  "Công Thức Nấu Ăn": (
+  "Cooking Recipes": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
       <div>
-        <h3 className="font-semibold text-base">MÓN CHÍNH</h3>
+        <h3 className="font-semibold text-base">MAIN DISHES</h3>
         <ul className="space-y-1 text-sm">
-          <li>Thịt Kho Tàu</li>
-          <li>Cá Kho Tộ</li>
-          <li>Gà Nướng Mật Ong</li>
-          <li>Phở Bò</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Braised Pork Belly</li>
+          <li>Braised Fish in Clay Pot</li>
+          <li>Honey Grilled Chicken</li>
+          <li>Beef Pho</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">MÓN CANH</h3>
+        <h3 className="font-semibold text-base">SOUPS</h3>
         <ul className="space-y-1 text-sm">
-          <li>Canh Chua Cá Lóc</li>
-          <li>Canh Khổ Qua Nhồi Thịt</li>
-          <li>Canh Bắp Cải Cuộn</li>
-          <li>Canh Rong Biển</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Sour Snakehead Fish Soup</li>
+          <li>Bitter Melon Stuffed Soup</li>
+          <li>Cabbage Roll Soup</li>
+          <li>Seaweed Soup</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">MÓN ĂN NHẸ</h3>
+        <h3 className="font-semibold text-base">SNACKS</h3>
         <ul className="space-y-1 text-sm">
-          <li>Bánh Cuốn</li>
-          <li>Chả Giò</li>
-          <li>Bánh Xèo</li>
-          <li>Bánh Khọt</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Steamed Rice Rolls</li>
+          <li>Spring Rolls</li>
+          <li>Vietnamese Pancakes</li>
+          <li>Mini Pancakes</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
     </div>
   ),
-  "Sách Nấu Ăn": (
+  "Cooking Books": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
       <div>
-        <h3 className="font-semibold text-base">ẨM THỰC VIỆT NAM</h3>
+        <h3 className="font-semibold text-base">VIETNAMESE CUISINE</h3>
         <ul className="space-y-1 text-sm">
-          <li>Phở và các món bún</li>
-          <li>Đặc sản miền Trung</li>
-          <li>Món quê hương</li>
-          <li>Món tráng miệng Việt</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Pho and Noodle Dishes</li>
+          <li>Central Vietnam Specialties</li>
+          <li>Traditional Dishes</li>
+          <li>Vietnamese Desserts</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">ẨM THỰC QUỐC TẾ</h3>
+        <h3 className="font-semibold text-base">INTERNATIONAL CUISINE</h3>
         <ul className="space-y-1 text-sm">
-          <li>Món Nhật</li>
-          <li>Ẩm Thực Hàn Quốc</li>
-          <li>Món Ý</li>
-          <li>Món Pháp</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Japanese Dishes</li>
+          <li>Korean Cuisine</li>
+          <li>Italian Dishes</li>
+          <li>French Dishes</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">MÓN CHAY & SỨC KHỎE</h3>
+        <h3 className="font-semibold text-base">VEGETARIAN & HEALTH</h3>
         <ul className="space-y-1 text-sm">
-          <li>Món chay cơ bản</li>
-          <li>Salad & nước ép</li>
-          <li>Chế độ ăn khỏe mạnh</li>
-          <li>Công thức ít calorie</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Basic Vegetarian Dishes</li>
+          <li>Salads & Juices</li>
+          <li>Healthy Eating Plans</li>
+          <li>Low-Calorie Recipes</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
     </div>
   ),
-  "Thư Viện E-Book": (
+  "E-Book Library": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
       <div>
-        <h3 className="font-semibold text-base">SÁCH CÔNG THỨC</h3>
+        <h3 className="font-semibold text-base">RECIPE BOOKS</h3>
         <ul className="space-y-1 text-sm">
-          <li>Công Thức Việt Nam</li>
-          <li>Công Thức Châu Á</li>
-          <li>Công Thức Châu Âu</li>
-          <li>Công Thức Tráng Miệng</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Vietnamese Recipes</li>
+          <li>Asian Recipes</li>
+          <li>European Recipes</li>
+          <li>Dessert Recipes</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">KỸ THUẬT NẤU ĂN</h3>
+        <h3 className="font-semibold text-base">COOKING TECHNIQUES</h3>
         <ul className="space-y-1 text-sm">
-          <li>Nấu Món Nướng</li>
-          <li>Kỹ Thuật Chiên Xào</li>
-          <li>Thực Hành Làm Bánh</li>
-          <li>Chuẩn Bị Nguyên Liệu</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Grilling Recipes</li>
+          <li>Stir-Frying Techniques</li>
+          <li>Baking Practices</li>
+          <li>Ingredient Preparation</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">SỨC KHỎE & DINH DƯỠNG</h3>
+        <h3 className="font-semibold text-base">HEALTH & NUTRITION</h3>
         <ul className="space-y-1 text-sm">
-          <li>Dinh Dưỡng Hàng Ngày</li>
-          <li>Thực Đơn Giảm Cân</li>
-          <li>Chế Độ Ăn Cho Trẻ Em</li>
-          <li>Dinh Dưỡng Thể Thao</li>
-          <li className="text-blue-500">Xem tất cả</li>
+          <li>Daily Nutrition</li>
+          <li>Weight Loss Meal Plans</li>
+          <li>Child Nutrition Plans</li>
+          <li>Sports Nutrition</li>
+          <li className="text-blue-500">View All</li>
         </ul>
       </div>
     </div>
   ),
 };
 
-export function StickyNavbar() {
+
+const Navbar = () => {
+
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [openNav, setOpenNav] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [stickyNavbar, setStickyNavbar] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeCategory, setActiveCategory] = useState("Sách Trong Nước");
   const navigate = useNavigate();
   const userRole = Cookies.get("UserRole");
   const accountonlineId = Cookies.get("UserId");
+
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    const handleResize = () => window.innerWidth >= 960 && setOpenNav(false);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [stickyNavbar]);
 
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
+  const handleScroll = () => {
+    setStickyNavbar(window.pageYOffset > 600);
+  };
   //Notification
   const { socket } = useSocket(); // Access `socket` and `user` from context
   const [notifications, setNotifications] = useState([]);
@@ -161,7 +164,7 @@ export function StickyNavbar() {
   useEffect(() => {
     if (socket) {
       socket.on("getNotification", (data) => {
-        setNotifications((prev) => [data,...prev]);
+        setNotifications((prev) => [data, ...prev]);
       });
     }
   }, [socket])
@@ -179,16 +182,15 @@ export function StickyNavbar() {
     setNotifications([]);
     setOpen(false);
   }
-
   const handleCategoryClick = (category) => {
     setActiveCategory(category);
-    if (category === "Sách Nấu Ăn") {
+    if (category === "Cooking Books") {
       navigate("/book")
     }
-    if (category == "Công Thức Nấu Ăn") {
+    if (category == "Cooking Recipes") {
       navigate("/recipe")
     }
-    if (category == "Thư Viện Ebook") {
+    if (category == "E-Book Library") {
       navigate("/ebook")
     }
   };
@@ -215,7 +217,7 @@ export function StickyNavbar() {
     }
   };
   const dropdownRef = React.useRef(null); // Khởi tạo ref
-  //Sửa dropdowwn trên avater
+  //Sửa dropdowwn trên avatar
   const toggleDropdown = () => {
     setIsDropdownOpen(prevState => !prevState);
   };
@@ -231,287 +233,304 @@ export function StickyNavbar() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  const navItems = [
-    "home",
-    "pages",
-    "meals",
-    "recharge",
-    "faq",
-    "features"
-  ];
-
   return (
-    <Navbar
-      className={`sticky top-0 z-10 h-max max-w-full rounded-none border-0 px-4 transition-all duration-300 lg:px-4 ${isScrolled
-        ? "bg-transparent backdrop-blur-md"
-        : "bg-gradient-to-r from-indigo-700 to-blue-700"
-        }`}
-    >
-      <div className={`flex items-center justify-between ${isScrolled ? "text-black" : "text-white"} px-4`}>
-        <NavLink to="/">
-          <img
-            src="/images/LogoA.png"
-            alt="LogoA"
-            className="w-20 h-auto object-contain transition-transform duration-500 ease-in-out hover:scale-110"
-          />
-        </NavLink>
-
-        <div className="relative">
-          <Button
-            variant="text"
-            size="sm"
-            className="flex items-center gap-1 text-white hover:text-gray-300"
-            onMouseEnter={() => setShowDropdown(true)}
-          >
-            <Widgets className="w-5 h-5" />
-            <ArrowDropDown className="w-5 h-5" />
-          </Button>
-          {showDropdown && (
-            <div
-              className="absolute left-0 top-full mt-2 w-[1000px] bg-white text-black shadow-lg rounded-md p-6 z-50"
-              onMouseLeave={() => setShowDropdown(false)}
+    <>
+      <nav
+        className={`text-center z-50 w-full absolute ${stickyNavbar
+          ? 'font-expletus animate-fade-in-down sticky top-0 bg-gray-50 shadow-sm'
+          : ''
+          }`}
+      >
+        <div
+          className={`section-center flex items-center justify-between lg:justify-center lg:space-x-32 sticky text-center z-50 w-full ${stickyNavbar ? 'py-4' : ''
+            }`}
+        >
+          <ul className="nav-links-container">
+            <NavLinks links={leftLinks} setIsMenuOpen={setIsMenuOpen} />
+            <Button
+              variant="text"
+              title={"Categories"}
+              size="sm"
+              className="flex items-center gap-1 text-white hover:text-green-500"
+              onMouseEnter={() => setShowDropdown(true)}
             >
-              <div className="flex">
-                <div className="w-1/4 pr-6 border-r">
-                  <h2 className="font-semibold text-gray-800 mb-4 text-lg">Danh mục sản phẩm</h2>
-                  <ul className="space-y-3 text-gray-700 font-medium text-base">
-                    {Object.keys(categoriesContent).map((category) => (
-                      <li
-                        key={category}
-                        className={`hover:bg-gray-200 p-2 rounded cursor-pointer ${activeCategory === category ? "bg-gray-300" : ""
-                          }`}
-                        onMouseEnter={() => setActiveCategory(category)}
-                        onClick={() => handleCategoryClick(category)}
-                      >
-                        {category}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <Widgets />
+              <ArrowDropDown />
+            </Button>
+            {showDropdown && (
+              <div
+                className="absolute left-0 top-full mt-2 w-[1000px] bg-white text-black shadow-lg rounded-md p-6 z-50"
+                onMouseLeave={() => setShowDropdown(false)}
+              >
+                <div className="flex">
+                  <div className="w-1/4 pr-6 border-r">
+                    <h2 className="font-semibold text-gray-800 mb-4 text-lg">Product Catalog</h2>
+                    <ul className="space-y-3 text-gray-700 font-medium text-base">
+                      {Object.keys(categoriesContent).map((category) => (
+                        <li
+                          key={category}
+                          className={`hover:bg-gray-200 p-2 rounded cursor-pointer ${activeCategory === category ? "bg-gray-300" : ""
+                            }`}
+                          onMouseEnter={() => setActiveCategory(category)}
+                          onClick={() => handleCategoryClick(category)}
+                        >
+                          {category}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-                <div className="w-3/4 pl-6">
-                  <h2 className="text-red-600 font-semibold mb-4 text-lg">{activeCategory}</h2>
-                  {categoriesContent[activeCategory]}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="mr-4 hidden lg:block">
-            <ul className="mt-2 mb-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-              {navItems.map((item) => (
-                <Typography
-                  key={item}
-                  as="li"
-                  variant="small"
-                  className="p-1 font-medium tracking-wide"
-                >
-                  <NavLink
-                    to={`/${item === 'home' ? 'home' : item}`}
-                    className={({ isActive }) => `
-                      flex items-center justify-center px-4 py-2 transition-all
-                      ${isActive ? `${isScrolled ? 'text-black' : 'text-white'} font-semibold border-b-2 border-current` : `${isScrolled ? 'text-black' : 'text-gray-100'}`}
-                      hover:border-b-2 uppercase
-                    `}
-                  >
-                    {item.toUpperCase()}
-                  </NavLink>
-                </Typography>
-              ))}
-
-            </ul>
-          </div>
-          {accountonlineId && (
-            <div className="icons">
-              <div className="icon" onClick={() => setOpen((prev) => !prev)}>
-                <img src={Notification} alt="Notification Icon" />
-                {notifications.length > 0 && (
-                  <div className="counter">{notifications.length}</div>
-                )}
-              </div>
-              {open && (
-                <div className="notifications">
-                  {notifications.map((n) => displayNotification(n))}
-                  {dbnotifications
-                    .map((notification) => {
-                      const notificationDate = new Date(notification.date); // Chuyển chuỗi thành đối tượng Date
-                      const now = Date.now(); // Lấy thời gian hiện tại
-                      const differenceInMs = now - notificationDate.getTime(); // Hiệu thời gian
-                      const minutesPassed = Math.floor(differenceInMs / (1000 * 60)); // Chuyển đổi ms sang phút
-                      const hoursPassed = Math.floor(minutesPassed / 60); // Chuyển đổi phút sang giờ
-
-                      return { ...notification, minutesPassed, hoursPassed }; // Gắn thêm `hoursPassed` vào thông báo
-                    })
-                    .sort((a, b) => a.minutesPassed - b.minutesPassed) // Sắp xếp theo `hoursPassed` tăng dần
-                    .map((notification, index) => (
-                      <div key={index} className="notification-item" style={{ fontWeight: 300 }}>
-                        <div className="notification-content">{notification.content}</div>
-                        <div className="notification-time">
-                          {notification.hoursPassed >= 1
-                            ? `${notification.hoursPassed} giờ trước`  // Nếu trên 1 giờ
-                            : `${notification.minutesPassed} phút trước`} {/* Nếu dưới 1 giờ */}
-                        </div>
-                        <hr style={{ margin: "10px 0", borderColor: "black", borderStyle: "solid" }} />
-                      </div>
-                    ))}
-                  <button className="nButton" onClick={handleRead}>
-                    Mark as read
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-          <SearchWrapper />
-          {isLoggedIn ? (
-            <div
-              ref={dropdownRef}
-              className="relative"
-            >
-              <div onClick={toggleDropdown} className="flex items-center cursor-pointer">
-                <img
-                  src="https://via.placeholder.com/50" // Hình ảnh mặc định
-                  alt="User Avatar"
-                  className="w-12 h-12 object-cover rounded-full"
-                />
-                <span
-                  className={`${isScrolled ? "text-black" : "text-white"
-                    } ml-2 font-medium`}
-                >
-                  My Account
-                </span>
-              </div>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md text-black z-10">
-                  {userRole === 'Admin' && (
-                    <NavLink
-                      to="/admin-dashboard" // Change to your admin page
-                      className="block px-4 py-2 hover:bg-gray-200"
-                    >
-                      Admin Dashboard
-                    </NavLink>
-                  )}
-                  <NavLink
-                    to="/add-recipe"
-                    className="block px-4 py-2 hover:bg-gray-200"
-                  >
-                    Add a recipe
-                  </NavLink>
-                  <NavLink
-                    to="/update-account"
-                    className="block px-4 py-2 hover:bg-gray-200"
-                  >
-                    My Profile
-                  </NavLink>
-                  <div
-                    className="block px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                    onClick={handleLogout}
-                  >
-                    Logout
+                  <div className="w-3/4 pl-6">
+                    <h2 className="text-red-600 font-semibold mb-4 text-lg">{activeCategory}</h2>
+                    {categoriesContent[activeCategory]}
                   </div>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-x-1">
-              <Button
-                variant="text"
-                size="sm"
-                className={`hidden lg:inline-block ${isScrolled ? "text-black" : "text-white"}`}
-              >
-                <NavLink to="/login">Log In</NavLink>
-              </Button>
-              <Button
-                variant="gradient"
-                size="sm"
-                className={`hidden lg:inline-block ${isScrolled ? "bg-gray-300 text-white" : "bg-custom-gradient text-white"}`}
-              >
-                <NavLink to="/signup">Sign Up</NavLink>
-              </Button>
-            </div>
-          )}
-
-          <IconButton
-            variant="text"
-            className={`ml-auto h-6 w-6 ${isScrolled ? "text-black" : "text-gray-100"} hover:bg-gray-100 lg:hidden`}
-            ripple={false}
-            onClick={() => setOpenNav(!openNav)}
-            aria-label="Toggle navigation"
-          >
-            {openNav ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                className="h-6 w-6"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              </div>
             )}
-          </IconButton>
-        </div>
-      </div>
+          </ul>
+          {accountonlineId && (
+              <div className="icons">
+                <div className="icon" onClick={() => setOpen((prev) => !prev)}>
+                  <img src={Notification} alt="Notification Icon" />
+                  {notifications.length > 0 && (
+                    <div className="counter">{notifications.length}</div>
+                  )}
+                </div>
+                {open && (
+                  <div className="notifications">
+                    {notifications.map((n) => displayNotification(n))}
+                    {dbnotifications
+                      .map((notification) => {
+                        const notificationDate = new Date(notification.date); // Chuyển chuỗi thành đối tượng Date
+                        const now = Date.now(); // Lấy thời gian hiện tại
+                        const differenceInMs = now - notificationDate.getTime(); // Hiệu thời gian
+                        const minutesPassed = Math.floor(differenceInMs / (1000 * 60)); // Chuyển đổi ms sang phút
+                        const hoursPassed = Math.floor(minutesPassed / 60); // Chuyển đổi phút sang giờ
 
-      <Collapse open={openNav}>
-        <ul className="flex flex-col items-center gap-y-2">
-          {navItems.map((item) => (
-            <Typography key={item} as="li" variant="small">
-              <NavLink
-                to={`/${item === 'home' ? 'home' : item}`}
-                className={`flex justify-center text-lg font-medium ${isScrolled ? "text-black" : "text-white"}`}
+                        return { ...notification, minutesPassed, hoursPassed }; // Gắn thêm `hoursPassed` vào thông báo
+                      })
+                      .sort((a, b) => a.minutesPassed - b.minutesPassed) // Sắp xếp theo `hoursPassed` tăng dần
+                      .map((notification, index) => (
+                        <div key={index} className="notification-item" style={{ fontWeight: 300 }}>
+                          <div className="notification-content">{notification.content}</div>
+                          <div className="notification-time">
+                            {notification.hoursPassed >= 1
+                              ? `${notification.hoursPassed} giờ trước`  // Nếu trên 1 giờ
+                              : `${notification.minutesPassed} phút trước`} {/* Nếu dưới 1 giờ */}
+                          </div>
+                          <hr style={{ margin: "10px 0", borderColor: "black", borderStyle: "solid" }} />
+                        </div>
+                      ))}
+                    <button className="nButton" onClick={handleRead}>
+                      Mark as read
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          <Link
+            to="/"
+            aria-label="Recipe RMRBD"
+            title="Recipe RMRBD"
+            className="inline-flex items-center"
+          >
+            <img href="/" src={LogoA} className="object-contain h-24 w-27" alt="company logo" />
+          </Link>
+          <ul className="nav-links-container">
+            <SearchWrapper />
+            <NavLinks links={rightLinks} setIsMenuOpen={setIsMenuOpen} />
+            {isLoggedIn ? (
+              <div
+                ref={dropdownRef}
+                className="relative"
               >
-                {item.toUpperCase()}
-              </NavLink>
-            </Typography>
-          ))}
-        </ul>
-        <div className="flex items-center gap-x-1">
-          {isLoggedIn ? (
-            <>
-              <div className="w-full">
-                <NavLink to="/user-collection" className="block px-4 py-2">
-                  My Collection
-                </NavLink>
-                <NavLink to="/update-account" className="block px-4 py-2">
-                  Update Account
-                </NavLink>
+                <div onClick={toggleDropdown} className="flex items-center cursor-pointer">
+                  <img
+                    src="https://via.placeholder.com/50" // Hình ảnh mặc định
+                    alt="User Avatar"
+                    className="w-12 h-12 object-cover rounded-full"
+                  />
+                  <span
+                    className={`text-white ml-2 font-medium`}
+                  >
+                    My Account
+                  </span>
+                </div>
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md text-black z-10">
+                    {userRole === 'Admin' && (
+                      <NavLink
+                        to="/admin-dashboard" // Change to your admin page
+                        className="block px-4 py-2 hover:bg-gray-200"
+                      >
+                        Admin Dashboard
+                      </NavLink>
+                    )}
+                    <NavLink
+                      to="/add-recipe"
+                      className="block px-4 py-2 hover:bg-gray-200"
+                    >
+                      Add a recipe
+                    </NavLink>
+                    <NavLink
+                      to="/update-account"
+                      className="block px-4 py-2 hover:bg-gray-200"
+                    >
+                      My Profile
+                    </NavLink>
+                    <div
+                      className="block px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-x-1">
                 <Button
-                  fullWidth
-                  variant="text"
+                  variant="gradient"
                   size="sm"
-                  onClick={handleLogout}
+                  className={`hidden lg:inline-block bg-gray-300 text-white`}
                 >
-                  Logout
+                  <NavLink to="/login">Log In</NavLink>
                 </Button>
               </div>
-            </>
-          ) : (
-            <>
-              <Button fullWidth variant="text" size="sm">
-                <NavLink to="/login">Log in</NavLink>
-              </Button>
-              <Button fullWidth variant="gradient" size="sm">
-                <NavLink to="/signup">Sign up</NavLink>
-              </Button>
-            </>
-          )}
-        </div>
-      </Collapse>
-    </Navbar>
-  );
-}
+            )}
 
-export default StickyNavbar;
+            <IconButton
+              variant="text"
+              className={`ml-auto h-6 w-6 text-black hover:bg-gray-100 lg:hidden`}
+              ripple={false}
+              onClick={() => setOpenNav(!openNav)}
+              aria-label="Toggle navigation"
+            >
+              {openNav ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  className="h-6 w-6"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </IconButton>
+          </ul>
+          <div className="lg:hidden">
+            <button
+              aria-label="Open Menu"
+              title="Open Menu"
+              className="p-2 -mr-1 transition duration-200 rounded hover:scale-125"
+              onClick={() => setIsMenuOpen(true)}
+            >
+              <svg className="w-5 text-black sm:w-8w" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M23,13H1c-0.6,0-1-0.4-1-1s0.4-1,1-1h22c0.6,0,1,0.4,1,1S23.6,13,23,13z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M23,6H1C0.4,6,0,5.6,0,5s0.4-1,1-1h22c0.6,0,1,0.4,1,1S23.6,6,23,6z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M23,20H1c-0.6,0-1-0.4-1-1s0.4-1,1-1h22c0.6,0,1,0.4,1,1S23.6,20,23,20z"
+                />
+              </svg>
+            </button>
+            {isMenuOpen && (
+              <div className="animate-fade-in-down absolute top-0 left-0 w-full text-black bg-green-50 text-left p-5  border rounded shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <Link
+                      to="/"
+                      aria-label="Recipe RMRBD"
+                      title="Recipe RMRBD"
+                      className="inline-flex items-center"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <img
+                        src={LogoA}
+                        className="w-8 h8"
+                        alt="company logo"
+                      />
+                      <span className="company-name">Recipe RMRBD</span>
+                    </Link>
+                  </div>
+                  <div>
+                    <button
+                      aria-label="Close Menu"
+                      title="Close Menu"
+                      className="p-2 -mt-2 -mr-2 transition duration-200 rounded hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <svg className="w-5 text-gray-600" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M19.7,4.3c-0.4-0.4-1-0.4-1.4,0L12,10.6L5.7,4.3c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l6.3,6.3l-6.3,6.3 c-0.4,0.4-0.4,1,0,1.4C4.5,19.9,4.7,20,5,20s0.5-0.1,0.7-0.3l6.3-6.3l6.3,6.3c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3 c0.4-0.4,0.4-1,0-1.4L13.4,12l6.3-6.3C20.1,5.3,20.1,4.7,19.7,4.3z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <nav>
+                  <ul className="space-y-4">
+                    <NavLinks links={leftLinks} setIsMenuOpen={setIsMenuOpen} />
+                    <NavLinks
+                      links={rightLinks}
+                      setIsMenuOpen={setIsMenuOpen}
+                    />
+                    <div className="flex items-center gap-x-1">
+                      {isLoggedIn ? (
+                        <>
+                          <div className="w-full">
+                            <NavLink to="/user-collection" className="block px-4 py-2">
+                              My Collection
+                            </NavLink>
+                            <NavLink to="/update-account" className="block px-4 py-2">
+                              Update Account
+                            </NavLink>
+                            <Button
+                              fullWidth
+                              variant="text"
+                              size="sm"
+                              onClick={handleLogout}
+                            >
+                              Logout
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <Button fullWidth variant="text" size="sm">
+                            <NavLink to="/login">Log in</NavLink>
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </ul>
+                </nav>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+    </>
+  );
+};
+
+export default Navbar;

@@ -15,11 +15,14 @@ import Book from '../Pages/Book/Book';
 import BookDetail from '../Pages/Book/BookDetail';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
+import UpdateProfile from '../AccountProfile/AccountProfile';
+//Recharge
 import RechargePage from '../Pages/Recharge/Recharge'; 
 import CoinTransaction from "../Pages/Recharge/CoinTransaction";
+import TermsOfPurchase from '../Pages/Recharge/TermsOfPurchase';
 import PaymentSuccess from '../Pages/Recharge/PaymentSuccess'
 import PaymentFailed from '../Pages/Recharge/PaymentFailed'
-import UpdateProfile from '../AccountProfile/AccountProfile';
+
 //Admin
 import AdminDashboard from "../Admin/Dashboard";
 import AccountManagement from '../Admin/AccountManagement';
@@ -66,6 +69,7 @@ export default function RouterPage() {
             <Route path="/book/:bookId" element={<BookDetail />} />
             <Route path="/recharge" element={<RechargePage />} />
             <Route path="/coinTransaction" element={<CoinTransaction />} />
+            <Route path="/termsofpurchase" element={<TermsOfPurchase />} /> 
             <Route
               path="/add-recipe"
               element={

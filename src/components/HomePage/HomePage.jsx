@@ -2,7 +2,7 @@ import React, { useState } from "react";
 // import BackgroundImage from "/images/Background.jpg";
 import ImageFilter from "../Filter/ImageFilter";
 import Slide from '../Filter/Slide';
-import Menu from '../Menu/Menu';
+import Hero from './Hero'
 const HomePage = () => {
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -20,7 +20,7 @@ const HomePage = () => {
 
   return (
     <div className="w-full min-h-screen">
-      <Menu/>
+      <Hero />
       <div className='home-styled'>
         <Slide />
       </div>

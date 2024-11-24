@@ -29,6 +29,10 @@ const Breadcrumb = () => {
     book: "Sách Nấu Ăn",
     recipe: "Công Thức Nấu Ăn",
     ebook: "Thư Viện Ebook",
+    recharge: "Nạp Xu",
+    coinTransaction: "Lịch Sử Nạp Xu",
+    termsofpurchase: "Điều khoản và điều kiện mua tiền xu",
+    faq: "Frequently Asked Questions"
   };
   return (
     <>
