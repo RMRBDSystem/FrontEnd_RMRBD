@@ -212,6 +212,7 @@ const Navbar = () => {
       Cookies.remove("UserId");
       Cookies.remove("Coin");
       localStorage.removeItem("isLoggedIn");
+      navigate("/home");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -234,7 +235,6 @@ const Navbar = () => {
     };
   }, []);
   return (
-    <>
       <nav
         className={`text-center z-50 w-full absolute ${stickyNavbar
           ? 'font-expletus animate-fade-in-down sticky top-0 bg-gray-900 shadow-sm'
@@ -251,7 +251,7 @@ const Navbar = () => {
               variant="text"
               title={"Categories"}
               size="sm"
-              className="flex items-center gap-1 text-white hover:text-green-500"
+              className="flex items-center gap-1 text-gray-50 hover:text-green-500"
               onMouseEnter={() => setShowDropdown(true)}
             >
               <Widgets />
@@ -384,10 +384,20 @@ const Navbar = () => {
                         </NavLink>
                       </>
                     )}
+                    {userRole === "Moderator" && (
+                      <>
+                        <NavLink
+                          to="/update-role"
+                          className="block px-4 py-2 hover:bg-gray-200"
+                        >
+                          Account moderate
+                        </NavLink>
+                      </>
+                    )}
                     {userRole === "Seller" && (
                       <>
                         <NavLink
-                          to="/recipecustomer-list"
+                          to="/recipe-customer-list"
                           className="block px-4 py-2 hover:bg-gray-200"
                         >
                           Seller Recipe
@@ -526,7 +536,7 @@ const Navbar = () => {
                       {isLoggedIn ? (
                         <>
                           <div className="w-full">
-                            <NavLink to="/user-collection" className="block px-4 py-2">
+                            <NavLink to="/list-saved-recipe" className="block px-4 py-2">
                               My Collection
                             </NavLink>
                             <NavLink to="/update-account" className="block px-4 py-2">
@@ -557,7 +567,6 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
-    </>
   );
 };
 

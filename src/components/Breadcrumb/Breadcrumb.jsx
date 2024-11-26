@@ -2,20 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const Breadcrumb = () => {
-  const images = [
-    "https://img.freepik.com/free-photo/abstract-blur-food-truck_1339-3329.jpg?t=st=1732461895~exp=1732465495~hmac=1baff3b4de2fad1239375e3ffa3d9e7a75db87620f7338cbed21b005b6667b7f&w=1800",
-    "https://st2.depositphotos.com/3542901/8137/i/450/depositphotos_81373660-stock-photo-blur-image-restaurant-food-center.jpg",
-    "https://www.shutterstock.com/image-photo/abstract-blur-bokeh-japanese-food-260nw-638993827.jpg"
-  ];
 
-  // State để lưu trữ URL của hình nền ngẫu nhiên
-  const [backgroundImage, setBackgroundImage] = useState("");
-
-  // Hàm chọn ngẫu nhiên hình ảnh từ mảng
-  useEffect(() => {
-    const randomImage = images[Math.floor(Math.random() * images.length)];
-    setBackgroundImage(randomImage);
-  }, []);
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
@@ -35,19 +22,13 @@ const Breadcrumb = () => {
     faq: "Frequently Asked Questions"
   };
   return (
-    <>
-      <header
-        className="flex justify-center items-center h-44 bg-cover bg-center"
-        style={{ backgroundImage: `url('${backgroundImage}')` }}
-      >
-      </header>
-      <nav className="flex justify-center items-center w-full lg:w-1/2 p-4 bg-" aria-label="Breadcrumb">
-        <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+      <nav className="min-h-52 flex items-end w-full p-4 bg-gray-900">
+        <ol className="pl-96 inline-flex space-x-1 md:space-x-2 rtl:space-x-reverse">
           {/* Link đầu tiên luôn là Home */}
           <li className="inline-flex items-center">
             <Link
-              to="/home"
-              className="inline-flex items-center text-sm font-medium text-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
+              to="/"
+              className="inline-flex items-center text-sm font-medium text-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
             >
               <svg
                 className="w-3 h-3 me-2.5"
@@ -106,7 +87,6 @@ const Breadcrumb = () => {
           })}
         </ol>
       </nav>
-    </>
   );
 };
 

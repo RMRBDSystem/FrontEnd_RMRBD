@@ -8,11 +8,10 @@ html {
     margin    : 0;
     padding   : 0;
     box-sizing: border-box;
-    --primary-color: #012138;
-    --secondary-color: #f9f9f9;
-    --gradient-color: #024d83;
+    --primary-color: #000000;
+    --secondary-color: #ffffff;
+    --gradient-color: #ffffff;
     --light-color: #fff;
-    --main-font: "Poppins", arial, helvetica, sans-serif;
     --title-font: "Countryside", sans-serif;
     --layout-max-width: 1350px;
 }
@@ -20,11 +19,11 @@ html {
 body {
     font-size  : 16px;
     margin     : 0;
-    font-family: var(--main-font);
-    background :
-        radial-gradient(ellipse farthest-corner at center top,
-            var(--gradient-color) 0%,
-            var(--primary-color) 100%);
+    // background :
+    //     radial-gradient(ellipse farthest-corner at center center,
+    //         var(--gradient-color) 80%,
+    //         var(--primary-color) 100%);
+    background : var(--secondary-color);
     min-height: 100vh;
 }
 

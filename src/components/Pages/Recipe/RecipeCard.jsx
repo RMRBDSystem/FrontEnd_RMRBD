@@ -32,7 +32,12 @@ function RecipeCard({ recipe }) {
     }, [accountId]);
 
     const handleCardClick = () => {
-        navigate(`/recipe/${recipe.recipeId}`);
+
+        if (purchasedRecipes.has(recipe.recipeId)) {
+            navigate(`/recipe/${recipe.recipeId}`);
+        } else {
+            alert("Bạn cần mua công thức này để xem chi tiết.");
+        }
     };
 
     const getAccountInfo = async () => {
@@ -56,7 +61,7 @@ function RecipeCard({ recipe }) {
     const getPurchasedRecipes = async () => {
         try {
             const result = await axios.get(
-                `https://rmrbdapi.somee.com/odata/PersonalRecipe?customerId=${accountId}`,
+                `https://rmrbdapi.somee.com/odata/PersonalRecipe/${accountId}`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -72,6 +77,11 @@ function RecipeCard({ recipe }) {
     };
 
     const handleBuy = async () => {
+        if (!accountId) {
+            navigate("/login");
+            return;
+        }
+
         if (purchasedRecipes.has(recipe.recipeId)) {
             alert("You have already purchased this recipe.");
             return;
@@ -250,15 +260,24 @@ function RecipeCard({ recipe }) {
 
                 {/* Buttons */}
                 <div className="flex justify-center">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation(); // Prevent card click from firing
-                            handleBuy(); // Handle buying recipe
-                        }}
-                        className="text-white bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 px-6 py-2 rounded font-semibold hover:scale-105 transform transition shadow-lg"
-                    >
-                        Mua
-                    </button>
+                    {purchasedRecipes.has(recipe.recipeId) ? (
+                        <button
+                            disabled
+                            className="text-gray-400 bg-gray-200 px-6 py-2 rounded font-semibold cursor-not-allowed"
+                        >
+                            Đã mua
+                        </button>
+                    ) : (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevent card click from firing
+                                handleBuy(); // Handle buying recipe
+                            }}
+                            className="text-white bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 px-6 py-2 rounded font-semibold hover:scale-105 transform transition shadow-lg"
+                        >
+                            Mua
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

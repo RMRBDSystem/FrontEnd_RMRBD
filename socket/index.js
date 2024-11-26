@@ -7,7 +7,7 @@ const io = new Server(httpServer, {
         methods: ["GET", "POST"], // Ensure CORS methods are allowed
     },
 });
-const PORT = process.env.PORT; // Lấy cổng từ môi trường, nếu không có sẽ dùng cổng 3000
+const PORT = process.env.PORT || 3000; // Lấy cổng từ môi trường, nếu không có sẽ dùng cổng 3000
 
 
 let databaseUsers = [];

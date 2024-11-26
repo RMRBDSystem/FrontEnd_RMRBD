@@ -5,6 +5,7 @@ import { updateAccountCoin } from '../../services/PaymentSuccess.js';
 const Success = () => {
   const [userId, setUserId] = useState('');
   const [coin, setCoin] = useState('');
+  const [price, setPrice] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,12 +18,19 @@ const Success = () => {
     if (storedCoin) {
       setCoin(storedCoin);
     }
+
+    const storedPrice = localStorage.getItem('Price');
+    if (storedPrice) {
+      setPrice(storedPrice);
+    }
   }, []);
 
   useEffect(() => {
     if (userId && coin) {
-      updateAccountCoin(userId, coin); // Call the imported function
+      updateAccountCoin(userId, coin, price); // Call the imported function
       Cookies.remove("Coin");
+      localStorage.removeItem("Coin");
+      localStorage.removeItem("Price");
       setLoading(false);
     }
   }, [userId, coin]);

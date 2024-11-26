@@ -1,5 +1,5 @@
 export const leftLinks = [
-  { href: "/home", title: "Home" },
+  { href: "/", title: "Home" },
   { href: "/recharge", title: "Recharge" },
 ];
 export const rightLinks = [

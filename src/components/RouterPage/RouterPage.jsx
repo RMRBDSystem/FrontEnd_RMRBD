@@ -6,14 +6,15 @@ import { AuthProvider } from "./AuthContext";
 //Page
 import Login from "../LoginPage/LoginPage";
 import HomePage from "../HomePage/HomePage";
-import Landing from "../LandingPage/Landing";
 import FAQPage from "../Pages/FAQ";
 //Customer
 import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import AddEbookPageForCustomer from "../AddItems/EbookCustomer";
 import Book from '../Pages/Book/Book';
 import BookDetail from '../Pages/Book/BookDetail';
+//import Addbook from '../Pages/Add Items/AddBook';
 import Recipe from "../Pages/Recipe/Recipe";
+import Checkout from "../Cart/Checkout";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
 import UpdateProfile from '../AccountProfile/AccountProfile';
 import EditRecipeForCustomer from "../Pages/Recipe/EditSavedRecipe";
@@ -51,7 +52,6 @@ export default function RouterPage() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Landing />} /> {/* Trang Landing không có Navbar và Footer */}
           <Route path="/login" element={<Login />} />
           <Route path="/admin/account-management" element={<AccountManagement />} />
           <Route path="/admin/income-management" element={<IncomeManagement />} />
@@ -59,11 +59,12 @@ export default function RouterPage() {
           <Route path="/admin/category-management" element={<CategoryManagement />} />
           <Route path="/admin/recipemanagement" element={<RecipeManagement />} />
           <Route path="/adminrecipe" element={<AdminRecipe />} />
+
           <Route path="/admincreaterecipe" element={<AdminCreateRecipe />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
           <Route path="/admin/ebooktest" element={<EBookTest />} />
-          <Route path="/admin//feedback" element={<Feedback />} />
+          <Route path="/admin/feedback" element={<Feedback />} />
           <Route path="/pdf-protect" element={<PDFProtect />} />
           <Route
             path="/admin-dashboard"
@@ -73,14 +74,8 @@ export default function RouterPage() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/recipecustomer-list"
-            element={
-              <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                <RecipeListCustomer />
-              </ProtectedRoute>
-            }
-          />
+
+
           <Route
             path="/edit-recipe/:id"
             element={
@@ -94,21 +89,20 @@ export default function RouterPage() {
             <Route path="/recipe-customer-detail/:recipeId" element={<RecipeCustomerDetail />} />
             <Route path="/update-account" element={<UpdateProfile />} />
             <Route path="/update-role" element={<UpdateRole />} />
-            <Route path="/home" element={<HomePage />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/recipe" element={<Recipe />} />
             <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
             <Route path="/book" element={<Book />} />
             <Route path="/book/:bookId" element={<BookDetail />} />
-            <Route path="/recharge" element={<RechargePage />} />
             <Route path="/coinTransaction" element={<CoinTransaction />} />
             <Route path="/termsofpurchase" element={<TermsOfPurchase />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/edit-recipe" element={<EditRecipe />} />
             <Route path="/recipe-customer" element={<RecipeCustomer />} />
             <Route path="/recipe-customer-detail" element={<RecipeCustomerDetail />} />
             <Route path="/recipe-list-customer" element={<RecipeListCustomer />} />
-            <Route path="/list-saved-recipe" element={<GetListSaveRecipe />} />
             <Route path="/editrecipecustomer-recipe/:recipeId" element={<EditRecipeForCustomer />} />
             <Route
               path="/recipecustomer-list"
@@ -119,10 +113,18 @@ export default function RouterPage() {
               }
             />
             <Route
-              path="/edit-recipe/:id"
+              path="/list-saved-recipe"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <EditRecipe />
+                  <GetListSaveRecipe />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recharge"
+              element={
+                <ProtectedRoute allowedRoles={["Customer", "Seller"]}>
+                  <RechargePage />
                 </ProtectedRoute>
               }
             />
@@ -131,6 +133,22 @@ export default function RouterPage() {
               element={
                 <ProtectedRoute allowedRoles={["Admin", "Moderator", "Customer"]}>
                   <AddRecipePageForCustomer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/update-role"
+              element={
+                <ProtectedRoute allowedRoles={["Moderator"]}>
+                  <UpdateRole />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recipe-customer-list"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <RecipeListCustomer />
                 </ProtectedRoute>
               }
             />

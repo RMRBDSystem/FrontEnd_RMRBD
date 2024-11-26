@@ -24,9 +24,9 @@ const CoinTransaction = () => {
         <FaArrowLeft
           className="min-w-[24px] h-[24px] text-gray-600 mr-2 cursor-pointer hover:text-gray-900"
           onClick={handleGoBack}></FaArrowLeft>
-        <h2 className="text-2xl font-medium">Transactions history</h2>
+        <h2 className="text-2xl font-medium">Lịch sử giao dịch</h2>
       </div>
-      <span className="ml-2 text-gray-600 mb-6">This page only shows the transaction history of your Coins purchased through TikTok.com. <a href="/termsofpurchase" className="text-blue-500 hover:underline">View Terms of Purchase for Coins</a></span>
+      <span className="ml-2 text-gray-600 mb-6">Trang này chỉ hiển thị lịch sử giao dịch qua phương thức PayOS. <a href="/termsofpurchase" className="text-blue-500 hover:underline">Xem điều khoảng</a></span>
       <div className="grid gap-6">
         {transactions.length > 0 ? (
           transactions.map((transaction, index) => (
@@ -35,38 +35,45 @@ const CoinTransaction = () => {
               className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow"
             >
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Transaction #{index + 1}
+                Ngày giao dịch: {new Intl.DateTimeFormat('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false,
+                }).format(new Date(transaction.date))}
               </h3>
               <ul className="text-sm text-gray-600 space-y-2">
                 <li className="flex items-center">
                   <FaExchangeAlt className="mr-2 text-blue-500" />
-                  <span>Coin Transaction ID: {transaction.coinTransactionId}</span>
+                  <span>Mã giao dịch: {transaction.coinTransactionId}</span>
                 </li>
                 <li className="flex items-center">
                   <FaExchangeAlt className="mr-2 text-blue-500" />
-                  <span>Customer ID: {transaction.customerId}</span>
+                  <span>Biến động tiền: {transaction.moneyFluctuations}</span>
                 </li>
                 <li className="flex items-center">
                   <FaExchangeAlt className="mr-2 text-blue-500" />
-                  <span>Money Fluctuations: {transaction.moneyFluctuations}</span>
+                  <span>Biến động xu: {transaction.coinFluctuations}</span>
                 </li>
                 <li className="flex items-center">
                   <FaExchangeAlt className="mr-2 text-blue-500" />
-                  <span>Coin Fluctuations: {transaction.coinFluctuations}</span>
+                  <span>Chi tiết giao dịch: {transaction.detail}</span>
                 </li>
                 <li className="flex items-center">
-                  <FaCalendarAlt className="mr-2 text-green-500" />
-                  <span>Date: {transaction.date}</span>
-                </li>
-                <li className="flex items-center">
-                      <FaCheckCircle className="mr-2 text-green-500" />
-                      <span className="text-green-600">Status: {transaction.status}</span>
+                  {transaction.status === 1 ? (
+                    <FaCheckCircle className="mr-2 text-green-500" />
+                  ) : (
+                    <FaTimesCircle className="mr-2 text-red-500" />
+                  )}
                 </li>
               </ul>
             </div>
           ))
         ) : (
-          <p className="text-gray-500">No transactions found.</p>
+          <p className="text-gray-500">Không có lịch sử giao dịch.</p>
         )}
       </div>
     </div>
