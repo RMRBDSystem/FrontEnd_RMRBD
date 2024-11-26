@@ -11,8 +11,7 @@ body {
 /* Thanh cuộn tùy chỉnh áp dụng cho toàn bộ body */
 body::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  background-color  : #727272;
-  border-radius     : 10px;
+  background-color  : #000000;
 }
 
 body::-webkit-scrollbar {
@@ -21,18 +20,17 @@ body::-webkit-scrollbar {
 }
 
 body::-webkit-scrollbar-thumb {
-  border-radius: 12px;
   background-image: -webkit-gradient(linear,
       left bottom,
       left top,
-      color-stop(0.44, rgb(0, 4, 255)),
-      color-stop(0.72, rgb(0, 132, 255)),
-      color-stop(0.86, rgb(110, 238, 255)));
+      color-stop(0.44, rgb(156, 156, 156)),
+      color-stop(0.72, rgb(156, 156, 156)),
+      color-stop(0.86, rgb(156, 156, 156)));
 }
 
 @layer components {
   .section {
-    @apply py-24 px-0;
+    @apply py-20 px-0;
   }
 
   .section-center {
@@ -53,5 +51,8 @@ body::-webkit-scrollbar-thumb {
 
   .section-title {
     @apply text-center mb-10 text-4xl uppercase font-extrabold;
+  }
+  .underline {
+    @apply w-20 h-1 mt-4 mx-auto;
   }
 }

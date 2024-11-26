@@ -22,8 +22,8 @@ const Breadcrumb = () => {
     faq: "Frequently Asked Questions"
   };
   return (
-      <nav className="min-h-52 flex items-end w-full p-4 bg-gray-900">
-        <ol className="pl-96 inline-flex space-x-1 md:space-x-2 rtl:space-x-reverse">
+      <nav className="min-h-40 flex items-end w-full p-4 bg-gray-900">
+        <ol className="pl-40 inline-flex space-x-1 md:space-x-2 rtl:space-x-reverse">
           {/* Link đầu tiên luôn là Home */}
           <li className="inline-flex items-center">
             <Link

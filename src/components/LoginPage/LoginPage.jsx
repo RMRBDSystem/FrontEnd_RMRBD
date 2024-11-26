@@ -49,7 +49,7 @@ const Login = () => {
       // case "Seller":
       //   return "/homepageDashboard";
       default:
-        return "/home";
+        return "/";
     }
   };
 

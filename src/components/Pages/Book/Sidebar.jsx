@@ -66,13 +66,13 @@ function Sidebar({ onFilterChange }) {
 
   return (
     <div className="p-4 rounded-lg shadow-md">
-      <h2 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-green-300 to-blue-500 text-lg mb-6">
+      <h2 className="font-bold bg-clip-text text-lg mb-6">
         Nhóm Sản Phẩm
       </h2>
 
       {/* Loại Sách */}
       <div className="mb-6">
-        <label className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-green-300 to-blue-500 mb-5">
+        <label className="inline-block font-bold bg-clip-text mb-5">
           Loại Sách
         </label>
         <ul className="space-y-3">
@@ -87,13 +87,13 @@ function Sidebar({ onFilterChange }) {
                   handleFilterChange("categories", category.categoryId)
                 }
               />
-              <span className="text-gray-300">{category.name}</span>
+              <span className="text-gray-600">{category.name}</span>
             </li>
           ))}
         </ul>
         {/* Nút Bỏ chọn */}
         <button
-          className="mt-4 px-4 py-2 text-sm font-medium text-black bg-gradient-to-r from-yellow-500 via-red-300 to-blue-500 rounded"
+          className="mt-4 px-4 py-2 text-sm font-medium text-white bg-red-400 rounded"
           onClick={clearCategoryFilter}
         >
           Clear Selection
@@ -102,7 +102,7 @@ function Sidebar({ onFilterChange }) {
 
       {/* Giá */}
       <div className="mb-6">
-        <label className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-green-300 to-blue-500 mb-5">
+        <label className="inline-block font-bold mb-5">
           Giá
         </label>
         <ul className="space-y-3">
@@ -119,7 +119,7 @@ function Sidebar({ onFilterChange }) {
                   handleFilterChange("priceRanges", priceRange.value)
                 }
               />
-              <span className="text-gray-300">{priceRange.label}</span>
+              <span className="text-gray-600">{priceRange.label}</span>
             </li>
           ))}
         </ul>
@@ -127,7 +127,7 @@ function Sidebar({ onFilterChange }) {
 
       {/* Đánh Giá */}
       <div className="mb-6">
-        <label className="inline-block font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-green-300 to-blue-500 mb-5">
+        <label className="inline-block font-bold mb-5">
           Đánh Giá
         </label>
         <ul className="space-y-3">
@@ -138,7 +138,7 @@ function Sidebar({ onFilterChange }) {
                 className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
                 onChange={() => handleFilterChange("ratings", rating)}
               />
-              <span className="text-gray-300">{rating} sao</span>
+              <span className="text-gray-600">{rating} sao</span>
             </li>
           ))}
         </ul>

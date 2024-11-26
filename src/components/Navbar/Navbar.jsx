@@ -212,7 +212,7 @@ const Navbar = () => {
       Cookies.remove("UserId");
       Cookies.remove("Coin");
       localStorage.removeItem("isLoggedIn");
-      navigate("/home");
+      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -334,7 +334,7 @@ const Navbar = () => {
             title="Recipe RMRBD"
             className="inline-flex items-center"
           >
-            <img href="/" src={LogoA} className="object-contain h-24 w-27" alt="company logo" />
+            <img href="/" src={LogoA} className="object-contain h-16 w-18" alt="company logo" />
           </Link>
           <ul className="nav-links-container">
             <SearchWrapper />
@@ -503,7 +503,7 @@ const Navbar = () => {
                     >
                       <img
                         src={LogoA}
-                        className="w-8 h8"
+                        className="w-5 h-5"
                         alt="company logo"
                       />
                       <span className="company-name">Recipe RMRBD</span>

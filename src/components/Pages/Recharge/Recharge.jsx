@@ -116,141 +116,140 @@ const RechargePage = () => {
 
   return (
     <section className='section'>
-    <div className="max-w-[1140px] mx-auto p-6 bg-white rounded-lg shadow-md mb-10">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Nạp xu</h2>
-
-      {/* Thông tin người dùng */}
-      <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg mb-4">
-        <div className="flex items-center">
-          <img
-            src="/images/avatar.png"
-            alt="User avatar"
-            className="w-10 h-10 rounded-full mr-3"
-          />
-          <div>
-            <p className="font-bold text-gray-800">{userName}</p>
-            <p className="text-sm text-gray-500">&#11088;{coin}</p>
+      <div className="max-w-[1140px] mx-auto p-6 bg-white rounded-lg shadow-lg mb-10">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Nhận Xu</h2>
+        {/* Thông tin người dùng */}
+        <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg mb-4">
+          <div className="flex items-center">
+            <img
+              src="/images/avatar.png"
+              alt="User avatar"
+              className="w-10 h-10 rounded-full mr-3"
+            />
+            <div>
+              <p className="font-bold text-gray-800">{userName}</p>
+              <p className="text-sm text-gray-500">&#11088;{coin}</p>
+            </div>
           </div>
+          <a href="/coinTransaction" className="text-gray-900 font-bold cursor-pointer">
+            Lịch sử giao dịch
+          </a>
         </div>
-        <a href="/coinTransaction" className="text-gray-900 font-bold cursor-pointer">
-          Lịch sử giao dịch
-        </a>
-      </div>
 
-      {/* Thông báo khuyến mãi */}
-      <div className="max-w-[450px] bg-yellow-100 p-2 rounded-md mb-4">
-        <p className="font-semibold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-red-500">Tiết kiệm 15% khi nạp trên 10000 xu.</span></span>
-      </div>
-      {/* Lựa chọn số xu */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {coinOptions.map((option, index) => (
+        {/* Thông báo khuyến mãi */}
+        <div className="max-w-[450px] bg-yellow-100 p-2 rounded-md mb-4">
+          <p className="font-bold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-red-500">Tiết kiệm 15% khi nạp trên 10000 xu.</span></span>
+        </div>
+        {/* Lựa chọn số xu */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          {coinOptions.map((option, index) => (
+            <div
+              key={index}
+              className={`p-3 rounded-sm shadow-sm flex flex-col justify-between ${selectedOption === option.coins ? 'border-3 border-yellow-500' : 'border'
+                } cursor-pointer`}
+              onClick={() => handleSelect(option)}
+            >
+              <div className="font-bold text-gray-900 text-xl text-center mb-1">&#11088; {option.coins}</div>
+              <div className="text-gray-600 text-sm text-center">
+                {typeof option.price === 'number' ? `₫${option.price.toLocaleString()}` : option.price}
+              </div>
+            </div>
+          ))}
+
+          {/* Tùy chọn Custom */}
           <div
-            key={index}
-            className={`p-3 rounded-sm shadow-sm flex flex-col justify-between ${selectedOption === option.coins ? 'border-3 border-yellow-500' : 'border'
-              } cursor-pointer`}
-            onClick={() => handleSelect(option)}
+            className="p-3 rounded-sm shadow-sm cursor-pointer border-3"
+            onClick={handleOpenCustomModal}
           >
-            <div className="font-semibold text-gray-900 text-xl text-center mb-1">&#11088; {option.coins}</div>
-            <div className="text-gray-600 text-sm text-center">
-              {typeof option.price === 'number' ? `₫${option.price.toLocaleString()}` : option.price}
-            </div>
+            <div className="font-semibold text-2xl mb-1 text-center">&#11088; Tùy chỉnh</div>
+            <div className="text-gray-600 font-bold text-sm">Khuyến mãi nạp trên 10000 xu</div>
           </div>
-        ))}
+        </div>
 
-        {/* Tùy chọn Custom */}
-        <div
-          className="p-3 rounded-sm shadow-sm cursor-pointer border-3"
-          onClick={handleOpenCustomModal}
+        {/* Chọn phương thức thanh toán */}
+        <div className="mb-4">
+          <div className="font-bold">
+            <label>
+              Phương thức thanh toán
+              <img
+                src="/images/payos_crop.png"
+                alt="PayOS icon"
+                className="inline w-14 h-4 ml-4"
+              />
+              <img
+                src="/images/VietQR.png"
+                alt="VietQR icon"
+                className="inline w-14 h-5 ml-1"
+              />
+              <img
+                src="/images/Napas247.png"
+                alt="Napas247 icon"
+                className="inline w-14 h-7 ml-1"
+              />
+            </label>
+
+          </div>
+        </div>
+
+        {/* Tổng tiền */}
+        <div className="flex justify-start mb-4">
+          <p className="text-lg font-medium text-gray-900 mr-4">Tổng tiền</p>
+          <p className="text-xl font-bold text-gray-900">{total ? `₫${total.toLocaleString()}` : '₫0'}</p>
+        </div>
+
+        {/* Nút Recharge */}
+        <button
+          id="create-payment-link-btn"
+          onClick={(event) => {
+            event.preventDefault();
+            handleGetPaymentLink(selectedOption, userId, total);
+          }}
+          className="min-w-[200px] py-3 bg-red-500 text-white font-bold rounded-lg hover:bg-red-900 transition cursor-pointer"
+          disabled={!total || !paymentMethod}
         >
-          <div className="font-bold text-2xl mb-1">&#11088; Tùy chỉnh</div>
-          <div className="text-gray-600 font-bold text-sm">Khuyến mãi nạp trên 10000 xu</div>
-        </div>
-      </div>
+          Thanh toán
+        </button>
 
-      {/* Chọn phương thức thanh toán */}
-      <div className="mb-4">
-        <div className="font-bold">
-          <label>
-            Phương thức thanh toán
-            <img
-              src="/images/payos_crop.png"
-              alt="PayOS icon"
-              className="inline w-30 h-4 ml-4"
-            />
-            <img
-              src="/images/VietQR.png"
-              alt="VietQR icon"
-              className="inline w-30 h-5 ml-1"
-            />
-            <img
-              src="/images/Napas247.png"
-              alt="Napas247 icon"
-              className="inline w-30 h-7 ml-1"
-            />
-          </label>
-
-        </div>
-      </div>
-
-      {/* Tổng tiền */}
-      <div className="flex justify-start mb-4">
-        <p className="text-lg font-medium text-gray-900 mr-4">Tổng tiền</p>
-        <p className="text-xl font-bold text-gray-900">{total ? `₫${total.toLocaleString()}` : '₫0'}</p>
-      </div>
-
-      {/* Nút Recharge */}
-      <button
-        id="create-payment-link-btn"
-        onClick={(event) => {
-          event.preventDefault();
-          handleGetPaymentLink(selectedOption, userId, total);
-        }}
-        className="min-w-[200px] py-3 bg-red-500 text-white font-bold rounded-lg hover:bg-red-900 transition"
-        disabled={!total || !paymentMethod}
-      >
-        Thanh toán
-      </button>
-
-      {/* Modal Custom */}
-      {isCustomModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Nhâp số xu muốn nạp</h3>
-            <input
-              type="text"
-              value={customCoins}
-              onChange={handleCustomCoinInput}
-              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-              placeholder="Nhập số lượng xu..."
-            />
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-lg font-medium text-gray-800">Tổng tiền</p>
-              <p className="text-lg font-medium text-gray-800">{`₫${total.toLocaleString()}`}</p>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={handleCloseCustomModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition"
-              >
-                Hủy
-              </button>
-              <button
-                id="create-payment-link-btn"
-                onClick={(event) => {
-                  event.preventDefault();
-                  handleGetPaymentLink(customCoins, userId, total);
-                }}
-                className="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
-                disabled={!total || !paymentMethod || isLoading}
-              >
-                {isLoading ? "Waiting..." : "Recharge"}
-              </button>
+        {/* Modal Custom */}
+        {isCustomModalOpen && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Nhâp số xu muốn nạp</h3>
+              <input
+                type="text"
+                value={customCoins}
+                onChange={handleCustomCoinInput}
+                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                placeholder="Nhập số lượng xu..."
+              />
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-lg font-medium text-gray-800">Tổng tiền</p>
+                <p className="text-lg font-medium text-gray-800">{`₫${total.toLocaleString()}`}</p>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={handleCloseCustomModal}
+                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  id="create-payment-link-btn"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    handleGetPaymentLink(customCoins, userId, total);
+                  }}
+                  className="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
+                  disabled={!total || !paymentMethod || isLoading}
+                >
+                  {isLoading ? "Waiting..." : "Recharge"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-    </section>
+        )}
+      </div>
+      </section>
   );
 };
 

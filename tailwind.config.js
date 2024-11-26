@@ -20,9 +20,6 @@ export default withMT({
         'gradient-start': '#1E3A8A', // Màu bắt đầu (xanh dương)
         'gradient-end': '#6B21A8', // Màu kết thúc (tím)
       },
-      fontFamily: {
-        'sans': '"Proxima Nova", system-ui, sans-serif',
-      },
       keyframes: {
         'fade-in-down': {
           '0%': {

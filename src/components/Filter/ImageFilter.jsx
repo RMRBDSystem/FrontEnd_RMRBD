@@ -54,8 +54,8 @@ const ImageFilter = () => {
   };
 
   return (
-    <section className="w-full flex flex-col gap-12 py-16 lg:px-16 md:px-10 px-5">
-      <div className="flex w-full md:justify-center items-start md:gap-6 gap-3 flex-wrap">
+    <section className="bg-gray-900 w-full flex flex-col py-5">
+      <div className="section-center flex w-full items-start md:justify-center md:gap-6 gap-3 flex-wrap items-start">
         {buttonCaptions.map((filter) => (
           <Button
             key={filter}
@@ -83,7 +83,7 @@ const ImageFilter = () => {
                 alt={item.name}
                 objectCover="object-cover"
               />
-              <div className="p-5">
+              <div className="p-3">
                 <Text
                   as="h5"
                   className="mb-2 text-2xl font-bold tracking-tight text-white"
