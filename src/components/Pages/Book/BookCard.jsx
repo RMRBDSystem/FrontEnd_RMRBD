@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
@@ -9,62 +9,92 @@ function BookCard({ book }) {
   const navigate = useNavigate();
   const maxStars = 5;
   const filledStars = Math.round(book.bookRate || 0);
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
+
+  const handleAddToCart = () => {
+    setIsAddedToCart(true);
+  };
+
+  const handleRemoveFromCart = () => {
+    setIsAddedToCart(false);
+  };
 
   const handleCardClick = () => {
     navigate(`/book/${book.bookId}`);
   };
 
   return (
-    <div
-      className="block p-px bg-gradient-to-br from-blueGray-800 via-blueGray-800 to-blueGray-800 hover:from-yellow-500 hover:via-green-400 hover:to-blue-500 cursor-pointer rounded-lg"
-      onClick={handleCardClick}
-    >
-      <div className="p-5 rounded-lg shadow-md">
-        {/* Book Image */}
-        <img
-          src={
-            book.images && book.images.length > 0
-              ? book.images[0].imageUrl
-              : "https://via.placeholder.com/150?text=No+Image" // URL ảnh mặc định
-          }
-          alt={book.bookName}
-          className="block w-full h-60 mb-4 object-cover object-center rounded-lg"
-        />
+    <div className="book">
+      <div className="book-container">
+        {/* Book Cover */}
+        <div
+          className="top"
+          style={{
+            backgroundImage: `url(${
+              book.images && book.images.length > 0
+                ? book.images[0].imageUrl
+                : "https://via.placeholder.com/150?text=No+Image"
+            })`,
+          }}
+          onClick={handleCardClick}
+        ></div>
 
-        {/* Book Title */}
-        <h3 className="font-bold text-white text-lg text-center mb-2">
-          {book.bookName}
-        </h3>
-
-        {/* Book Price */}
-        <div className="text-center text-gray-300 text-lg font-semibold mb-4">
-          <span className="text-yellow-400">{book.price.toLocaleString()} đ</span>
+        {/* Book Info */}
+        <div className={`bottom ${isAddedToCart ? "clicked" : ""}`}>
+          <div className="left">
+            <div className="details">
+              <h1>{book.bookName}</h1>
+              <p>{book.price.toLocaleString()} đ</p>
+            </div>
+            <div className="buy cursor-pointer" onClick={handleAddToCart}>
+              <i className="material-icons">add_shopping_cart</i>
+            </div>
+          </div>
+          <div className="right">
+            <div className="done">
+              <i className="material-icons">done</i>
+            </div>
+            <div className="details">
+              <h1>{book.bookName}</h1>
+              <p>Đã thêm vào giỏ hàng</p>
+            </div>
+            <div className="remove cursor-pointer" onClick={handleRemoveFromCart}>
+              <i className="material-icons">clear</i>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Book Rating */}
-        <div className="flex justify-center items-center mb-3">
-          {[...Array(maxStars)].map((_, index) => (
-            <FontAwesomeIcon
-              key={index}
-              icon={index < filledStars ? faStar : faStarOutline}
-              className={`${
-                index < filledStars ? "text-yellow-500" : "text-gray-500"
-              } text-lg`}
-            />
-          ))}
+      {/* Inside Details */}
+      <div className="inside">
+        <div className="icon">
+          <i className="material-icons">info_outline</i>
         </div>
-
-        {/* Button */}
-        <div className="flex justify-center">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/book/${book.bookId}`);
-            }}
-            className="text-white bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 px-6 py-2 rounded font-semibold hover:scale-105 transform transition shadow-lg"
-          >
-            Xem chi tiết
-          </button>
+        <div className="contents">
+          <h1 className="pb-2">{book.description || "Không rõ" }</h1>
+          <h1>Tác giả  {book.author || "Không rõ"}</h1>
+          <table>
+            <tbody>
+              <tr>
+                <th>Xếp hạng</th>
+                <td>
+                  {[...Array(maxStars)].map((_, index) => (
+                    <FontAwesomeIcon
+                      key={index}
+                      icon={index < filledStars ? faStar : faStarOutline}
+                      className={`${
+                        index < filledStars ? "text-yellow-500" : "text-gray-500"
+                      }`}
+                    />
+                  ))}
+                </td>
+              </tr>
+              <tr>
+                <th>Giá</th>
+                <td>{book.price.toLocaleString()} đ</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -75,8 +105,10 @@ BookCard.propTypes = {
   book: PropTypes.shape({
     bookId: PropTypes.number.isRequired,
     bookName: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
     bookRate: PropTypes.number,
+    author: PropTypes.string,
     images: PropTypes.arrayOf(
       PropTypes.shape({
         imageUrl: PropTypes.string.isRequired,

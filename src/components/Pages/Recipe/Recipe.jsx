@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../Recipe/Sidebar.jsx';
-import Banner from '../Book/Banner.jsx';
 import RecipeCard from './RecipeCard.jsx';
 import { getRecipes, getRecipesByTags } from '../../services/RecipeService.js';
 
@@ -92,8 +91,6 @@ function Recipe() {
 
                     {/* Main Content */}
                     <div className="w-full lg:w-8/12 xl:w-9/12 px-4">
-                        <Banner />
-
                         {loading ? (
                             <p className="text-center text-gray-500">Đang tải dữ liệu...</p>
                         ) : error ? (

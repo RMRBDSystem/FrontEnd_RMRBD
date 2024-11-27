@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar.jsx";
-import Banner from "./Banner.jsx";
 import BookCard from "./BookCard.jsx";
 import { getBooks, getBooksByCategory } from "../../services/BookService.js";
 
@@ -17,23 +16,23 @@ function Book() {
     const fetchBooks = async () => {
       setLoading(true);
       setError(null);
-  
+
       try {
         let booksData;
-  
+
         if (selectedFilters.categories) {
           booksData = await getBooksByCategory(selectedFilters.categories);
         } else {
           booksData = await getBooks();
         }
-  
+
         // Kiểm tra xem booksData có phải là mảng
         if (Array.isArray(booksData)) {
           const filteredBooks = booksData.filter((book) => {
             // Đảm bảo các trường luôn là mảng, kể cả khi chưa chọn gì
             const priceRanges = selectedFilters.priceRanges || [];
             const ratings = selectedFilters.ratings || [];
-  
+
             // Lọc theo giá
             const matchesPrice =
               priceRanges.length === 0 ||
@@ -41,15 +40,15 @@ function Book() {
                 const [min, max] = range.split("-").map(Number);
                 return book.price >= min && book.price <= max;
               });
-  
+
             // Lọc theo đánh giá
             const matchesRating =
               ratings.length === 0 ||
               ratings.includes(Math.round(book.bookRate || 0));
-  
+
             return matchesPrice && matchesRating;
           });
-  
+
           setBooks(filteredBooks);
         } else {
           console.error("Dữ liệu không hợp lệ:", booksData);
@@ -62,12 +61,12 @@ function Book() {
         setLoading(false);
       }
     };
-  
+
     fetchBooks();
   }, [selectedFilters]);
-  
-  
-  
+
+
+
 
   // Tính tổng số trang và sách hiển thị trên trang hiện tại
   const totalPages = Math.ceil(books.length / booksPerPage);
@@ -88,111 +87,65 @@ function Book() {
   };
 
   return (
-    <section className="py-20">
+    <section className="section-center">
       <div className="container px-4 mx-auto">
-        <div className="flex flex-wrap -mx-4">
+        <div className="flex flex-col lg:flex-row items-start justify-between -mx-4">
           {/* Sidebar */}
-          <div className="w-full lg:w-4/12 xl:w-3/12 px-4">
+          <div className="flex w-full lg:w-auto lg:flex-row px-4 items-center space-x-4">
             <Sidebar onFilterChange={applyFilters} />
           </div>
 
           {/* Main Content */}
-          <div className="w-full lg:w-8/12 xl:w-9/12 px-4">
-            <Banner />
-
-            {/* Trạng thái dữ liệu */}
+          <div className="flex-1 px-4 rounded-lg shadow-md bg-gray-300 ">
+            {/* Nội dung sách */}
             {loading ? (
               <p className="text-center text-gray-500">Đang tải dữ liệu...</p>
             ) : error ? (
               <p className="text-center text-red-500">{error}</p>
             ) : books.length === 0 ? (
-              <p className="text-center text-gray-500">
-                Không tìm thấy sách nào.
-              </p>
+              <p className="text-center text-gray-500">Không tìm thấy sách nào.</p>
             ) : (
-              <div className="flex flex-wrap mb-20">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {displayedBooks.map((book) => (
-                  <div
-                    key={book.bookId}
-                    className="w-full sm:w-1/2 xl:w-1/3 mb-4 p-2"
-                  >
-                    <BookCard book={book} />
-                  </div>
+                  <BookCard key={book.bookId} book={book} />
                 ))}
               </div>
             )}
 
             {/* Phân trang */}
             {totalPages > 1 && (
-              <nav>
-                <ul className="flex items-center justify-center">
+              <nav className="mt-4">
+                <ul className="flex justify-center space-x-2">
                   {/* Nút Previous */}
                   <li>
                     <button
-                      onClick={() =>
-                        handlePageChange(Math.max(currentPage - 1, 1))
-                      }
-                      className="flex w-9 h-9 items-center justify-center border border-gray-800 text-gray-400 hover:text-yellow-300"
-                      aria-label="Previous"
+                      onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                      className="w-9 h-9 flex items-center justify-center border border-gray-800 text-gray-400 hover:text-yellow-300"
                     >
-                      <svg
-                        width="7"
-                        height="12"
-                        viewBox="0 0 7 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M6 10.6666L1.33333 5.99992L6 1.33325"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      &lt;
                     </button>
                   </li>
-
                   {/* Số trang */}
                   {[...Array(totalPages)].map((_, index) => (
                     <li key={index + 1}>
                       <button
                         onClick={() => handlePageChange(index + 1)}
-                        className={`flex w-9 h-9 items-center justify-center ${
-                          currentPage === index + 1
+                        className={`w-9 h-9 flex items-center justify-center ${currentPage === index + 1
                             ? "bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 text-black font-bold"
-                            : "text-gray-400 hover:text-yellow-300 border border-gray-800 font-bold"
-                        }`}
+                            : "border border-gray-800 text-gray-400 hover:text-yellow-300"
+                          }`}
                       >
                         {index + 1}
                       </button>
                     </li>
                   ))}
-
                   {/* Nút Next */}
                   <li>
                     <button
-                      onClick={() =>
-                        handlePageChange(Math.min(currentPage + 1, totalPages))
-                      }
-                      className="flex w-9 h-9 items-center justify-center border border-gray-800 text-gray-400 hover:text-yellow-300"
-                      aria-label="Next"
+                      onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+                      className="w-9 h-9 flex items-center justify-center border border-gray-800 text-gray-400 hover:text-yellow-300"
                     >
-                      <svg
-                        width="7"
-                        height="12"
-                        viewBox="0 0 7 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M1 1.33341L5.66667 6.00008L1 10.6667"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      &gt;
                     </button>
                   </li>
                 </ul>

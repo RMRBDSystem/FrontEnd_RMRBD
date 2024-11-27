@@ -65,14 +65,14 @@ function Sidebar({ onFilterChange }) {
   };
 
   return (
-    <div className="p-4 rounded-lg shadow-md">
+    <div className="p-4 rounded-lg shadow-md bg-white">
       <h2 className="font-bold bg-clip-text text-lg mb-6">
         Nhóm Sản Phẩm
       </h2>
 
       {/* Loại Sách */}
       <div className="mb-6">
-        <label className="inline-block font-bold bg-clip-text mb-5">
+        <label className="inline-block font-bold bg-clip-text mb-4">
           Loại Sách
         </label>
         <ul className="space-y-3">

@@ -290,7 +290,7 @@ const Navbar = () => {
             {accountonlineId && (
               <div className="icon">
                 <div className="icon" onClick={() => setOpen((prev) => !prev)}>
-                  <img className="w-12 h-12" src={Notification} alt="Notification Icon" />
+                  <img className="w-8 h-8" src={Notification} alt="Notification Icon" />
                   {notifications.length > 0 && (
                     <div className="counter">{notifications.length}</div>
                   )}
