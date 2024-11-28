@@ -97,7 +97,7 @@ function Sidebar({ onFilterChange }) {
           className="mt-4 px-4 py-2 text-sm font-medium text-black bg-gradient-to-r from-yellow-500 via-red-300 to-blue-500 rounded"
           onClick={clearCategoryFilter}
         >
-          Clear Selection
+          Bỏ chọn
         </button>
       </div>
 

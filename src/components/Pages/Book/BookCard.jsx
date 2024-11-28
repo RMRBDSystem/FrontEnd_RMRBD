@@ -64,7 +64,6 @@ function BookCard({ book }) {
           </div>
         </div>
       </div>
-
       {/* Inside Details */}
       <div className="inside">
         <div className="icon">

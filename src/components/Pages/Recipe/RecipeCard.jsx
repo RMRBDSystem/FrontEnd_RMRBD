@@ -19,16 +19,19 @@ function RecipeCard({ recipe }) {
     const defaultImage = "https://via.placeholder.com/150?text=No+Image"; // Default image URL
 
     useEffect(() => {
-        const storedUserId = Cookies.get("UserId");
-        if (storedUserId) {
-            setAccountId(storedUserId);
-        }
-        const storedCoin = Cookies.get("Coin");
-        if (storedCoin) {
-            setCoin(storedCoin);
-        }
-        getAccountInfo();
-        getPurchasedRecipes();
+        const asyncEffect = async () => {
+            const storedUserId = Cookies.get("UserId");
+            if (storedUserId) {
+                setAccountId(storedUserId);
+            }
+            const storedCoin = Cookies.get("Coin");
+            if (storedCoin) {
+                setCoin(storedCoin);
+            }
+            await getAccountInfo();
+            await getPurchasedRecipes();
+        };
+        asyncEffect();
     }, [accountId]);
 
     const handleCardClick = () => {
@@ -52,16 +55,17 @@ function RecipeCard({ recipe }) {
                     },
                 }
             );
-            setDataAccount(result.data);
+            await setDataAccount(result.data);
         } catch (error) {
             console.error("Error fetching account data:", error);
         }
     };
 
     const getPurchasedRecipes = async () => {
+        const storedUserId = Cookies.get("UserId");
         try {
             const result = await axios.get(
-                `https://rmrbdapi.somee.com/odata/PersonalRecipe/${accountId}`,
+                `https://rmrbdapi.somee.com/odata/PersonalRecipe/${storedUserId}`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -70,7 +74,7 @@ function RecipeCard({ recipe }) {
                 }
             );
             const purchasedIds = new Set(result.data.map((item) => item.recipeId));
-            setPurchasedRecipes(purchasedIds);
+            await setPurchasedRecipes(purchasedIds);
         } catch (error) {
             console.error("Error fetching purchased recipes:", error);
         }
@@ -287,7 +291,7 @@ function RecipeCard({ recipe }) {
 // PropTypes configuration
 RecipeCard.propTypes = {
     recipe: PropTypes.shape({
-        accountId: PropTypes.number.isRequired,
+        accountId: PropTypes.number,
         recipeId: PropTypes.number.isRequired,
         recipeName: PropTypes.string.isRequired,
         price: PropTypes.number.isRequired,

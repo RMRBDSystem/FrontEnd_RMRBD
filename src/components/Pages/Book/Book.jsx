@@ -99,11 +99,11 @@ function Book() {
           <div className="flex-1 px-4 rounded-lg shadow-md bg-gray-300 ">
             {/* Nội dung sách */}
             {loading ? (
-              <p className="text-center text-gray-500">Đang tải dữ liệu...</p>
+              <p className="text-2xl text-center text-blue-500">Đang tải dữ liệu...</p>
             ) : error ? (
               <p className="text-center text-red-500">{error}</p>
             ) : books.length === 0 ? (
-              <p className="text-center text-gray-500">Không tìm thấy sách nào.</p>
+              <p className="text-2xl text-center text-gray-500 font-bold">Không tìm thấy sách nào.</p>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {displayedBooks.map((book) => (

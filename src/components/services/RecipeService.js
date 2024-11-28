@@ -16,7 +16,7 @@ export const getRecipes = async () => {
     try {
 
         // Lấy tất cả recipe
-        const response = await axios.get('https://rmrbdapi.somee.com/odata/Recipe', {
+        const response = await axios.get('https://rmrbdapi.somee.com/odata/Recipe?$filter=status eq 1', {
             headers: {
                 token: '123-abc',
                 mode: 'no-cors'
@@ -82,6 +82,39 @@ export const getFirstImageByRecipeId = async (recipeId) => {
     }
 };
 
+// export const getRecipesByTags = async (tagId) => {
+//     const recipes = [];
+//     try {
+//       const response = await axios.get(`${API_URL}/recipeTag`, {
+//         params: {
+//           $filter: `TagId eq ${tagId}`,
+//         },
+//         headers: {
+//           token: '123-abc',
+//           mode: 'no-cors',
+//         },
+//       });
+
+//       console.log('response.data', response.data);
+  
+//       response.data.forEach(element =>async () => {
+//         const response2 = await axios.get(`${API_URL}/recipe/${element.recipeId}`, {
+//             headers: {
+//               token: '123-abc',
+//               mode: 'no-cors',
+//             },
+//           });
+//           recipes.push(response2.data);
+//           console.log('response2.data', response2.data);
+//       });  
+//       console.log('recipes', recipes);
+//       return recipes;
+//     } catch (error) {
+//       console.error(`Error fetching recipes for tag ${tagId}:`, error);
+//       throw error;
+//     }
+//   };
+
 export const getRecipesByTags = async (tagId) => {
     try {
       const response = await axios.get(`${API_URL}/recipeTag`, {
@@ -93,19 +126,21 @@ export const getRecipesByTags = async (tagId) => {
           mode: 'no-cors',
         },
       });
+
   
-      const recipes = await Promise.all(
-        response.data.map(async (tag) => {
-          const response2 = await axios.get(`${API_URL}/recipe/${tag.recipeId}`, {
-            headers: {
-              token: '123-abc',
-              mode: 'no-cors',
-            },
-          });
-          return response2.data;
-        })
-      );
-  
+      const recipes = [];
+      for (const element of response.data) {
+        const response2 = await axios.get(`${API_URL}/recipe?$filter=RecipeID eq ${element.recipeId} and status eq 1`, {
+          headers: {           
+            token: '123-abc',
+            mode: 'no-cors',
+          },
+        });
+        const recipe = response2.data?.[0];
+if (recipe) {
+  recipes.push(recipe);
+}
+      }
       return recipes;
     } catch (error) {
       console.error(`Error fetching recipes for tag ${tagId}:`, error);

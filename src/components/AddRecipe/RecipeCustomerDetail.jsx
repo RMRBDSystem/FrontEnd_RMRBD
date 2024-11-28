@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import ClockIcon from "/images/icon/iconclock.png"
+import SpoonIcon from "/images/icon/iconsspoon.png"
+import CheckMarkIcon from "/images/icon/iconscheckmark24.png"
+
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
   const [accountID, setAccountID] = useState(null);
   const [images, setImages] = useState([]); // Thay đổi thành mảng hình ảnh
+  const [mainImage, setMainImage] = useState(null);
   const [tagMap, setTagMap] = useState({}); // Lưu tên tag theo tagId
 
   useEffect(() => {
@@ -49,6 +54,7 @@ const RecipeDetail = () => {
           }
         );
         setImages(imageResult.data);
+        setMainImage(imageResult.data[0].imageUrl);
 
         // Lấy tên tag từ API cho từng tagId
         const tagResult = await axios.get(
@@ -83,27 +89,127 @@ const RecipeDetail = () => {
   return (
     <>
       <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Recipe Detail</h2>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">{recipe?.recipeName || "N/A"}</h1>
 
         <div className="space-y-4">
           <p className="text-lg">
-            <strong>Name:</strong> {recipe?.recipeName || "N/A"}
+            {recipe?.description || "N/A"}
           </p>
           <p className="text-lg">
-            <strong>Description:</strong> {recipe?.description || "N/A"}
+            <strong>Tạo bởi:</strong> {accountID?.userName || "N/A"}
           </p>
+          <div className="flex flex-col md:flex-row items-start space-x-4">
+            {/* Recipe Image Section */}
+            <div className="md:w-2/3 relative">
+              <img
+                src={mainImage}
+                alt="Main Recipe"
+                className="w-full object-cover rounded-lg shadow-md"
+              />
+              {/* Thumbnail Images */}
+              <div className="flex space-x-4 overflow-x-auto mt-4">
+                {images && images.length > 0 ? (
+                  images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image.imageUrl || ""}
+                      alt={`Recipe image ${index + 1}`}
+                      className="w-20 h-20 object-cover rounded-lg shadow-md cursor-pointer hover:opacity-75"
+                      onClick={() => setMainImage(image.imageUrl)} // Set main image on click
+                    />
+                  ))
+                ) : (
+                  <p className="text-lg">N/A</p>
+                )}
+              </div>
+            </div>
+
+            {/* Recipe Details Section */}
+            <div className="md:w-1/3 bg-gray-50 p-4 rounded-lg shadow-md relative">
+              {/* Clock Icon */}
+              {/* <ClockIcon className="w-6 h-6 text-gray-600 absolute top-2 right-2" /> */}
+              <img src={ClockIcon} alt="" className="w-6 h-6 text-gray-600 absolute top-2 right-2" />
+
+              {/* Recipe Details */}
+              <p className="text-lg mb-2">
+                <strong className="text-gray-800">Khẩu phần:</strong>{" "}
+                {recipe?.numberOfService || "N/A"} người
+              </p>
+              <p className="text-lg mb-2">
+                <strong className="text-gray-800">Thời gian:</strong>{" "}
+                {recipe?.totalTime || "N/A"} phút
+              </p>
+              <p className="text-lg">
+                <strong className="text-gray-800">Giá:</strong>{" "}
+                {recipe?.price || "N/A"}đ
+              </p>
+              <p className="text-lg">
+                <strong>Sự dinh dưỡng:</strong> {recipe?.nutrition || "N/A"}
+              </p>
+              <p className="text-lg mb-2">
+                <strong className="text-gray-800">Ngày tạo:</strong>{" "}
+                {recipe?.createDate 
+                  ? new Date(recipe.createDate ).toLocaleDateString("vi-VN") // Định dạng ngày theo chuẩn Việt Nam
+                  : "N/A"}
+              </p>
+            </div>
+          </div>
+          <div className="relative flex items-center mb-8">
+            <hr className="flex-grow border-t border-black-300" />
+            <img src={SpoonIcon} alt="Icon" className="mx-2 w-6 h-6" />
+          </div>
           <p className="text-lg">
-            <strong>Nutrition:</strong> {recipe?.nutrition || "N/A"}
+            <strong>Hướng dẫn</strong>
+            {recipe?.tutorial ? (
+              <div className="whitespace-pre-line">
+                {recipe.tutorial.split('Bước ').map((step, index) => (
+                  step && (
+                    <div key={index} className="mb-4">
+                      <div className="flex items-center mb-1">
+                        <img src={CheckMarkIcon} alt="" className="w-5 h-5 mr-2" />
+                        <strong>Bước {index}</strong>
+                      </div>
+                      <div className="ml-7">
+                        {step.trim()}
+                      </div>
+                    </div>
+                  )
+                ))}
+              </div>
+            ) : (
+              "N/A"
+            )}
           </p>
+          <div className="relative flex items-center mb-8">
+            <hr className="flex-grow border-t border-black-300" />
+            <img src={SpoonIcon} alt="Icon" className="mx-2 w-6 h-6" />
+          </div>
           <p className="text-lg">
-            <strong>Tutorial:</strong> {recipe?.tutorial || "N/A"} kcal
+            <strong>Thành phần</strong> <br />
+            {recipe?.ingredient || "N/A"}
           </p>
-          <p className="text-lg">
-            <strong>Ingredient:</strong> {recipe?.ingredient || "N/A"}
-          </p>
-          <p className="text-lg">
-            <strong>Created Date:</strong> {recipe?.createDate || "N/A"}
-          </p>
+          <div>
+            <p className="text-lg">
+              <strong className="block text-lg mb-2">Thể loại</strong>
+            </p>
+            <ul className="list-disc pl-5">
+              {recipe?.recipeTags?.length > 0 ? (
+                recipe.recipeTags.map((tag, index) => (
+                  <li key={index} className="text-lg">
+                    {tagMap[tag.tagId] || "Unknown"}
+                  </li>
+                ))
+              ) : (
+                <li className="text-lg">N/A</li>
+              )}
+            </ul>
+          </div>
+
+          <div className="relative flex items-center mb-8">
+            <hr className="flex-grow border-t border-black-300" />
+            <img src={SpoonIcon} alt="Icon" className="mx-2 w-6 h-6" />
+          </div>
+
           <p className="text-lg">
             <strong>Video:</strong>{" "}
             {recipe?.video ? (
@@ -120,63 +226,15 @@ const RecipeDetail = () => {
             )}
           </p>
           <p className="text-lg">
-            <strong>Price:</strong> đ{recipe?.price || "N/A"}
-          </p>
-          <p className="text-lg">
-            <strong>Number of Servings:</strong>{" "}
-            {recipe?.numberOfService || "N/A"}
-          </p>
-          <p className="text-lg">
-            <strong>Total time:</strong> {recipe?.totalTime || "N/A"}
-          </p>
-          <p className="text-lg">
-            <strong>Created By:</strong> {accountID?.userName || "N/A"}
-          </p>
-
-          <div>
-            <strong className="block text-lg mb-2">Recipe Tags:</strong>
-            <ul className="list-disc pl-5">
-              {recipe?.recipeTags?.length > 0 ? (
-                recipe.recipeTags.map((tag, index) => (
-                  <li key={index} className="text-lg">
-                    {tagMap[tag.tagId] || "Unknown"}
-                  </li>
-                ))
-              ) : (
-                <li className="text-lg">N/A</li>
-              )}
-            </ul>
-          </div>
-
-          <p className="text-lg">
             <strong>Status:</strong>
             {recipe?.status === 1
               ? "Censored"
               : recipe?.status === -1
-              ? "Uncensored"
-              : recipe?.status === 0
-              ? "Blocked"
-              : "N/A"}
+                ? "Uncensored"
+                : recipe?.status === 0
+                  ? "Blocked"
+                  : "N/A"}
           </p>
-
-          <div>
-            <strong className="block text-lg mb-2">Recipe Images:</strong>
-            <div className="flex space-x-4 overflow-x-auto">
-              {images && images.length > 0 ? (
-                images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image?.imageUrl || ""}
-                    alt={`Recipe image ${index + 1}`}
-                    className="w-32 h-32 object-cover rounded-lg shadow-md"
-                  />
-                ))
-              ) : (
-                <p className="text-lg">N/A</p>
-              )}
-            </div>
-          </div>
-
           <button
             className="mt-6 px-6 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition"
             onClick={() => window.history.back()}
