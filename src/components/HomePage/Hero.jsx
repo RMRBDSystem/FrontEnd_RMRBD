@@ -12,25 +12,25 @@ const Hero = () => {
             className="absolute top-0 left-0 w-full h-full object-cover opacity-80 z-30 "
           >
             <source src={heroVideo} type="video/mp4" />
-            Your browser does not support the video tag. I suggest you upgrade your
-            browser.
+            Trình duyệt của bạn không hỗ trợ thẻ video. Tôi khuyên bạn nên nâng cấp
+            trình duyệt.
           </video>
     
           <div className="text-5xl z-40 text-center text-white mt-40">
             <h2 className="text-white text-3xl sm:text-5xl md:text-7xl font-expletus font-extrabold uppercase">
-              Welcome To RMRBD
+
             </h2>
-            <h3 className="text-2xl sm:text-3xl md:text-5xl my-2 sm:my-5 capitalize">
-            Recipe Cook
+            <h3 className="text-2xl sm:text-3xl md:text-5xl my-2 sm:my-5">
+            Biến việc nấu ăn hàng ngày trở nên thú vị hơn!
             </h3>
             <p className="text-gray-100 max-w-2xl mx-auto my-2 sm:my-5 text-base sm:text-xl lg:text-2xl">
-              Find the perfect recipes for your next meal, party, or event.
+            Tìm và chia sẻ các công thức tuyệt vời cho việc nấu ăn hàng ngày của bạn
             </p>
             <a
               href="#featured"
               className={`text-xs bg-white text-gray-800 py-2.5 px-7 mt-2.5 uppercase tracking-wider hover:tracking-widest transition duration-200 ease-in-out`}
             >
-              Explore
+              KHÁM PHÁ NGAY
             </a>
           </div>
         </section>

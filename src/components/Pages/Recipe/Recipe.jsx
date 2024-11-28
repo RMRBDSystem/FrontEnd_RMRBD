@@ -48,7 +48,7 @@ function Recipe() {
                         return matchesPrice && matchesRating;
                     });
 
-                    setRecipes(filteredRecipes); // Đảm bảo booksData là mảng
+                    await setRecipes(filteredRecipes); // Đảm bảo booksData là mảng
                 } else {
                     console.error("Dữ liệu không hợp lệ:", booksData);
                     setError("Dữ liệu không hợp lệ.");
@@ -73,9 +73,9 @@ function Recipe() {
         setCurrentPage(page);
     };
 
-    const applyFilters = (filters) => {
-        setSelectedFilters(filters);
-        setCurrentPage(1); // Reset về trang đầu khi áp dụng bộ lọc
+    const applyFilters = async (filters) => {
+        await setSelectedFilters(filters);
+        await setCurrentPage(1); // Reset về trang đầu khi áp dụng bộ lọc
     };
 
 

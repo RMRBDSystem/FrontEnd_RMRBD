@@ -297,32 +297,39 @@ const Navbar = () => {
                 </div>
                 {open && (
                   <div className="notifications">
+                    <div className="topnav-dropdown-header">
+                      <span className="notification-title">Thông báo</span>
+                      <button className="clear-noti" onClick={handleRead}>
+                        Đọc tất cả
+                      </button>
+                    </div>
                     {notifications.map((n) => displayNotification(n))}
+
                     {dbnotifications
                       .map((notification) => {
-                        const notificationDate = new Date(notification.date); // Chuyển chuỗi thành đối tượng Date
-                        const now = Date.now(); // Lấy thời gian hiện tại
-                        const differenceInMs = now - notificationDate.getTime(); // Hiệu thời gian
-                        const minutesPassed = Math.floor(differenceInMs / (1000 * 60)); // Chuyển đổi ms sang phút
-                        const hoursPassed = Math.floor(minutesPassed / 60); // Chuyển đổi phút sang giờ
+                        const notificationDate = new Date(notification.date); // Convert date string to Date object
+                        const now = Date.now(); // Current timestamp
+                        const differenceInMs = now - notificationDate.getTime(); // Time difference in ms
+                        const minutesPassed = Math.floor(differenceInMs / (1000 * 60)); // Convert ms to minutes
+                        const hoursPassed = Math.floor(minutesPassed / 60); // Convert minutes to hours
+                        const daysPassed = Math.floor(hoursPassed / 24); // Convert hours to days
 
-                        return { ...notification, minutesPassed, hoursPassed }; // Gắn thêm `hoursPassed` vào thông báo
+                        return { ...notification, minutesPassed, hoursPassed, daysPassed }; // Add `daysPassed`
                       })
-                      .sort((a, b) => a.minutesPassed - b.minutesPassed) // Sắp xếp theo `hoursPassed` tăng dần
+                      .sort((a, b) => a.minutesPassed - b.minutesPassed) // Sort by `minutesPassed`
                       .map((notification, index) => (
-                        <div key={index} className="notification-item" style={{ fontWeight: 300 }}>
+                        <div key={notification.id || index} className="notification-item" style={{ fontWeight: 300 }}>
                           <div className="notification-content">{notification.content}</div>
                           <div className="notification-time">
-                            {notification.hoursPassed >= 1
-                              ? `${notification.hoursPassed} giờ trước`  // Nếu trên 1 giờ
-                              : `${notification.minutesPassed} phút trước`} {/* Nếu dưới 1 giờ */}
+                            {notification.daysPassed >= 1
+                              ? `${notification.daysPassed} ngày trước` // If more than 1 day
+                              : notification.hoursPassed >= 1
+                                ? `${notification.hoursPassed} giờ trước` // If more than 1 hour
+                                : `${notification.minutesPassed} phút trước`} {/* If less than 1 hour */}
                           </div>
                           <hr style={{ margin: "10px 0", borderColor: "black", borderStyle: "solid" }} />
                         </div>
                       ))}
-                    <button className="nButton" onClick={handleRead}>
-                      Mark as read
-                    </button>
                   </div>
                 )}
               </div>

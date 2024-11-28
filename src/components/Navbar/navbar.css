@@ -7,18 +7,40 @@
   flex-direction: column;
   border-radius: 10px;
   max-height: 300px; /* Giới hạn chiều cao */
-  max-width: 400px; /* Giới hạn chiều rộng */
+  width: 400px; /* Giới hạn chiều rộng */
   overflow-y: auto; /* Kích hoạt cuộn dọc */
   border: 1px solid #ccc; /* Viền cho vùng thông báo */
   padding: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
 }
+.topnav-dropdown-header .clear-noti {
+  color: #ea5455 !important;
+  float: right;
+  font-size: 11px !important;
+  text-transform: uppercase
+}
+.topnav-dropdown-header {
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  font-size: 12px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0 12px
+}
+.topnav-dropdown-header .notification-title {
+  color: #333;
+  display: block;
+  float: left;
+  font-size: 14px
+}
+
 
 .notifications .notification {
   padding: 5px;
   font-size: 14px;
   border-bottom: 1px solid #eee; /* Đường viền dưới giữa các mục */
   margin-bottom: 5px;
+  border-radius: 10px;
 }
 
 .notifications .nButton {
@@ -33,16 +55,11 @@
   transition: background-color 0.3s ease; /* Hiệu ứng hover */
 }
 
-.notifications .nButton:hover {
-  background-color: #0056b3; /* Màu nền khi hover */
-}
-
 .notifications .notification-item {
-  padding: 10px;
   display: flex;
   flex-direction: column;
   background-color: #f9f9f9; /* Màu nền từng mục thông báo */
-  border-radius: 5px; /* Bo góc từng mục */
+  border-radius: 10px;
   margin-bottom: 10px;
 }
 
@@ -56,4 +73,21 @@
   font-size: 12px;
   align-self: flex-end; /* Canh phải thời gian */
   color: #888; /* Màu chữ thời gian */
+}
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  border-radius: 50px !important
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff9f43
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555
 }

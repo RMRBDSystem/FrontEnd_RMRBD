@@ -96,7 +96,7 @@ function Sidebar({ onFilterChange }) {
           className="mt-4 px-4 py-2 text-sm font-medium text-white bg-red-400 rounded"
           onClick={clearCategoryFilter}
         >
-          Clear Selection
+          Bỏ chọn
         </button>
       </div>
 
@@ -109,7 +109,7 @@ function Sidebar({ onFilterChange }) {
           {[
             { label: "0đ - 150,000đ", value: "0-150000" },
             { label: "150,000đ - 300,000đ", value: "150000-300000" },
-            { label: "300,000đ - 500,000đ", value: "300000-500000" },
+            { label: ">300,000đ", value: "300000-99999999999999" },
           ].map((priceRange, index) => (
             <li key={index} className="flex items-center">
               <input
