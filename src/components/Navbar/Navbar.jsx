@@ -5,7 +5,7 @@ import NavLinks from './NavLinks';
 import { leftLinks } from '../../data/data';
 import { rightLinks } from '../../data/data';
 import { Button, IconButton } from "@material-tailwind/react";
-import SearchWrapper from "./SearchWrapper";
+import SearchWrapper from "../Search/SearchWrapper";
 import { Widgets, ArrowDropDown } from "@mui/icons-material";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -289,7 +289,7 @@ const Navbar = () => {
             )}
             {accountonlineId && (
               <div className="icon">
-                <div className="icon" onClick={() => setOpen((prev) => !prev)}>
+                <div className="icon-notification" onClick={() => setOpen((prev) => !prev)}>
                   <img className="w-8 h-8" src={Notification} alt="Notification Icon" />
                   {notifications.length > 0 && (
                     <div className="counter">{notifications.length}</div>

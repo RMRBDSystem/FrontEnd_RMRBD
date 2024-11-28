@@ -512,8 +512,13 @@ const BookDetail = () => {
                         <span role="img" aria-label="write">✏️</span> Give your stars for this recipe
                     </button>
                 </div>
+                <div className="max-w-10xl mx-auto p-6 bg-white shadow-md rounded-lg flex justify-center" style={{width:"205%"}}>
+                    <div className="w-full max-w-6xl">
+                    <CommentBooks bookId={bookId} createById={createById} />
+                    </div>
+                </div>
             </div>
-            <CommentBooks bookId={bookId} createById={createById} />
+            
             <ToastContainer />
         </>
 

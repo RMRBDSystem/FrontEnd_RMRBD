@@ -53,9 +53,9 @@ const Comment = ({
             <div className="comment-right-part" >
                 <div className="comment-content" style={{ display: 'flex' }}>
                     <div className="comment-author">{accountName || "Guest"}</div>
-                    <div>{commentedAt}</div>
+                    <div style={{ color : '#333' }}>{commentedAt}</div>
                 </div>
-                {!isEditing && <div className="comment-text">{comment.content}</div>}
+                {!isEditing && <div className="comment-text" style={{ color : '#333' }}>{comment.content}</div>}
                 {isEditing && (
                     <CommentForm
                         submitLabel="Update"

@@ -26,6 +26,8 @@ const RecipeCustomer = () => {
   const [censorNote, setCensorNote] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadComplete, setUploadComplete] = useState(false);
   useEffect(() => {
     const storedUserId = Cookies.get("UserId");
     console.log("Stored UserId:", storedUserId);
@@ -60,26 +62,26 @@ const RecipeCustomer = () => {
   const validateFields = () => {
     const newErrors = {};
 
-    if (!recipeName) newErrors.recipeName = "Recipe name is required.";
+    if (!recipeName) newErrors.recipeName = "Tên công thức là bắt buộc.";
     if (!numberOfService || isNaN(numberOfService) || numberOfService <= 0) {
-      newErrors.numberOfService = "Please enter a valid number of servings.";
+      newErrors.numberOfService = "Vui lòng nhập số lượng phần ăn hợp lệ.";
     }
     if (!price || isNaN(price) || price < 0) {
-      newErrors.price = "Please enter a valid price.";
+      newErrors.price = "Vui lòng nhập giá hợp lệ.";
     }
-    if (!nutrition) newErrors.nutrition = "Nutrition information is required.";
-    if (!tutorial) newErrors.tutorial = "Tutorial is required.";
-    if (!video) newErrors.video = "Video is required.";
-    if (!ingredient) newErrors.ingredient = "Ingredients is required.";
-    if (!description) newErrors.description = "Description is required.";
+    if (!nutrition) newErrors.nutrition = "Thông tin dinh dưỡng là cần thiết.";
+    if (!tutorial) newErrors.tutorial = "Hướng dẫn là cần thiết.";
+    if (!video) newErrors.video = "Video là bắt buộc.";
+    if (!ingredient) newErrors.ingredient = "Thành phần là bắt buộc.";
+    if (!description) newErrors.description = "Mô tả là bắt buộc.";
     if (!totalTime || isNaN(totalTime) || totalTime <= 0) {
-      newErrors.totalTime = "Please enter a valid total time.";
+      newErrors.totalTime = "Vui lòng nhập tổng thời gian hợp lệ.";
     }
     if (recipeImage.length === 0) {
-      newErrors.recipeImage = "At least one image is required.";
+      newErrors.recipeImage = "Ít nhất một hình ảnh là bắt buộc.";
     }
     if (selectedTagIds.length === 0) {
-      newErrors.selectedTagIds = "Please select at least one tag.";
+      newErrors.selectedTagIds = "Vui lòng chọn ít nhất một thẻ.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -180,7 +182,7 @@ const RecipeCustomer = () => {
       }
 
       clear();
-      toast.success("Recipe and images have been added successfully!");
+      toast.success("Công thức và hình ảnh đã được thêm thành công!");
     } catch (error) {
       console.error("Error saving recipe or uploading images:", error);
       toast.error(`Failed to add recipe or upload images: ${error.message}`);
@@ -215,39 +217,61 @@ const RecipeCustomer = () => {
       recipeImage: "",
     }));
     const files = Array.from(e.target.files);
-    setRecipeImage((prevImages) => [...prevImages, ...files]); // Cập nhật state với các file mới
-  };
-  const removeImage = (index) => {
-    setRecipeImage((prevImages) => prevImages.filter((_, i) => i !== index));
+
+    // Bắt đầu quá trình tải lên
+    setIsUploading(true);
+    setUploadComplete(false); // Đảm bảo "Lưu hoàn tất" không hiển thị khi bắt đầu tải lên
+
+    // Giả lập tải lên trong 2 giây (bạn có thể thay bằng API thật)
+    setTimeout(() => {
+      // Sau khi tải lên hoàn tất, cập nhật trạng thái
+      setIsUploading(false);
+      setUploadComplete(true);
+      setRecipeImage((prevImages) => [...prevImages, ...files]);
+    }, 1000);
   };
 
-  // Sử dụng renderImageInputs để hiển thị hình ảnh đã chọn
+  const removeImage = (index) => {
+    setRecipeImage((prevImages) => {
+      const updatedImages = prevImages.filter((_, i) => i !== index);
+      // Nếu không còn ảnh nào, ẩn trạng thái "Lưu hoàn tất"
+      if (updatedImages.length === 0) {
+        setUploadComplete(false); // Ẩn "Lưu hoàn tất"
+      }
+      return updatedImages;
+    });
+  };
+
   const renderImageInputs = () => {
     return recipeImage.map((file, index) => (
-      <Col key={index} style={{ marginBottom: "10px" }}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+      <Col key={index} className="mb-4">
+        <div className="relative flex flex-col items-center">
           <img
             src={URL.createObjectURL(file)}
             alt={`Preview ${index}`}
-            style={{ width: "100px", height: "100px", margin: "10px 0" }}
+            className="w-32 h-32 object-cover rounded-lg mb-2"
           />
-          <Button
-            variant="danger"
-            size="sm"
-            style={{
-              marginTop: "5px",
-            }}
+          {/* Nút xóa ảnh */}
+          <button
             onClick={() => removeImage(index)}
-            disabled={isLoading}
+            className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 shadow-md hover:bg-red-700"
+            disabled={isUploading}
           >
-            Remove
-          </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
       </Col>
     ));
@@ -309,174 +333,208 @@ const RecipeCustomer = () => {
   };
 
   return (
-    <>
+    <section className="section-center">
       <ToastContainer />
-      <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+      <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md">
         {/* Header */}
-        <h1 className="text-4xl font-bold mb-6 flex items-center">
-          <span className="text-orange-500 mr-2 text-5xl">+</span> Thêm Công thức của bạn
+        <h1 className="text-3xl font-bold mb-6 flex items-center">
+          <span className="flex justify-center text-orange-500 mr-2 text-5xl items-center">+</span> Viết món mới
         </h1>
-        <p className="text-gray-600 mb-8">
-          Tải lên công thức nấu ăn cá nhân thật dễ dàng! Thêm mục yêu thích của bạn, chia sẻ với bạn bè, gia đình hoặc cộng đồng RMRBD.
-        </p>
-
-        <hr className="mb-8" />
-
+        <hr className="mb-4" />
         {/* Form */}
-        <form className="space-y-8">
+        <form className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Recipe Title */}
             <Col>
               <Form.Group controlId="recipeName">
-                <Form.Label>Tên công thức</Form.Label>
                 {errors.recipeName && (
                   <p className="text-danger">{errors.recipeName}</p>
                 )}
                 <Form.Control
                   type="text"
-                  placeholder="Đặt tiêu đề cho công thức của bạn"
+                  placeholder="Tên món: Món canh rau mướp đắng nhồi thịt"
                   value={recipeName}
                   onChange={handleInputChange(setRecipeName, "recipeName")}
                   disabled={isLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400 "
+                />
+              </Form.Group>
+              <Form.Group controlId="description" className="mt-4">
+                {errors.description && (
+                  <p className="text-danger">{errors.description}</p>
+                )}
+                <Form.Control
+                  as="textarea"
+                  rows={5}
+                  placeholder="Hãy chia sẻ với mọi người về món này của bạn nhé - ai đã truyền cảm hứng cho bạn, tại sao nó đặc biệt, bạn thích thưởng thức nó thế nào?"
+                  value={description}
+                  onChange={handleInputChange(setDescription, "description")}
+                  disabled={isLoading}
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 "
                 />
               </Form.Group>
             </Col>
-
             {/* Photo Upload */}
             <div className="relative">
               <Form.Group controlId="recipeImage">
-                <Form.Label>Ảnh công thức</Form.Label>
                 {errors.recipeImage && (
-                  <p className="text-danger">{errors.recipeImage}</p>
+                  <p className="text-sm text-red-500">{errors.recipeImage}</p>
                 )}
-                <Form.Control
-                  type="file"
-                  multiple
-                  onChange={handleImageChange}
-                  disabled={isLoading}
-                />
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    marginTop: "10px",
-                  }}
-                >
-                  {renderImageInputs()}
-                </div>
+
+                {/* Hiển thị vùng chọn ảnh khi chưa có ảnh */}
+                {recipeImage.length === 0 && !isUploading && (
+                  <label
+                    htmlFor="fileInput"
+                    className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
+                  >
+                    <h1 className="material-icons text-6xl my-4">
+                      cloud_upload
+                    </h1>
+                    <p className="text-lg">Bạn đã đăng hình món mình nấu ở đây chưa?</p>
+                    <p className="text-sm">Chia sẻ thành phần nấu nướng của bạn với mọi người nào!</p>
+                    <input
+                      type="file"
+                      id="fileInput"
+                      multiple
+                      onChange={handleImageChange}
+                      disabled={isUploading}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                  </label>
+                )}
+
+                {/* Hiển thị trạng thái "Đang tải" trong label nếu đang tải */}
+                {isUploading && (
+                  <label
+                    htmlFor="fileInput"
+                    className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-200 hover:border-gray-400"
+                  >
+                    <div className="flex justify-center items-center">
+                      <img
+                        src="/images/loading-image.png"
+                        alt="Đang tải..."
+                        className="w-12 h-12 animate-spin"
+                      />
+                      <p className="ml-2 text-lg">Đang tải...</p>
+                    </div>
+                    <input
+                      type="file"
+                      id="fileInput"
+                      multiple
+                      onChange={handleImageChange}
+                      disabled={true} // Disable input khi đang tải
+                      accept="images/*"
+                      className="hidden"
+                    />
+                  </label>
+                )}
+
+                {/* Hiển thị trạng thái "Lưu hoàn tất" nếu tải lên hoàn tất */}
+                {uploadComplete && (
+                  <div className="flex justify-center mt-3">
+                    <span className="material-icons text-green-500">
+                      check_circle
+                    </span>
+                    <p>Lưu hoàn tất</p>
+                  </div>
+                )}
+
+                {/* Hiển thị ảnh đã chọn */}
+                {recipeImage.length > 0 && !isUploading && (
+                  <div className="flex flex-wrap gap-4 mt-3">
+                    {renderImageInputs()}
+                  </div>
+                )}
               </Form.Group>
             </div>
-          </div>
 
-          {/* Description */}
-          <div>
-            <Form.Group controlId="description">
-              <Form.Label>Mô tả công thức</Form.Label>
-              {errors.description && (
-                <p className="text-danger">{errors.description}</p>
-              )}
-              <Form.Control
-                as="textarea"
-                rows={5}
-                placeholder="Chia sẻ câu chuyện đằng sau công thức của bạn và điều gì làm cho nó trở nên đặc biệt."
-                value={description}
-                onChange={handleInputChange(setDescription, "description")}
-                disabled={isLoading}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </Form.Group>
           </div>
 
           <hr className="mb-8" />
-
           {/* Ingredients */}
-          <h2 className="text-2xl font-bold mb-4">Thành phần</h2>
-          <p className="text-gray-600 mb-6">
-            Nhập một thành phần trên mỗi dòng. Bao gồm số lượng (ví dụ: cốc, muỗng canh) và bất kỳ chế phẩm đặc biệt nào (ví dụ: rây, làm mềm, xắt nhỏ).
-          </p>
-          {ingredient.map((ingredient_chirld, index) => (
-            <Row className="mb-4" key={index}>
-              <Col>
-                <Form.Group controlId={`ingredients-${index}`}>
-                  <Form.Label>Thành phần</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    placeholder={`e.g. ${index === 0 ? "2 chén bột mì, rây" : "1 chén đường"}`}
-                    value={ingredient_chirld}
-                    onChange={(e) => handleIngredientChange(index, e.target.value)}
-                    rows={4}
-                  />
-                </Form.Group>
-              </Col>
-              <Col xs="auto" className="d-flex align-items-center justify-content-center">
-                <Button
-                  variant="link"
-                  onClick={() => removeIngredient(index)}
-                  className="text-danger"
-                >
-                  <FiX size={24} />
-                </Button>
-              </Col>
-            </Row>
-          ))}
-          <Button
-            variant="outline-warning" // Use Bootstrap's orange variant for the border
-            onClick={addIngredient}
-            className="custom-button d-flex align-items-center mt-4"
-          >
-            <FiPlus className="mr-2" /> Thêm thành phần
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="col-span-1">
+              <h2 className="text-xl font-bold mb-4">Nguyên liệu</h2>
+              {ingredient.map((ingredient_chirld, index) => (
+                <Row className="mb-2" key={index}>
+                  <Col>
+                    <Form.Group controlId={`ingredients-${index}`}>
+                      <Form.Control
+                        type="text"
+                        placeholder={`${index === 0 ? "250g bột" : "100ml nước"}`}
+                        value={ingredient_chirld}
+                        onChange={(e) => handleIngredientChange(index, e.target.value)}
+                        rows={4}
+                        className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
+                      />
 
-          <hr className="mb-8" />
+                    </Form.Group>
+                  </Col>
+                  <Col xs="auto" className="d-flex align-items-center justify-content-center">
+                    <Button
+                      variant="link"
+                      onClick={() => removeIngredient(index)}
+                      className="text-danger"
+                    >
+                      <FiX size={24} />
+                    </Button>
+                  </Col>
+                </Row>
+              ))}
+              <Button
+                variant="outline-warning" // Use Bootstrap's orange variant for the border
+                onClick={addIngredient}
+                className="custom-button d-flex align-items-center mt-4"
+              >
+                <FiPlus className="mr-2" />Thêm nguyên liệu
+              </Button>
+            </div>
+            <div className="col-span-1">
+              {/* Directions Section */}
+              <h2 className="text-xl font-bold mb-4">Các bước</h2>
+              {tutorial.map((step, index) => (
+                <Row className="mb-2" key={index}>
+                  <Col>
+                    <Form.Group controlId={`tutorial-${index}`}>
+                      <Form.Label>Bước {index + 1}</Form.Label>
+                      {errors.tutorial && errors.tutorial[index] && (
+                        <p className="text-danger">{errors.tutorial[index]}</p>
+                      )}
+                      <Form.Control
+                        as="textarea"
+                        placeholder={`${index === 0
+                          ? "Làm nóng lò ở 350 ° F..."
+                          : "Kết hợp các nguyên liệu khô trong một cái bát..."
+                          }`}
+                        value={step}
+                        onChange={(e) => handleTutorialChange(index, e.target.value)}
+                        rows={3}
+                        disabled={isLoading}
+                        className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col xs="auto" className="d-flex align-items-center justify-content-center">
+                    <Button
+                      variant="link"
+                      onClick={() => removeTutorialStep(index)}
+                      className="text-danger"
+                    >
+                      <FiX size={24} />
+                    </Button>
+                  </Col>
+                </Row>
+              ))}
 
-          {/* Directions Section */}
-          <h2 className="text-2xl font-bold mb-4">Hướng dẫn</h2>
-          <p className="text-gray-600 mb-6">
-            Giải thích cách làm công thức của bạn, bao gồm nhiệt độ lò, thời gian nướng hoặc nấu,
-            và kích thước chảo, v.v. Sử dụng các tiêu đề tùy chọn để sắp xếp các phần khác nhau của công thức
-            (tức là Chuẩn bị, Nướng, Trang trí).
-          </p>
-
-          {tutorial.map((step, index) => (
-            <Row className="mb-4" key={index}>
-              <Col>
-                <Form.Group controlId={`tutorial-${index}`}>
-                  <Form.Label>Bước {index + 1}</Form.Label>
-                  {errors.tutorial && errors.tutorial[index] && (
-                    <p className="text-danger">{errors.tutorial[index]}</p>
-                  )}
-                  <Form.Control
-                    as="textarea"
-                    placeholder={`e.g. ${index === 0
-                      ? "Làm nóng lò ở 350 ° F..."
-                      : "Kết hợp các nguyên liệu khô trong một cái bát..."
-                      }`}
-                    value={step}
-                    onChange={(e) => handleTutorialChange(index, e.target.value)}
-                    rows={3}
-                    disabled={isLoading}
-                  />
-                </Form.Group>
-              </Col>
-              <Col xs="auto" className="d-flex align-items-center justify-content-center">
-                <Button
-                  variant="link"
-                  onClick={() => removeTutorialStep(index)}
-                  className="text-danger"
-                >
-                  <FiX size={24} />
-                </Button>
-              </Col>
-            </Row>
-          ))}
-
-          <Button
-            onClick={addTutorialStep}
-            className="custom-button d-flex align-items-center mt-4"
-          >
-            <FiPlus className="mr-2" /> Thêm bước
-          </Button>
+              <Button
+                onClick={addTutorialStep}
+                className="custom-button d-flex align-items-center mt-4"
+              >
+                <FiPlus className="mr-2" /> Thêm bước
+              </Button>
+            </div>
+          </div>
 
           <hr className="mb-8" />
 
@@ -495,7 +553,7 @@ const RecipeCustomer = () => {
                     value={numberOfService}
                     onChange={handleInputChange(setNumberOfService, "numberOfService")}
                     disabled={isLoading}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                   />
                 </Form.Group>
               </Col>
@@ -515,7 +573,7 @@ const RecipeCustomer = () => {
                     value={totalTime}
                     onChange={handleInputChange(setTotalTime, "totalTime")}
                     disabled={isLoading}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                   />
                 </Form.Group>
               </Col>
@@ -534,7 +592,7 @@ const RecipeCustomer = () => {
                     value={price}
                     onChange={handleInputChange(setPrice, "price")}
                     disabled={isLoading}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                   />
                 </Form.Group>
               </Col>
@@ -553,7 +611,7 @@ const RecipeCustomer = () => {
                     value={video}
                     onChange={handleInputChange(setVideo, "video")}
                     disabled={isLoading}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                   />
                 </Form.Group>
               </Col>
@@ -590,7 +648,7 @@ const RecipeCustomer = () => {
                     value={nutrition}
                     onChange={handleInputChange(setNutrition, "nutrition")}
                     disabled={isLoading}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                   />
                 </Form.Group>
               </Col>
@@ -667,7 +725,7 @@ const RecipeCustomer = () => {
           </div>
         </form>
       </div>
-    </>
+    </section>
   );
 };
 
