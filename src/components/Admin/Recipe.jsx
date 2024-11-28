@@ -176,7 +176,7 @@ const CRUD = () => {
       // Step 3: Refresh the data and clear inputs
       await getData();
       clear();
-      toast.success("Recipe and images have been added successfully!");
+      toast.success("Công thức và hình ảnh đã được thêm thành công!");
     } catch (error) {
       console.error("Error saving recipe or uploading images:", error);
       toast.error(`Failed to add recipe or upload images: ${error.message}`);

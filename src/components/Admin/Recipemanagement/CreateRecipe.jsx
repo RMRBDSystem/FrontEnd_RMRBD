@@ -59,29 +59,26 @@ const RecipeCustomer = () => {
   const validateFields = () => {
     const newErrors = {};
 
-    if (!recipeName) newErrors.recipeName = "Recipe name is required.";
+    if (!recipeName) newErrors.recipeName = "Tên công thức là bắt buộc.";
     if (!numberOfService || isNaN(numberOfService) || numberOfService <= 0) {
-      newErrors.numberOfService = "Please enter a valid number of servings.";
+      newErrors.numberOfService = "Vui lòng nhập số lượng phần ăn hợp lệ.";
     }
     if (!price || isNaN(price) || price < 0) {
-      newErrors.price = "Please enter a valid price.";
+      newErrors.price = "Vui lòng nhập giá hợp lệ.";
     }
-    if (!nutrition) newErrors.nutrition = "Nutrition information is required.";
-    if (!tutorial) newErrors.tutorial = "Tutorial is required.";
-    if (!video) newErrors.video = "Video is required.";
-    if (!ingredient) newErrors.ingredient = "Ingredient is required.";
-    if (!description) newErrors.description = "Description is required.";
+    if (!nutrition) newErrors.nutrition = "Thông tin dinh dưỡng là cần thiết.";
+    if (!tutorial) newErrors.tutorial = "Hướng dẫn là cần thiết.";
+    if (!video) newErrors.video = "Video là bắt buộc.";
+    if (!ingredient) newErrors.ingredient = "Thành phần là bắt buộc.";
+    if (!description) newErrors.description = "Mô tả là bắt buộc.";
     if (!totalTime || isNaN(totalTime) || totalTime <= 0) {
-      newErrors.totalTime = "Please enter a valid total time.";
+      newErrors.totalTime = "Vui lòng nhập tổng thời gian hợp lệ.";
     }
     if (recipeImage.length === 0) {
-      newErrors.recipeImage = "At least one image is required.";
+      newErrors.recipeImage = "Ít nhất một hình ảnh là bắt buộc.";
     }
     if (selectedTagIds.length === 0) {
-      newErrors.selectedTagIds = "Please select at least one tag.";
-    }
-    if (selectedTagIds.length === 0) {
-      newErrors.selectedTagIds = "Please select at least one tag.";
+      newErrors.selectedTagIds = "Vui lòng chọn ít nhất một thẻ.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -180,7 +177,7 @@ const RecipeCustomer = () => {
       }
 
       clear();
-      toast.success("Recipe and images have been added successfully!");
+      toast.success("Công thức và hình ảnh đã được thêm thành công!");
     } catch (error) {
       console.error("Error saving recipe or uploading images:", error);
       toast.error(`Failed to add recipe or upload images: ${error.message}`);

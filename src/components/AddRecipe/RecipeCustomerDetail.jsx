@@ -87,7 +87,7 @@ const RecipeDetail = () => {
   }
 
   return (
-    <>
+    <section className="section-center">
       <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">{recipe?.recipeName || "N/A"}</h1>
 
@@ -226,7 +226,7 @@ const RecipeDetail = () => {
             )}
           </p>
           <p className="text-lg">
-            <strong>Status:</strong>
+            <strong>Status: </strong>
             {recipe?.status === 1
               ? "Censored"
               : recipe?.status === -1
@@ -243,7 +243,7 @@ const RecipeDetail = () => {
           </button>
         </div>
       </div>
-    </>
+    </section>
   );
 };
 

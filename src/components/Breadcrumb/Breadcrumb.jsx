@@ -22,7 +22,7 @@ const Breadcrumb = () => {
     faq: "Frequently Asked Questions"
   };
   return (<>
-    <div className="min-h-32 flex items-end w-full p-4 bg-gray-900">
+    <div className="min-h-24 flex items-end w-full p-4 bg-gray-900">
     </div>
     <nav className="flex items-end w-full p-4">
       <ol className="pl-40 inline-flex space-x-1 md:space-x-2 rtl:space-x-reverse">
