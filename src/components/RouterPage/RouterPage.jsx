@@ -104,6 +104,11 @@ export default function RouterPage() {
             <Route path="/recipe-customer-detail" element={<RecipeCustomerDetail />} />
             <Route path="/recipe-list-customer" element={<RecipeListCustomer />} />
             <Route path="/editrecipecustomer-recipe/:recipeId" element={<EditRecipeForCustomer />} />
+            <Route path="/listreport" element={<ListReport />} />
+            <Route path="/reportdetail/:reportId" element={<ReportDetail />} />
+            <Route path="/reportmod" element={<ReportMod />} />
+            <Route path="/reportresponse/:reportId" element={<ReportResponse />} />
+            <Route path="/report" element={<Report />} />
             <Route
               path="/recipecustomer-list"
               element={
