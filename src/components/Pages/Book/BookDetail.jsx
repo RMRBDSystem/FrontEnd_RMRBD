@@ -13,7 +13,8 @@ import { saveBookRate, updateBookRate, getBookRatePoint, getCountBookRateBybookI
 import { getAccountById } from "../../services/AccountService"
 import { getProvinceName, fetchDistrictName, fetchWardName } from '../../services/AddressService';
 import { ToastContainer, toast } from 'react-toastify';
-
+import { useSocket } from "../../../App"
+import {createNotification} from "../../services/NotificationService"
 const BookDetail = () => {
     const { bookId } = useParams();
     const [book, setBook] = useState(null);
@@ -39,6 +40,7 @@ const BookDetail = () => {
     const [hover, setHover] = useState(null);
     const [checkRatedStatus, setcheckRated] = useState("");
     const [accountName, setAccountName] = useState("")
+    const [roleaccountonline,setRoleaccountonline] = useState("");
     const handleOpenModal = () => {
         setShowModal(true);
     };
@@ -61,6 +63,24 @@ const BookDetail = () => {
             console.error("Failed to save recipe rate:", error);
         }
     };
+    const { socket, accountOnline } = useSocket();
+    const handleNotification = (text) => {
+        socket.emit("sendNotification", {
+            senderName: accountOnline,
+            receiverName: accountName,
+            content:text,
+        });
+        const addNotification = () => {
+            const newNotificationData = {
+                accountId: createById,
+                content: text,
+                date: new Date().toISOString(),
+                status: 1,
+            };
+            createNotification(newNotificationData); // Không cần await
+        };
+        addNotification();
+    };
 
     useEffect(() => {
         const fetchBookData = async () => {
@@ -71,12 +91,14 @@ const BookDetail = () => {
                 const countrate = await getCountBookRateBybookId(bookId);
                 const checkrateddata = await checkRated(accountId, bookId);
                 const createbyName = await getAccountById(data.createById);
+                const infoacconline =await getAccountById(accountId);
                 setcheckRated(checkrateddata?.ratePoint);
                 setCreateById(data.createById);
                 setAverageRate(rateData[0]?.AvgRatePoint);
                 setCountRate(countrate || 0);
                 setBook(data);
                 setAccountName(createbyName.userName);
+                setRoleaccountonline(infoacconline.roleId);
                 setImageUrl(imageData);
                 const addressData = await fetch(`https://rmrbdapi.somee.com/odata/CustomerAddress/${data.senderAddressId}`, {
                     method: 'GET',
@@ -498,7 +520,10 @@ const BookDetail = () => {
                                     </button>
                                     <button
                                         className="bg-custom-orange hover:bg-orange-500 text-white font-bold py-2 px-4 rounded"
-                                        onClick={checkRatedStatus ? handleUpdateRecipeRate : handleSaveRecipeRate}
+                                        onClick={() => {
+                                            handleNotification(`${accountOnline} đã đánh giá ${ratepoint} sao về sách ${book.recipeName} của bạn`);
+                                            checkRatedStatus ? handleUpdateRecipeRate() : handleSaveRecipeRate();
+                                          }}
                                     >
                                         {checkRatedStatus ? "Update Ratepoint" : "Save Ratepoint"}
                                     </button>
@@ -514,7 +539,7 @@ const BookDetail = () => {
                 </div>
                 <div className="max-w-10xl mx-auto p-6 bg-white shadow-md rounded-lg flex justify-center" style={{width:"205%"}}>
                     <div className="w-full max-w-6xl">
-                    <CommentBooks bookId={bookId} createById={createById} />
+                    <CommentBooks bookId={bookId} createById={createById} roleaccountonline={roleaccountonline} />
                     </div>
                 </div>
             </div>

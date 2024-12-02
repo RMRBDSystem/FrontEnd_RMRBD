@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { saveReportImage, saveReport } from '../../services/ReportService';
-import { TextField, Button, Box, Typography, Input } from '@mui/material';
+import { TextField, Button, Box, Typography } from '@mui/material';
 import Swal from 'sweetalert2';  // Import SweetAlert2
+import { useNavigate } from 'react-router-dom';  // Import useNavigate hook
 
 const ReportPage = () => {
     const imageInput = useRef(null);
@@ -10,6 +11,9 @@ const ReportPage = () => {
     const [content, setContent] = useState('');
     const [image, setImage] = useState(null);
     const [UserId, setUserId] = useState('');
+    const [loading, setLoading] = useState(false);  // Loading state
+    const navigate = useNavigate();  // Initialize useNavigate hook
+
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -43,6 +47,8 @@ const ReportPage = () => {
             Status: -1
         };
 
+        setLoading(true);  // Set loading state to true
+
         try {
             const response = await saveReport(report);
 
@@ -52,6 +58,7 @@ const ReportPage = () => {
                     title: 'Báo cáo thất bại',
                     showConfirmButton: true
                 });
+                setLoading(false);
                 return;
             }
 
@@ -63,8 +70,10 @@ const ReportPage = () => {
                         title: 'Cảm ơn vì đã cung cấp ý kiến',
                         showConfirmButton: true
                     }).then(() => {
-                        window.location.href = '/listreport';
+                        navigate('/listreport');  // Navigate to the report list page
                     });
+                } else {
+                    setLoading(false);
                 }
             } else {
                 Swal.fire({
@@ -72,7 +81,7 @@ const ReportPage = () => {
                     title: 'Cảm ơn vì đã cung cấp ý kiến',
                     showConfirmButton: true
                 }).then(() => {
-                    window.location.href = '/listreport';
+                    navigate('/listreport');  // Navigate to the report list page
                 });
             }
         } catch (error) {
@@ -82,13 +91,17 @@ const ReportPage = () => {
                 text: 'Có lỗi xảy ra. Vui lòng thử lại sau.',
                 showConfirmButton: true
             });
+            setLoading(false);
         }
     };
 
     return (
         <section className="section-center">
             <div className="report-page max-w-4xl container text-center bg-white shadow-lg rounded p-3 my-3 mx-auto">
-                <Typography variant="h5" color="primary" gutterBottom><strong>ĐƠN KHIẾU NẠI</strong></Typography>
+                <span className="material-icons text-blue-600 text-6xl">
+                    email
+                </span>
+                <Typography variant="h5" color="primary" gutterBottom><strong>Đơn Khiếu Nại</strong></Typography>
 
                 <form onSubmit={handleSubmit} noValidate>
                     {/* Title Input */}
@@ -166,8 +179,8 @@ const ReportPage = () => {
 
                     {/* Submit and History buttons */}
                     <Box mt={2}>
-                        <Button variant="contained" color="success" size="large" type="submit" sx={{ mr: 2 }}>
-                            Gửi báo cáo
+                        <Button variant="contained" color="success" size="large" type="submit" sx={{ mr: 2 }} disabled={loading}>
+                            {loading ? 'Đang gửi...' : 'Gửi báo cáo'}
                         </Button>
                         <Button variant="outlined" color="error" size="large" href="/listreport">
                             Xem lịch sử báo cáo

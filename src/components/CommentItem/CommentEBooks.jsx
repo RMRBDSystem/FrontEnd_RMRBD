@@ -10,7 +10,9 @@ import {useSocket} from "../../App"
 import {createNotification} from "../services/NotificationService"
 import {getAccountById} from "../services/AccountService"
 import {getEbookById} from "../services/BookService"
-const Comments = ({ebookId,createById}) => {
+import Swal from 'sweetalert2';
+
+const Comments = ({ebookId,createById,roleaccountonline}) => {
     const accountId = Cookies.get("UserId");
     const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
@@ -34,12 +36,21 @@ const Comments = ({ebookId,createById}) => {
     }
 
     const deleteComment = async (commentId) => {
-        if (window.confirm("Are you sure that you want to remove comment?")) {
-            await RemoveComment(commentId);
-            setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
-            backgroundPromise.push(backendComments)
-
-        }
+        Swal.fire({
+            text: "Bạn có thực sự muốn xóa bình luận này?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Có, xóa nó!",
+            cancelButtonText: "Không"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await RemoveComment(commentId);
+                setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
+                backgroundPromise.push(backendComments);
+            }
+        });
     };
 
 
@@ -131,7 +142,7 @@ const Comments = ({ebookId,createById}) => {
                 <CommentForm 
                 submitLabel="Write" 
                 handleSubmit={handleWriteClick} 
-                onClick={() => handleNotification(`${accountOnline} commented on your ${ebook.ebookName} recipe`)} 
+                onClick={() => handleNotification(`${accountOnline} đã bình luận về sách điện tử ${ebook.ebookName} của bạn`)} 
                 />
                 <div className="comments-container">
                     {Comments.slice(0, visibleComments).map((comment) => {
@@ -147,7 +158,8 @@ const Comments = ({ebookId,createById}) => {
                                 deleteComment={deleteComment}
                                 rootCommentId={comment.rootCommentId}
                                 currentUserId={Number(accountId)}
-                                createByUserId= {Number(createById)}
+                                createByUserId={Number(createById)}
+                                roleaccountonline={Number(roleaccountonline)}
                             />
                         );
                     })}

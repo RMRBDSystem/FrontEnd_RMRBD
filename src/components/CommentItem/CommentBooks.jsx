@@ -1,22 +1,23 @@
-import { useState, useEffect} from "react"
+import { useState, useEffect } from "react"
 import Comment from "./Comment";
 import CommentForm from "./CommentForm";
 import Cookies from 'js-cookie';
-import { createComment, UpdateComment, RemoveComment,getCommentsbyBookId } from "../services/CommentService"
+import { createComment, UpdateComment, RemoveComment, getCommentsbyBookId } from "../services/CommentService"
 import "../../assets/styles/Components/commentstyle.css"
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {useSocket} from "../../App"
-import {createNotification} from "../services/NotificationService"
-import {getAccountById} from "../services/AccountService"
-import {getBookById} from "../services/BookService"
-const Comments = ({bookId,createById}) => {
+import { useSocket } from "../../App"
+import { createNotification } from "../services/NotificationService"
+import { getAccountById } from "../services/AccountService"
+import { getBookById } from "../services/BookService"
+import Swal from 'sweetalert2';
+const Comments = ({ bookId, createById, roleaccountonline }) => {
     const accountId = Cookies.get("UserId");
     const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
     const [activeComment, setActiveComment] = useState(null); //  Tracks active comment for editing
     const backgroundPromise = [];
-    const [createbyName,setCreatebyName] =useState(null);
+    const [createbyName, setCreatebyName] = useState(null);
     const [book, setBook] = useState(null)
     const Comments = backendComments
         .filter((comment) => comment.rootCommentId === null)
@@ -34,12 +35,21 @@ const Comments = ({bookId,createById}) => {
     }
 
     const deleteComment = async (commentId) => {
-        if (window.confirm("Are you sure that you want to remove comment?")) {
-            await RemoveComment(commentId);
-            setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
-            backgroundPromise.push(backendComments)
-
-        }
+        Swal.fire({
+            text: "Bạn có thực sự muốn xóa bình luận này?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Có, xóa nó!",
+            cancelButtonText: "Không"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await RemoveComment(commentId);
+                setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
+                backgroundPromise.push(backendComments);
+            }
+        });
     };
 
 
@@ -60,6 +70,7 @@ const Comments = ({bookId,createById}) => {
         ));
         backgroundPromise.push(backendComments)
         setActiveComment(null);
+        
     }
     const handleWriteClick = (text) => {
         if (!accountId) {
@@ -75,7 +86,7 @@ const Comments = ({bookId,createById}) => {
         socket.emit("sendNotification", {
             senderName: accountOnline,
             receiverName: createbyName,
-            content:text,
+            content: text,
         });
         const addNotification = () => {
             const newNotificationData = {
@@ -99,12 +110,13 @@ const Comments = ({bookId,createById}) => {
                 setBook(bookdata)
                 setCreatebyName(receiverName.userName);
                 setBackendComments(data);
+                console.log("reole",roleaccountonline);
             } catch (err) {
                 console.error(err);
             }
         };
-        fetchComment();    
-    }, [bookId,backgroundPromise,createById]);
+        fetchComment();
+    }, [bookId, backgroundPromise, createById]);
     const addComment = async (text, rootcommentId = null) => {
 
         const newCommentData = {
@@ -121,6 +133,7 @@ const Comments = ({bookId,createById}) => {
         setBackendComments([comment, ...backendComments]);
         backgroundPromise.push(backendComments)
         setActiveComment(null);
+        
     };
     return (
         <>
@@ -128,10 +141,10 @@ const Comments = ({bookId,createById}) => {
             <div className="comments">
                 <h3 className="comments-title">Comments</h3>
                 <div className="comment-form-title">Write comment</div>
-                <CommentForm 
-                submitLabel="Write" 
-                handleSubmit={handleWriteClick} 
-                onClick={() => handleNotification(`${accountOnline} commented on your ${book.bookName} book`)} 
+                <CommentForm
+                    submitLabel="Write"
+                    handleSubmit={handleWriteClick}
+                    onClick={() => handleNotification(`${accountOnline} đã bình luận về sách ${book.bookName} của bạn`)}
                 />
                 <div className="comments-container">
                     {Comments.slice(0, visibleComments).map((comment) => {
@@ -147,7 +160,8 @@ const Comments = ({bookId,createById}) => {
                                 deleteComment={deleteComment}
                                 rootCommentId={comment.rootCommentId}
                                 currentUserId={Number(accountId)}
-                                createByUserId= {Number(createById)}
+                                createByUserId={Number(createById)}
+                                roleaccountonline={Number(roleaccountonline)}
                             />
                         );
                     })}

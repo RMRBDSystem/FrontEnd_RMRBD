@@ -11,9 +11,10 @@ import { getCommentsbyRecipeId } from "../services/CommentService"
 import {getAccountById} from "../services/AccountService"
 import {getRecipeById} from "../services/RecipeService"
 import {createNotification} from "../services/NotificationService"
+import Swal from 'sweetalert2';
 //import PropTypes from "prop-types";
 import {useSocket} from "../../App"
-const Comments = ({ recipeId, createById}) => {
+const Comments = ({ recipeId, createById,roleaccountonline}) => {
     const accountId = Cookies.get("UserId");
     const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
@@ -35,11 +36,21 @@ const Comments = ({ recipeId, createById}) => {
     }
 
     const deleteComment = async (commentId) => {
-        if (window.confirm("Are you sure that you want to remove comment?")) {
-            await RemoveComment(commentId);
-            setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
-            backgroundPromise.push(backendComments)
-        }
+        Swal.fire({
+            text: "Bạn có thực sự muốn xóa bình luận này?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Có, xóa nó!",
+            cancelButtonText: "Không"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await RemoveComment(commentId);
+                setBackendComments(backendComments.filter((comment) => comment.id !== commentId));
+                backgroundPromise.push(backendComments);
+            }
+        });
     };
 
 
@@ -132,7 +143,7 @@ const Comments = ({ recipeId, createById}) => {
                 <CommentForm
                     submitLabel="Write"
                     handleSubmit={handleWriteClick}
-                    onClick={() => handleNotification(`${accountOnline} commented on your ${recipe.recipeName} recipe`)} 
+                    onClick={() => handleNotification(`${accountOnline} đã bình luận về công thức ${recipe.recipeName} của bạn`)} 
                 />
                 <div className="comments-container">
                     {Comments.slice(0, visibleComments).map((comment) => {
@@ -149,6 +160,7 @@ const Comments = ({ recipeId, createById}) => {
                                 rootCommentId={comment.rootCommentId}
                                 currentUserId={Number(accountId)}
                                 createByUserId={Number(createById)}
+                                roleaccountonline={Number(roleaccountonline)}
                             />
                         );
                     })}

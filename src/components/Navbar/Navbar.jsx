@@ -215,7 +215,7 @@ const Navbar = () => {
       localStorage.removeItem("isLoggedIn");
       navigate("/");
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("Đăng xuất không thành công:", error);
     }
   };
   const dropdownRef = React.useRef(null); // Khởi tạo ref
@@ -358,21 +358,16 @@ const Navbar = () => {
                   alt="User Avatar"
                   className="w-12 h-12 object-cover rounded-full"
                 />
-                <span
-                  className={`text-white ml-2 font-medium`}
-                >
-                  My Account
-                </span>
               </div>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md text-black z-10">
+                <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-md text-black z-10">
                   {userRole === "Admin" && (
                     <>
                       <NavLink
                         to="/admin-dashboard" // Change to your admin page
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 rounded-md"
                       >
-                        Admin Dashboard
+                        Quản trị viên
                       </NavLink>
                     </>
                   )}
@@ -380,15 +375,15 @@ const Navbar = () => {
                     <>
                       <NavLink
                         to="/update-account"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 rounded-md"
                       >
-                        My Profile
+                        Đăng kí bán hàng
                       </NavLink>
                       <NavLink
                         to="/list-saved-recipe"
                         className="block px-4 py-2 hover:bg-gray-200"
                       >
-                        My Collection
+                        Công thức của tôi
                       </NavLink>
                       <NavLink
                         to="/report"
@@ -432,7 +427,7 @@ const Navbar = () => {
                         to="/list-saved-recipe"
                         className="block px-4 py-2 hover:bg-gray-200"
                       >
-                        My Collection
+                        Công thức của tôi
                       </NavLink>
                       <NavLink
                         to="/report"
@@ -446,7 +441,7 @@ const Navbar = () => {
                     className="block px-4 py-2 hover:bg-gray-200 cursor-pointer"
                     onClick={handleLogout}
                   >
-                    Logout
+                    Đăng xuất
                   </div>
                 </div>
               )}
@@ -563,10 +558,10 @@ const Navbar = () => {
                       <>
                         <div className="w-full">
                           <NavLink to="/list-saved-recipe" className="block px-4 py-2">
-                            My Collection
+                            Công thức của tôi
                           </NavLink>
                           <NavLink to="/update-account" className="block px-4 py-2">
-                            Update Account
+                            Đăng kí bán hàng
                           </NavLink>
                           <Button
                             fullWidth
@@ -574,7 +569,7 @@ const Navbar = () => {
                             size="sm"
                             onClick={handleLogout}
                           >
-                            Logout
+                            Đăng xuất
                           </Button>
                         </div>
                       </>

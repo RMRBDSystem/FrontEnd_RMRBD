@@ -15,13 +15,22 @@ const Comment = ({
     addComment,
     rootCommentId = null,
     currentUserId,
+    createByUserId,
+    roleaccountonline,
 }) => {
     const fiveMinutes = 300000;
     const timePassed = new Date() - new Date(comment.date) < fiveMinutes;
     const canReply = Boolean(currentUserId);
     const canEdit = currentUserId === comment.customerId && timePassed;
-    const canDelete = currentUserId === comment.customerId && timePassed;
-    const commentedAt = new Date(comment.date).toLocaleDateString();
+    const canDelete = currentUserId === comment.customerId && timePassed || createByUserId===currentUserId
+        || roleaccountonline === 3;
+    const commentedAt = new Date(comment.date).toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
     const isReplying =
         activeComment &&
         activeComment.type === 'replying' &&
@@ -53,15 +62,15 @@ const Comment = ({
             <div className="comment-right-part" >
                 <div className="comment-content" style={{ display: 'flex' }}>
                     <div className="comment-author">{accountName || "Guest"}</div>
-                    <div style={{ color : '#333' }}>{commentedAt}</div>
+                    <div style={{ color: '#333' }}>{commentedAt}</div>
                 </div>
-                {!isEditing && <div className="comment-text" style={{ color : '#333' }}>{comment.content}</div>}
+                {!isEditing && <div className="comment-text" style={{ color: '#333' }}>{comment.content}</div>}
                 {isEditing && (
                     <CommentForm
                         submitLabel="Update"
                         hasCancelButton
                         initialText={comment.content}
-                        handleSubmit={(text) => updateComment(text, comment.commentId,comment.rootCommentId)}
+                        handleSubmit={(text) => updateComment(text, comment.commentId, comment.rootCommentId)}
                         handleCancel={() => setActiveComment(null)}
                     />
                 )}
@@ -116,6 +125,8 @@ const Comment = ({
                                 addComment={addComment}
                                 rootCommentId={comment.commentId}
                                 currentUserId={currentUserId}
+                                createByUserId={createByUserId}
+                                roleaccountonline={roleaccountonline}
                             />
                         ))}
                     </div>
@@ -164,6 +175,7 @@ Comment.propTypes = {
     activeComment: PropTypes.any,
     addComment: PropTypes.func.isRequired,
     setActiveComment: PropTypes.func.isRequired,
-    rootCommentId: PropTypes.number
+    rootCommentId: PropTypes.number,
+    roleaccountonline:PropTypes.number
 };
 export default Comment;

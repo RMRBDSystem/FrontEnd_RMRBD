@@ -141,10 +141,13 @@ const RecipeDetail = () => {
               </p>
               <p className="text-lg">
                 <strong className="text-gray-800">Giá:</strong>{" "}
-                {recipe?.price || "N/A"}đ
+                {recipe?.price || "N/A"} xu
               </p>
               <p className="text-lg">
                 <strong>Sự dinh dưỡng:</strong> {recipe?.nutrition || "N/A"}
+              </p>
+              <p className="text-lg">
+                <strong>Năng lượng:</strong> {recipe?.nutrition || "N/A"} kcal
               </p>
               <p className="text-lg mb-2">
                 <strong className="text-gray-800">Ngày tạo:</strong>{" "}
