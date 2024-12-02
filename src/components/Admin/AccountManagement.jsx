@@ -277,7 +277,7 @@ const AccountManagement = () => {
   });
 
   return (
-    <div className="flex flex-col min-h-screen font-roboto">
+    <div className="flex flex-col min-h-screen">
       <div className="flex flex-1">
         {/* Sidebar */}
         <div

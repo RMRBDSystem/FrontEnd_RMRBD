@@ -28,6 +28,7 @@ const RecipeCustomer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [energy,setEnergy] =useState("");
   useEffect(() => {
     const storedUserId = Cookies.get("UserId");
     console.log("Stored UserId:", storedUserId);
@@ -74,6 +75,8 @@ const RecipeCustomer = () => {
     if (!video) newErrors.video = "Video là bắt buộc.";
     if (!ingredient) newErrors.ingredient = "Thành phần là bắt buộc.";
     if (!description) newErrors.description = "Mô tả là bắt buộc.";
+    if (!energy) newErrors.energy = "Năng lượng là bắt buộc.";
+
     if (!totalTime || isNaN(totalTime) || totalTime <= 0) {
       newErrors.totalTime = "Vui lòng nhập tổng thời gian hợp lệ.";
     }
@@ -138,7 +141,7 @@ const RecipeCustomer = () => {
     if (!validateFields()) return;
     // const url = "https://localhost:7220/odata/Recipe";
     const url = "https://rmrbdapi.somee.com/odata/Recipe";
-    const formattedTutorial = tutorial.map((step, index) => `Bước ${index + 1}: ${step}`);
+    const formattedTutorial = tutorial.map((step, index) => `Bước ${step}`);
     const recipeData = {
       recipeName,
       numberOfService,
@@ -152,7 +155,7 @@ const RecipeCustomer = () => {
       description,
       video,
       censorNote,
-      Energy: 123
+      energy
     };
 
     console.log("Recipe data:", recipeData);
@@ -202,6 +205,7 @@ const RecipeCustomer = () => {
     setVideo("");
     setIngredients([]);
     setTotalTime("");
+    setEnergy("");
     const today = new Date().toISOString().slice(0, 10);
     setCreateDate(today); // Reset createDate to today's date
     setErrors({});
@@ -277,11 +281,6 @@ const RecipeCustomer = () => {
     ));
   };
 
-  // const toggleTagsVisibility = () => {
-  //   setTagsVisible(!tagsVisible); // Toggle the visibility
-  // };
-
-
   const handleIngredientChange = (index, value) => {
     const newIngredients = [...ingredient];
     newIngredients[index] = value;
@@ -313,15 +312,15 @@ const RecipeCustomer = () => {
     setTutorial(updatedTutorial);
   };
 
-  const [showNoteForm, setShowNoteForm] = useState(false);
+  // const [showNoteForm, setShowNoteForm] = useState(false);
 
-  const handleAddNoteClick = () => {
-    setShowNoteForm(true);
-  };
+  // const handleAddNoteClick = () => {
+  //   setShowNoteForm(true);
+  // };
 
-  const handleCancelNote = () => {
-    setShowNoteForm(false);
-  };
+  // const handleCancelNote = () => {
+  //   setShowNoteForm(false);
+  // };
 
   const toggleTagSelection = (tagId) => {
     const isSelected = selectedTagIds.includes(tagId);
@@ -619,17 +618,18 @@ const RecipeCustomer = () => {
 
             <Row className="mb-4">
               <Col>
-                <Form.Group controlId="createDate">
-                  <Form.Label>Ngày tạo</Form.Label>
-                  {errors.createDate && (
-                    <p className="text-danger">{errors.createDate}</p>
+                <Form.Group controlId="energy">
+                  <Form.Label>Năng lượng</Form.Label>
+                  {errors.energy && (
+                    <p className="text-danger">{errors.energy}</p>
                   )}
                   <Form.Control
-                    type="text"
-                    placeholder="Create Date"
-                    value={createDate}
-                    onChange={(e) => setCreateDate(e.target.value)}
-                    readOnly
+                    type="number"
+                    placeholder="e.g. 120 calories"
+                    value={energy}
+                    onChange={handleInputChange(setEnergy, "energy")}
+                    disabled={isLoading}
+                    className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                   />
                 </Form.Group>
               </Col>
@@ -644,7 +644,7 @@ const RecipeCustomer = () => {
                   )}
                   <Form.Control
                     type="text"
-                    placeholder="e.g. 120 calories"
+                    placeholder="e.g. Có chất béo, Vitamin B1, B6, B12 từ thịt lợn"
                     value={nutrition}
                     onChange={handleInputChange(setNutrition, "nutrition")}
                     disabled={isLoading}
@@ -688,7 +688,7 @@ const RecipeCustomer = () => {
               </Form.Control>
             </Form.Group>
           </Col>
-          <hr className="nm-8" />
+          {/* <hr className="nm-8" />
           <div className="notes-section">
             <h2 className="text-2xl font-bold mb-4">Ghi chú (Tùy chọn)</h2>
             <p>Thêm bất kỳ lời khuyên hữu ích nào về thay thế thành phần, phục vụ hoặc lưu trữ tại đây.</p>
@@ -716,7 +716,7 @@ const RecipeCustomer = () => {
                 </div>
               </Form>
             )}
-          </div>
+          </div> */}
 
           <div className="d-flex justify-content-between align-items-center mt-4">
             <Button variant="danger" onClick={handleSave} className="px-4 py-2 fw-bold">

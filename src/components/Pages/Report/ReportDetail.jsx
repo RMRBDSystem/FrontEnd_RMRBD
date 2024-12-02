@@ -95,7 +95,7 @@ const ReportDetail = () => {
                             {report.status === 1 ? (
                                 <span style={{ color: 'green' }}>Đã xử lý</span>
                             ) : report.status === -1 ? (
-                                <span style={{ color: 'yellow' }}>Chưa xử lý</span>
+                                <span style={{ color: 'orange' }}>Chưa xử lý</span>
                             ) : (
                                 <span style={{ color: 'red' }}>Đã hủy</span>
                             )}

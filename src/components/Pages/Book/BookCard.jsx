@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarOutline } from "@fortawesome/free-regular-svg-icons";
 import { useNavigate } from "react-router-dom";
+import "../../../assets/styles/Components/BookCard.css";
 
 function BookCard({ book }) {
   const navigate = useNavigate();
@@ -26,7 +27,6 @@ function BookCard({ book }) {
   return (
     <div className="book">
       <div className="book-container">
-        {/* Book Cover */}
         <div
           className="top"
           style={{

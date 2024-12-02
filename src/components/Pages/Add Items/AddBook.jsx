@@ -204,7 +204,7 @@ const AddBook = () => {
       {/* Background and Form Section */}
       <div className="flex-grow" style={{ backgroundImage: `url(${BackgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="bg-white mx-4 p-4 shadow-md mt-20" style={{ minHeight: 'calc(100vh - 200px)' }}>
-          <h2 className="text-2xl font-bold ml-4" style={{ fontFamily: 'Roboto, sans-serif' }}>Add new book</h2>
+          <h2 className="text-2xl font-bold ml-4">Add new book</h2>
           <div className="border-b border-black w-auto mx-auto mt-1" />
 
           <form onSubmit={handleSubmit} className="mt-4">

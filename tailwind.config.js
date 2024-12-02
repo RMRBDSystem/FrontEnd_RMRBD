@@ -8,6 +8,9 @@ export default withMT({
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter Tight', 'sans-serif'],  // Cập nhật font chữ mặc định
+      },
       translate: {
         'full': '100%',
         'half': '50%',

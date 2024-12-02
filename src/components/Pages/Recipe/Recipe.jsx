@@ -80,12 +80,12 @@ function Recipe() {
 
 
     return (
-        <section className="py-20">
+        <section className="section-center">
             <div className="container px-4 mx-auto">
                 {/* Giới hạn độ rộng tối đa và căn giữa nội dung */}
-                <div className="flex flex-wrap -mx-4">
+                <div className="flex flex-col lg:flex-row items-start justify-between -mx-4">
                     {/* Sidebar */}
-                    <div className="w-full lg:w-4/12 xl:w-3/12 px-4">
+                    <div className="flex w-full lg:w-auto lg:flex-row px-4 items-center space-x-4">
                         <Sidebar onFilterChange={applyFilters} />
                     </div>
 

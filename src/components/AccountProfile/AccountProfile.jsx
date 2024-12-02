@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import Tesseract from "tesseract.js";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
 
 const AccountProfile = () => {
   const [accountID, setAccountID] = useState();
@@ -20,7 +21,6 @@ const AccountProfile = () => {
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [idCardNumber, setIdCardNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  // State lưu lỗi cho từng trường
   const [errors, setErrors] = useState({
     portrait: "",
     frontIDCard: "",
@@ -48,10 +48,26 @@ const AccountProfile = () => {
       formErrors.bankAccountQR = "Vui lòng chọn mã QR tài khoản ngân hàng.";
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
-      toast.error("Vui lòng điền đầy đủ thông tin.");
+      Swal.fire({
+        title: 'Lỗi',
+        text: 'Vui lòng điền đầy đủ thông tin.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
       return;
     }
-    if (!window.confirm("Bạn có chắc chắn muốn gửi thông tin không?")) return;
+
+    const confirmSave = await Swal.fire({
+      title: 'Xác nhận',
+      text: 'Bạn có chắc chắn muốn gửi thông tin không?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy'
+    });
+
+    if (!confirmSave.isConfirmed) return;
+
     const url = `https://rmrbdapi.somee.com/odata/AccountProfile/${accountID}`;
     const formData = new FormData();
     formData.append("portrait", portrait);
@@ -60,6 +76,7 @@ const AccountProfile = () => {
     formData.append("backIDCard", backIDCard);
     formData.append("dateOfBirth", dateOfBirth.toISOString().split("T")[0]);
     formData.append("iDCardNumber", idCardNumber);
+
     setIsLoading(true);
     try {
       const result = await axios.post(url, formData, {
@@ -70,13 +87,28 @@ const AccountProfile = () => {
       });
       console.log("API Response:", result.data);
       clear();
-      toast.success("Account Profile đã được thêm thành công");
+      Swal.fire({
+        title: 'Thành công',
+        text: 'Đơn đăng kí của bạn đã được gửi thành công!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(error.response.data.message);
+        Swal.fire({
+          title: 'Lỗi',
+          text: error.response.data.message,
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
         setIsLoading(false);
       } else {
-        toast.error("Lỗi khi gửi hồ sơ.");
+        Swal.fire({
+          title: 'Lỗi',
+          text: 'Lỗi khi gửi hồ sơ.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
         setIsLoading(false);
       }
     }
@@ -101,7 +133,6 @@ const AccountProfile = () => {
     const file = e.target.files[0];
     setFile(file);
     setPreview(URL.createObjectURL(file));
-    // Khi người dùng chọn ảnh, ẩn thông báo lỗi nếu có
     if (file) {
       setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
     }
@@ -109,8 +140,6 @@ const AccountProfile = () => {
 
   const handlefrontIDCardFileChange = (e) => {
     const file = e.target.files[0];
-
-    // Clear error message if user selects a valid file
     if (file) {
       setErrors((prevErrors) => ({ ...prevErrors, frontIDCard: "" }));
     }
@@ -130,7 +159,6 @@ const AccountProfile = () => {
       logger: (m) => console.log(m),
     })
       .then(({ data: { text } }) => {
-        // Kiểm tra số căn cước
         const idMatch = text.match(/\b\d{10,12}\b/);
         if (idMatch) {
           setIdCardNumber(idMatch[0]);
@@ -141,7 +169,6 @@ const AccountProfile = () => {
           }));
         }
 
-        // Kiểm tra ngày sinh (DD/MM/YYYY)
         const dateMatch = text.match(/\b(\d{2})\/(\d{2})\/(\d{4})\b/);
         if (dateMatch) {
           const [_, day, month, year] = dateMatch;
@@ -154,7 +181,6 @@ const AccountProfile = () => {
           }));
         }
 
-        // Kiểm tra nếu thiếu số căn cước hoặc ngày sinh
         if (!idMatch && !dateMatch) {
           setErrors((prevErrors) => ({
             ...prevErrors,
@@ -172,7 +198,6 @@ const AccountProfile = () => {
       });
   };
 
-  // Handle delete for each image
   const handleDeleteImage = (field, setFile, setPreview) => {
     setFile(null);
     setPreview(null);
@@ -180,233 +205,225 @@ const AccountProfile = () => {
   };
 
   return (
-    <>
+    <section className="section-center max-w-4xl bg-white rounded shadow-lg my-4">
       <ToastContainer />
-      <Container className="my-5">
-        <h2 className="text-center mb-4">Cập nhật hồ sơ</h2>
+      <Container className="items-center font-medium text-xl">
+        <h2 className="section-title">Thông tin tài khoản người bán</h2>
         <Form>
           <Row className="mb-4">
-            <Col>
+            <Form.Label>Thêm ảnh CCCD mặt trước</Form.Label>
+            {!frontIDCardPreview ? (
               <Form.Group controlId="frontIDCard">
-                <Form.Label>Ảnh căn cước mặt trước</Form.Label>
-                <Form.Control
+                <label
+                  htmlFor="fileInput"
+                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
+                >
+                  <h1 className="material-icons text-6xl">cloud_upload</h1>
+                  <p className="text-lg">Ảnh CCCD Mặt Trước</p>
+                </label>
+                <input
                   type="file"
+                  id="fileInput"
                   name="frontIDCard"
+                  multiple
+                  accept="image/*"
                   onChange={handlefrontIDCardFileChange}
                   disabled={isLoading}
+                  style={{ display: 'none' }}
                 />
                 {errors.frontIDCard && (
-                  <Form.Text className="text-danger">
-                    {errors.frontIDCard}
-                  </Form.Text>
-                )}
-                {frontIDCardPreview && (
-                  <div>
-                    <img
-                      src={frontIDCardPreview}
-                      alt="Front ID Preview"
-                      className="mt-2"
-                      style={{ width: "100%", maxWidth: "200px" }}
-                    />
-                    <Button
-                      variant="danger"
-                      onClick={() =>
-                        handleDeleteImage(
-                          "frontIDCard",
-                          setFrontIDCard,
-                          setFrontIDCardPreview
-                        )
-                      }
-                      disabled={isLoading}
-                      className="mt-2"
-                    >
-                      Xóa ảnh
-                    </Button>
-                  </div>
+                  <Form.Text className="text-danger mt-2">{errors.frontIDCard}</Form.Text>
                 )}
               </Form.Group>
-            </Col>
+            ) : (
+              <div className="mt-3">
+                <img
+                  src={frontIDCardPreview}
+                  alt="Front ID Preview"
+                  className="img-fluid rounded"
+                  style={{ maxWidth: "200px" }}
+                />
+                <div className="mt-2">
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteImage("frontIDCard", setFrontIDCard, setFrontIDCardPreview)}
+                    disabled={isLoading}
+                  >
+                    Xóa ảnh
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Row>
+          <Row className="mb-4">
+            <Form.Label>Số căn cước công dân</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Nhập số căn cước công dân"
+              value={idCardNumber}
+              onChange={(e) => setIdCardNumber(e.target.value)}
+              disabled={isLoading}
+              isInvalid={!!errors.idCardNumber}
+            />
+            {errors.idCardNumber && (
+              <Form.Text className="text-danger">{errors.idCardNumber}</Form.Text>
+            )}
           </Row>
 
           <Row className="mb-4">
-            <Col>
+            <Form.Label>Ngày sinh</Form.Label>
+            <DatePicker
+              selected={dateOfBirth}
+              onChange={(date) => setDateOfBirth(date)}
+              dateFormat="dd/MM/yyyy"
+              disabled={isLoading}
+              className="form-control"
+            />
+            {errors.dateOfBirth && (
+              <Form.Text className="text-danger">{errors.dateOfBirth}</Form.Text>
+            )}
+          </Row>
+          <Row className="mb-4">
+            <Form.Label>Ảnh CCCD mặt sau</Form.Label>
+            {!backIDCardPreview ? (
               <Form.Group controlId="backIDCard">
-                <Form.Label>Ảnh căn cước mặt sau</Form.Label>
-                <Form.Control
+                <label
+                  htmlFor="backIDCardInput"
+                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
+                >
+                  <h1 className="material-icons text-6xl">cloud_upload</h1>
+                  <p className="text-lg">Ảnh CCCD Mặt Sau</p>
+                </label>
+                <input
                   type="file"
+                  id="backIDCardInput"
                   name="backIDCard"
-                  onChange={(e) =>
-                    handleFileChange(e, setBackIDCard, setBackIDCardPreview)
-                  }
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, setBackIDCard, setBackIDCardPreview)}
                   disabled={isLoading}
+                  style={{ display: 'none' }}
                 />
                 {errors.backIDCard && (
-                  <Form.Text className="text-danger">
-                    {errors.backIDCard}
-                  </Form.Text>
-                )}
-                {backIDCardPreview && (
-                  <div>
-                    <img
-                      src={backIDCardPreview}
-                      alt="Back ID Preview"
-                      className="mt-2"
-                      style={{ width: "100%", maxWidth: "200px" }}
-                    />
-                    <Button
-                      variant="danger"
-                      onClick={() =>
-                        handleDeleteImage(
-                          "backIDCard",
-                          setBackIDCard,
-                          setBackIDCardPreview
-                        )
-                      }
-                      disabled={isLoading}
-                      className="mt-2"
-                    >
-                      Xóa ảnh
-                    </Button>
-                  </div>
+                  <Form.Text className="text-danger mt-2">{errors.backIDCard}</Form.Text>
                 )}
               </Form.Group>
-            </Col>
-          </Row>
-
-          <Row className="mb-4">
-            <Col>
-              <Form.Group controlId="dateOfBirth">
-                <Form.Label>Ngày sinh</Form.Label>
-                <DatePicker
-                  selected={dateOfBirth}
-                  onChange={(date) => setDateOfBirth(date)}
-                  dateFormat="dd/MM/yyyy"
-                  className="form-control"
-                  disabled={isLoading}
+            ) : (
+              <div className="mt-3">
+                <img
+                  src={backIDCardPreview}
+                  alt="Back ID Preview"
+                  className="img-fluid rounded"
+                  style={{ maxWidth: "200px" }}
                 />
-                {errors.dateOfBirth && (
-                  <Form.Text className="text-danger">
-                    {errors.dateOfBirth}
-                  </Form.Text>
-                )}
-              </Form.Group>
-            </Col>
+                <div className="mt-2">
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteImage("backIDCard", setBackIDCard, setBackIDCardPreview)}
+                    disabled={isLoading}
+                  >
+                    Xóa ảnh
+                  </Button>
+                </div>
+              </div>
+            )}
           </Row>
-
           <Row className="mb-4">
-            <Col>
+            <Form.Label>Ảnh chân dung</Form.Label>
+            {!portraitPreview ? (
               <Form.Group controlId="portrait">
-                <Form.Label>Ảnh chân dung</Form.Label>
-                <Form.Control
+                <label
+                  htmlFor="portraitInput"
+                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
+                >
+                  <h1 className="material-icons text-6xl">cloud_upload</h1>
+                  <p className="text-lg">Ảnh chân dung</p>
+                </label>
+                <input
                   type="file"
+                  id="portraitInput"
                   name="portrait"
-                  onChange={(e) =>
-                    handleFileChange(e, setPortrait, setPortraitPreview)
-                  }
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, setPortrait, setPortraitPreview)}
                   disabled={isLoading}
+                  style={{ display: 'none' }}
                 />
                 {errors.portrait && (
-                  <Form.Text className="text-danger">
-                    {errors.portrait}
-                  </Form.Text>
-                )}
-                {portraitPreview && (
-                  <div>
-                    <img
-                      src={portraitPreview}
-                      alt="Portrait Preview"
-                      className="mt-2"
-                      style={{ width: "100%", maxWidth: "200px" }}
-                    />
-                    <Button
-                      variant="danger"
-                      onClick={() =>
-                        handleDeleteImage(
-                          "portrait",
-                          setPortrait,
-                          setPortraitPreview
-                        )
-                      }
-                      disabled={isLoading}
-                      className="mt-2"
-                    >
-                      Xóa ảnh
-                    </Button>
-                  </div>
+                  <Form.Text className="text-danger mt-2">{errors.portrait}</Form.Text>
                 )}
               </Form.Group>
-            </Col>
+            ) : (
+              <div className="mt-3">
+                <img
+                  src={portraitPreview}
+                  alt="Portrait Preview"
+                  className="img-fluid rounded"
+                  style={{ maxWidth: "200px" }}
+                />
+                <div className="mt-2">
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteImage("portrait", setPortrait, setPortraitPreview)}
+                    disabled={isLoading}
+                  >
+                    Xóa ảnh
+                  </Button>
+                </div>
+              </div>
+            )}
           </Row>
 
+
+
           <Row className="mb-4">
-            <Col>
+            <Form.Label>Mã QR tài khoản ngân hàng</Form.Label>
+            {!bankAccountQRPreview ? (
               <Form.Group controlId="bankAccountQR">
-                <Form.Label>Mã QR tài khoản ngân hàng</Form.Label>
-                <Form.Control
+                <label
+                  htmlFor="bankAccountQRInput"
+                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
+                >
+                  <h1 className="material-icons text-6xl">cloud_upload</h1>
+                  <p className="text-lg">Mã QR tài khoản ngân hàng</p>
+                </label>
+                <input
                   type="file"
+                  id="bankAccountQRInput"
                   name="bankAccountQR"
-                  onChange={(e) =>
-                    handleFileChange(
-                      e,
-                      setBankAccountQR,
-                      setBankAccountQRPreview
-                    )
-                  }
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, setBankAccountQR, setBankAccountQRPreview)}
                   disabled={isLoading}
+                  style={{ display: 'none' }}
                 />
                 {errors.bankAccountQR && (
-                  <Form.Text className="text-danger">
-                    {errors.bankAccountQR}
-                  </Form.Text>
-                )}
-                {bankAccountQRPreview && (
-                  <div>
-                    <img
-                      src={bankAccountQRPreview}
-                      alt="Bank Account QR Preview"
-                      className="mt-2"
-                      style={{ width: "100%", maxWidth: "200px" }}
-                    />
-                    <Button
-                      variant="danger"
-                      onClick={() =>
-                        handleDeleteImage(
-                          "bankAccountQR",
-                          setBankAccountQR,
-                          setBankAccountQRPreview
-                        )
-                      }
-                      className="mt-2"
-                      disabled={isLoading}
-                    >
-                      Xóa ảnh
-                    </Button>
-                  </div>
+                  <Form.Text className="text-danger mt-2">{errors.bankAccountQR}</Form.Text>
                 )}
               </Form.Group>
-            </Col>
-          </Row>
-
-          <Row className="mb-4">
-            <Col>
-              <Form.Group controlId="idCardNumber">
-                <Form.Label>Số căn cước</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={idCardNumber}
-                  onChange={(e) => setIdCardNumber(e.target.value)}
-                  disabled={isLoading}
+            ) : (
+              <div className="mt-3">
+                <img
+                  src={bankAccountQRPreview}
+                  alt="Bank Account QR Preview"
+                  className="img-fluid rounded"
+                  style={{ maxWidth: "200px" }}
                 />
-              </Form.Group>
-            </Col>
+                <div className="mt-2">
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteImage("bankAccountQR", setBankAccountQR, setBankAccountQRPreview)}
+                    disabled={isLoading}
+                  >
+                    Xóa ảnh
+                  </Button>
+                </div>
+              </div>
+            )}
           </Row>
-
-          <Button variant="primary" onClick={handleSaveAccountProfile}>
-            Lưu
-          </Button>
+            <Button className="font-semibold" variant="primary" onClick={handleSaveAccountProfile} disabled={isLoading}>
+              {isLoading ? 'Đang gửi...' : 'Gửi thông tin'}
+            </Button>
         </Form>
       </Container>
-    </>
+    </section>
   );
 };
 

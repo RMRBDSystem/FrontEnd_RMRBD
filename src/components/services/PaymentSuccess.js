@@ -1,9 +1,9 @@
 import axios from "axios";
 
-export const updateAccountCoin = async (accountId, coin) => {
+export const updateAccountCoin = async (accountId, coin, price) => {
   try {
     // Send the updated account data back to the API
-    const updatedResponse = await axios.post(`https://rmrbdapi.somee.com/odata/Payment/${accountId}/${coin}`, {}, {
+    const updatedResponse = await axios.post(`https://rmrbdapi.somee.com/odata/Payment/${accountId}/${coin}/${price}`, {}, {
       headers: {
         "Content-Type": "application/json",
         Token: "123-abc",

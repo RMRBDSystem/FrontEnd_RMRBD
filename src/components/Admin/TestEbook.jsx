@@ -230,7 +230,7 @@ const TestEbook = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen font-roboto">
+    <div className="flex flex-col min-h-screen">
       <main className="flex-1 bg-gray-50 flex flex-col">
         <div className="p-4">
           <button onClick={() => setModalOpen(true)} className="bg-orange-500 text-white p-2 rounded">
