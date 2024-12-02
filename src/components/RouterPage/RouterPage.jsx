@@ -30,6 +30,12 @@ import EditRecipe from '../AddRecipe/EditRecipe';
 import RecipeCustomer from "../AddRecipe/RecipeCustomer";
 import RecipeCustomerDetail from "../AddRecipe/RecipeCustomerDetail";
 import RecipeListCustomer from "../AddRecipe/RecipeListCustomer";
+//Moderator
+import Report from "../Pages/Report/Report";
+import ListReport from "../Pages/Report/ListReport";
+import ReportDetail from "../Pages/Report/ReportDetail";
+import ReportMod from "../Pages/Report/ReportMod";
+import ReportResponse from "../Pages/Report/ReportResponse";
 //Admin
 import RecipeDetails from "../Admin/Recipemanagement/RecipeDetail";
 import AdminDashboard from "../Admin/Dashboard";
@@ -104,6 +110,11 @@ export default function RouterPage() {
             <Route path="/recipe-customer-detail" element={<RecipeCustomerDetail />} />
             <Route path="/recipe-list-customer" element={<RecipeListCustomer />} />
             <Route path="/editrecipecustomer-recipe/:recipeId" element={<EditRecipeForCustomer />} />
+            <Route path="/listreport" element={<ListReport />} />
+            <Route path="/reportdetail/:reportId" element={<ReportDetail />} />
+            <Route path="/reportmod" element={<ReportMod />} />
+            <Route path="/reportresponse/:reportId" element={<ReportResponse />} />
+            <Route path="/report" element={<Report />} />
             <Route
               path="/recipecustomer-list"
               element={

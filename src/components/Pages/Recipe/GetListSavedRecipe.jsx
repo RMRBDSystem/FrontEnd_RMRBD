@@ -55,11 +55,11 @@ const GetListSaveRecipe = () => {
   };
 
   return (
-    <Container className="py-8" maxWidth={"xl"}>
-      <Typography className="text-gray-50" variant="h4" gutterBottom>
-        Saved Recipes
+    <Container className="section-center py-8" maxWidth={"xl"}>
+      <Typography className="text-black-500" variant="h4" gutterBottom>
+        Công thức nấu ăn đã lưu
       </Typography>
-      
+
       {/* Show loading indicator when data is being fetched */}
       {loading ? (
         <Box
