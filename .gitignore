@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+FrontEnd_RMRBD-main/src/utils/formatters.js
+FrontEnd_RMRBD-main/src/firebase.js
+FrontEnd_RMRBD-main/src/firebase.js

@@ -76,10 +76,27 @@ const AddBook = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
   
-    if (name === 'price') {
+    // Define max limits
+    const maxValues = {
+      weight: 50000,
+      length: 200,
+      width: 200,
+      height: 200,
+    };
+  
+    if (['weight', 'length', 'width', 'height'].includes(name)) {
+      const numericValue = parseInt(value) || 0;
+      if (numericValue > maxValues[name]) {
+        toast.error(`${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed ${maxValues[name]}`);
+        return; // Prevent setting value if it exceeds max
+      }
+      setBook((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+    } else if (name === 'price') {
       const rawValue = value.replace(/[^0-9.]/g, '');
       const formattedValue = rawValue ? new Intl.NumberFormat().format(rawValue) : '';
-  
       setBook((prev) => ({
         ...prev,
         price: formattedValue,
@@ -87,8 +104,7 @@ const AddBook = () => {
     } else {
       setBook((prev) => ({
         ...prev,
-        [name]: name === 'unitInStock' || name === 'weight' || name === 'length' || 
-                name === 'width' || name === 'height' ? parseInt(value) || 0 : value,
+        [name]: value,
       }));
     }
   };
@@ -103,57 +119,58 @@ const AddBook = () => {
   };
 
   const saveBook = async (e) => {
-  e.preventDefault();
-
-  // Remove commas from the price and parse it as an integer
-  const rawPrice = parseInt(book.price.replace(/[^0-9]/g, ''));
-
-  // Check if the price is zero, and if so, set it to 'Free'
-  if (rawPrice === 0) {
-    setBook((prev) => ({
-      ...prev,
-      price: 'Free',
-    }));
-  }
-
-  // Check if the price is less than 1000 but not 'Free'
-  if (rawPrice < 1000 && rawPrice !== 0) {
-    toast.error('Price must be at least 1000 dong!');
-    return; // Prevent form submission
-  }
-
-  const bookData = {
-    ...book,
-    createById: Cookies.get('UserId') || '',
-    status: "-1",
-    createDate: new Date().toISOString(),
-    bookOrders: [],
-    bookRates: [],
-    comments: [],
-    createBy: null,
-  };
-
-  try {
-    const response = await axios.post('https://rmrbdapi.somee.com/odata/book', bookData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Token': '123-abc',
-      },
-    });
-
-    if (response.status === 200 || response.status === 201) {
-      toast.success('Book added successfully!');
-      setCreatedBookId(response.data.bookId); // Save the newly created book ID
-      setShowImageUploadModal(true); // Open the image upload modal
-      resetForm();
-    } else {
-      toast.error('Error adding book. Please try again.');
+    e.preventDefault();
+  
+    // Remove commas from the price before sending it to the backend
+    const rawPrice = parseInt(book.price.replace(/[^0-9]/g, '')); // Remove commas
+  
+    // Check if the price is zero, and if so, set it to 'Free'
+    if (rawPrice === 0) {
+      setBook((prev) => ({
+        ...prev,
+        price: 'Free',
+      }));
     }
-  } catch (error) {
-    console.error('Error saving book:', error.response ? error.response.data : error.message);
-    toast.error('Error saving book. Please try again.');
-  }
-};
+  
+    // Check if the price is less than 1000 but not 'Free'
+    if (rawPrice < 1000 && rawPrice !== 0) {
+      toast.error('Price must be at least 1000 dong!');
+      return; // Prevent form submission
+    }
+  
+    const bookData = {
+      ...book,
+      price: rawPrice === 0 ? 'Free' : rawPrice, // Send price as raw number or 'Free'
+      createById: Cookies.get('UserId') || '',
+      status: "-1",
+      createDate: new Date().toISOString(),
+      bookOrders: [],
+      bookRates: [],
+      comments: [],
+      createBy: null,
+    };
+  
+    try {
+      const response = await axios.post('https://rmrbdapi.somee.com/odata/book', bookData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Token': '123-abc',
+        },
+      });
+  
+      if (response.status === 200 || response.status === 201) {
+        toast.success('Book added successfully!');
+        setCreatedBookId(response.data.bookId); // Save the newly created book ID
+        setShowImageUploadModal(true); // Open the image upload modal
+        resetForm();
+      } else {
+        toast.error('Error adding book. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving book:', error.response ? error.response.data : error.message);
+      toast.error('Error saving book. Please try again.');
+    }
+  };
 
   const resetForm = () => {
     setBook({
@@ -328,6 +345,7 @@ const AddBook = () => {
                   name="weight"
                   value={book.weight}
                   onChange={handleInputChange}
+                  max="50000" 
                   required
                 />
               </Form.Group>
@@ -342,6 +360,7 @@ const AddBook = () => {
                   name="length"
                   value={book.length}
                   onChange={handleInputChange}
+                  max="200" 
                   required
                 />
               </Form.Group>
@@ -356,6 +375,7 @@ const AddBook = () => {
                   name="width"
                   value={book.width}
                   onChange={handleInputChange}
+                  max="200" 
                   required
                 />
               </Form.Group>
@@ -370,6 +390,7 @@ const AddBook = () => {
                   name="height"
                   value={book.height}
                   onChange={handleInputChange}
+                  max="200" 
                   required
                 />
               </Form.Group>

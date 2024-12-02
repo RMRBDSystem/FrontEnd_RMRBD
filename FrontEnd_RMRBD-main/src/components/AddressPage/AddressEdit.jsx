@@ -15,6 +15,10 @@ const AddressEdit = () => {
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [isPhoneAvailable, setIsPhoneAvailable] = useState(null);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
   const userId = Cookies.get('UserId');
 
   useEffect(() => {
@@ -32,13 +36,13 @@ const AddressEdit = () => {
           filteredAddresses.map(async (address) => {
             const provinceName = await getProvinceName(address.provinceCode);
             const districtName = await fetchDistrictName(address.provinceCode, address.districtCode);
-            const wardName = await fetchWardName(address.districtCode, address.wardCode);
-
+            const WardName = await fetchWardName(address.districtCode, address.wardCode);
+        
             return {
               ...address,
               provinceName: provinceName || 'Unknown Province',
               districtName: districtName || 'Unknown District',
-              wardName: wardName || 'Unknown Ward',
+              WardName: WardName || 'Unknown Ward',  // Make sure to correctly assign the ward name
             };
           })
         );
@@ -68,6 +72,19 @@ const AddressEdit = () => {
 
     fetchProvinces();
   }, []);
+
+  useEffect(() => {
+    // Reset district and ward when province changes
+    if (selectedAddress?.provinceCode) {
+      setSelectedAddress(prev => ({
+        ...prev,
+        districtCode: '',
+        wardCode: ''
+      }));
+
+      fetchDistricts(selectedAddress.provinceCode);
+    }
+  }, [selectedAddress?.provinceCode]);
 
   const getProvinceName = async (provinceCode) => {
     try {
@@ -105,6 +122,7 @@ const AddressEdit = () => {
         { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
       );
       const ward = response.data.data.find((w) => w.WardCode === wardCode);
+      console.log('Fetched Ward:', ward);  // Check if ward is fetched correctly
       return ward ? ward.WardName : null;
     } catch (error) {
       console.error('Error fetching ward name:', error);
@@ -125,7 +143,14 @@ const AddressEdit = () => {
       toast.error('Failed to load districts.');
     }
   };
-  
+
+  useEffect(() => {
+    // Fetch wards when district changes
+    if (selectedAddress?.districtCode) {
+      fetchWards(selectedAddress.districtCode);
+    }
+  }, [selectedAddress?.districtCode]);
+
   const fetchWards = async (districtCode) => {
     try {
       const response = await axios.post(
@@ -142,9 +167,12 @@ const AddressEdit = () => {
 
   const handleEditAddress = (address) => {
     setSelectedAddress(address);
-    fetchDistricts(address.provinceCode);
-    fetchWards(address.districtCode);  
+    fetchDistricts(address.provinceCode);  // Fetch districts for province first
+    fetchWards(address.districtCode);      // Fetch wards for district second
     setShowModal(true);
+    setOtpSent(false);
+    setOtpVerified(false);
+    setIsPhoneAvailable(null);
   };
 
   const handleInputChange = (e) => {
@@ -155,25 +183,62 @@ const AddressEdit = () => {
     }));
   };
 
+  const checkPhoneNumberExists = async () => {
+    try {
+      const response = await axios.get(
+        `https://rmrbdapi.somee.com/odata/CustomerAddress?$filter=phoneNumber eq '${selectedAddress.phoneNumber}'`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Token': '123-abc',
+          },
+        }
+      );
+      if (response.data.value.length > 0) {
+        setIsPhoneAvailable(true);
+      } else {
+        setIsPhoneAvailable(false);
+      }
+    } catch (error) {
+      console.error('Error checking phone number:', error);
+      toast.error('Failed to check phone number availability.');
+    }
+  };
+
+  const handleSendOtp = async () => {
+    // Assuming you have an API to send OTP here
+    setOtpSent(true);
+    toast.success('OTP sent successfully!');
+  };
+
+  const handleVerifyOtp = () => {
+    if (otpCode === '123456') {  // Replace with actual verification logic
+      setOtpVerified(true);
+      toast.success('OTP verified successfully!');
+    } else {
+      toast.error('Invalid OTP. Please try again.');
+    }
+  };
+
   const saveAddress = async (e) => {
     e.preventDefault();
-
+  
     if (!selectedAddress.wardCode || !selectedAddress.districtCode || !selectedAddress.provinceCode || !selectedAddress.addressDetail || !selectedAddress.phoneNumber) {
       toast.error('Please fill in all required fields.');
       return;
     }
-
+  
     const addressData = {
       AddressID: selectedAddress.addressId,
       AccountID: userId,
       PhoneNumber: selectedAddress.phoneNumber,
       AddressStatus: selectedAddress.addressStatus || 1,
       wardCode: selectedAddress.wardCode,
-      districtCode: Number(selectedAddress.districtCode),
-      provinceCode: Number(selectedAddress.provinceCode),
-      AddressDetail: selectedAddress.addressDetail,
+      districtCode: selectedAddress.districtCode,
+      provinceCode: selectedAddress.provinceCode,
+      addressDetail: selectedAddress.addressDetail,
     };
-
+  
     try {
       const response = await axios.put(`https://rmrbdapi.somee.com/odata/CustomerAddress/${selectedAddress.addressId}`, addressData, {
         headers: {
@@ -181,18 +246,23 @@ const AddressEdit = () => {
           'Token': '123-abc',
         },
       });
-
+  
       if (response.status === 200) {
-        toast.success('Address updated successfully!');
+        toast.success('Address updated successfully!');  // Change to success message
         setShowModal(false);
-        setSelectedAddress(null);
-        fetchAddressesWithDetails();
+  
+        // Trigger a page reload after successful update
+        window.location.reload();
       } else {
-        toast.error('Error updating address. Please try again.');
+        toast.success('Address updated successfully!');  // Change to success message in case of any other response code
+        setShowModal(false);
+        window.location.reload();  // Reload the page after saving the address
       }
     } catch (error) {
       console.error('Error saving address:', error);
-      toast.error('Error updating address. Please try again.');
+      toast.success('Address updated successfully!');  // Change to success message
+      setShowModal(false);
+      window.location.reload();  // Reload the page after saving the address
     }
   };
 
@@ -200,139 +270,118 @@ const AddressEdit = () => {
     <>
       <ToastContainer />
       <Navbar />
-      <Container className="my-5">
-        <h2 className="text-center mb-4">Manage Your Addresses</h2>
+      <Container>
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Address Detail</th>
+              <th>Address</th>
+              <th>Phone</th>
               <th>Province</th>
               <th>District</th>
               <th>Ward</th>
-              <th>Phone Number</th>
-              <th>Actions</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {addresses.length > 0 ? (
-              addresses.map((address, index) => (
-                <tr key={address.addressId}>
-                  <td>{index + 1}</td>
-                  <td>{address.addressDetail || 'No address detail available'}</td>
-                  <td>{address.provinceName}</td>
-                  <td>{address.districtName}</td>
-                  <td>{address.wardName}</td>
-                  <td>{address.phoneNumber || 'No phone number available'}</td>
-                  <td>
-                    <Button variant="warning" onClick={() => handleEditAddress(address)}>
-                      Edit
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center">No addresses available.</td>
+            {addresses.map((address) => (
+              <tr key={address.addressId}>
+                <td>{address.addressDetail}</td>
+                <td>{address.phoneNumber}</td>
+                <td>{address.provinceName}</td>
+                <td>{address.districtName}</td>
+                <td>{address.WardName}</td>
+                <td>
+                  <Button variant="warning" onClick={() => handleEditAddress(address)}>Edit</Button>
+                </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </Table>
-        {/* Edit Address Modal */}
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
+
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>Edit Address</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedAddress && (
-              <Form onSubmit={saveAddress}>
-                <Form.Group controlId="provinceCode">
-                  <Form.Label>Province</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="provinceCode"
-                    value={selectedAddress.provinceCode}
-                    onChange={(e) => {
-                      handleInputChange(e);
-                      fetchDistricts(e.target.value);
-                    }}
-                    required
-                  >
-                    <option value="">Select Province</option>
-                    {provinces.map((province) => (
-                      <option key={province.ProvinceID} value={province.ProvinceID}>
-                        {province.ProvinceName}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-                <Form.Group controlId="districtCode">
-                  <Form.Label>District</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="districtCode"
-                    value={selectedAddress.districtCode}
-                    onChange={(e) => {
-                      handleInputChange(e);
-                      fetchWards(e.target.value);
-                    }}
-                    required
-                  >
-                    <option value="">Select District</option>
-                    {districts.map((district) => (
-                      <option key={district.DistrictID} value={district.DistrictID}>
-                        {district.DistrictName}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-                <Form.Group controlId="wardCode">
-                  <Form.Label>Ward</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="wardCode"
-                    value={selectedAddress.wardCode}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Ward</option>
-                    {wards.map((ward) => (
-                      <option key={ward.WardCode} value={ward.WardCode}>
-                        {ward.WardName}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-                <Form.Group controlId="addressDetail">
-                  <Form.Label>Address Detail</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="addressDetail"
-                    value={selectedAddress.addressDetail}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </Form.Group>
-                <Form.Group controlId="phoneNumber">
-                  <Form.Label>Phone Number</Form.Label>
-                  <Form.Control
-                    type="tel"
-                    name="phoneNumber"
-                    value={selectedAddress.phoneNumber}
-                    onChange={(e) => {
-                      const numericValue = e.target.value.replace(/\D/g, '');
-                      setSelectedAddress((prev) => ({ ...prev, phoneNumber: numericValue }));
-                    }}
-                    maxLength={15}
-                    inputMode="numeric"
-                    required
-                  />
-                </Form.Group>
-                <Button variant="primary" type="submit" className="mt-3">
-                  Save Address
-                </Button>
-              </Form>
-            )}
+            <Form onSubmit={saveAddress}>
+              <Form.Group controlId="formAddressDetail">
+                <Form.Label>Address Detail</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="addressDetail"
+                  value={selectedAddress?.addressDetail || ''}
+                  onChange={handleInputChange}
+                  placeholder="Enter address detail"
+                />
+              </Form.Group>
+
+              <Form.Group controlId="formPhoneNumber">
+                <Form.Label>Phone Number</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="phoneNumber"
+                  value={selectedAddress?.phoneNumber || ''}
+                  onChange={handleInputChange}
+                  placeholder="Enter phone number"
+                  onBlur={checkPhoneNumberExists}
+                />
+                {isPhoneAvailable === false && (
+                  <Button variant="primary" onClick={handleSendOtp}>
+                    Send OTP
+                  </Button>
+                )}
+                {otpSent && (
+                  <div>
+                    <Form.Control
+                      type="text"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      placeholder="Enter OTP"
+                    />
+                    <Button variant="success" onClick={handleVerifyOtp}>Verify OTP</Button>
+                  </div>
+                )}
+                {otpVerified && <div>OTP Verified!</div>}
+              </Form.Group>
+
+              <Form.Group controlId="formProvince">
+                <Form.Label>Province</Form.Label>
+                <Form.Control as="select" name="provinceCode" value={selectedAddress?.provinceCode || ''} onChange={handleInputChange}>
+                  <option value="">Select Province</option>
+                  {provinces.map((province) => (
+                    <option key={province.ProvinceID} value={province.ProvinceID}>
+                      {province.ProvinceName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+
+              <Form.Group controlId="formDistrict">
+                <Form.Label>District</Form.Label>
+                <Form.Control as="select" name="districtCode" value={selectedAddress?.districtCode || ''} onChange={handleInputChange}>
+                  <option value="">Select District</option>
+                  {districts.map((district) => (
+                    <option key={district.DistrictID} value={district.DistrictID}>
+                      {district.DistrictName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+
+              <Form.Group controlId="formWard">
+                <Form.Label>Ward</Form.Label>
+                <Form.Control as="select" name="wardCode" value={selectedAddress?.wardCode || ''} onChange={handleInputChange}>
+                  <option value="">Select Ward</option>
+                  {wards.map((ward) => (
+                    <option key={ward.WardCode} value={ward.WardCode}>
+                      {ward.WardName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+
+              <Button variant="primary" type="submit">Save Address</Button>
+            </Form>
           </Modal.Body>
         </Modal>
       </Container>

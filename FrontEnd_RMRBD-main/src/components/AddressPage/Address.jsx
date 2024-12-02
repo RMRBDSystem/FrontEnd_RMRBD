@@ -27,7 +27,6 @@ const Address = () => {
   const [wards, setWards] = useState([]);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-  const [otp, setOtp] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0); 
   const [isPhoneChecking, setIsPhoneChecking] = useState(false);
