@@ -1,14 +1,21 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { FaBan, FaCheckCircle, FaRegClock, FaBars } from "react-icons/fa";
+import { FaBan, FaCheckCircle, FaRegClock, FaInfoCircle, FaFilter } from "react-icons/fa";
 import Cookies from "js-cookie";
+import DataTable from "react-data-table-component";
+
 const EbookList = () => {
   const [ebooks, setebooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [censorID, setcensorID] = useState();
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterText, setFilterText] = useState(""); // For ebook name filter
+  const [filterStatus, setFilterStatus] = useState(""); // For ebook status filter
+
   useEffect(() => {
     setcensorID(Cookies.get("UserId"));
   }, []);
+
   const fetchebooks = async () => {
     try {
       const response = await axios.get(
@@ -24,126 +31,158 @@ const EbookList = () => {
       setLoading(false);
     }
   };
-  const handleStatusChange = async (ebookId, newStatus) => {
-    console.log("Updating status for ebook:", ebookId, "to:", newStatus);
-    try {
-      const response = await axios.get(
-        `https://rmrbdapi.somee.com/odata/ebook/${ebookId}`,
-        {
-          headers: { "Content-Type": "application/json", token: "123-abc" },
-        }
-      );
-
-      const currentData = response.data;
-      console.log("Fetched current ebook data:", currentData);
-
-      const updatedData = {
-        ...currentData,
-        status: newStatus,
-        censorId: censorID,
-      };
-
-      await axios.put(
-        `https://rmrbdapi.somee.com/odata/ebook/${ebookId}`,
-        updatedData,
-        {
-          headers: { "Content-Type": "application/json", token: "123-abc" },
-        }
-      );
-      setebooks((prevebooks) =>
-        prevebooks.map((ebook) =>
-          ebook.ebookId === ebookId ? { ...ebook, status: newStatus } : ebook
-        )
-      );
-
-      console.log(
-        `Status for ebook ${ebookId} updated successfully to ${newStatus}`
-      );
-    } catch (error) {
-      console.error("Error updating status:", error.response || error.message);
-      alert("Failed to update status. Please try again.");
-    }
-  };
 
   const handleDetails = async (accountId, newDetails) => {};
+
   useEffect(() => {
     fetchebooks();
   }, []);
 
+  const columns = [
+    {
+      name: '#',
+      selector: (row, index) => index + 1,
+      sortable: true,
+    },
+    {
+      name: 'Tên sách điện tử',
+      selector: (row) => row.ebookName || "Unknown",
+      sortable: true,
+    },
+    {
+      name: 'Giá',
+      selector: (row) => row.price || "Unknown",
+      sortable: true,
+    },
+    {
+      name: 'Ảnh',
+      selector: (row) => (
+        <img
+          src={row.imageUrl}
+          alt="ebook preview"
+          className="w-16 h-16 object-cover rounded-md"
+        />
+      ),
+      sortable: false,
+    },
+    {
+      name: 'Trạng thái',
+      selector: (row) => {
+        if (row.status === 0) {
+          return (
+            <FaBan
+              style={{
+                color: "red",
+                cursor: "pointer",
+                fontSize: "24px",
+              }}
+              title="Bị khóa"
+            />
+          );
+        }
+        if (row.status === 1) {
+          return (
+            <FaCheckCircle
+              style={{
+                color: "green",
+                cursor: "pointer",
+                fontSize: "24px",
+              }}
+              title="Đã xác nhận"
+            />
+          );
+        }
+        if (row.status === -1) {
+          return (
+            <FaRegClock
+              style={{
+                color: "orange",
+                cursor: "pointer",
+                fontSize: "24px",
+              }}
+              title="Chờ được xác nhận"
+            />
+          );
+        }
+      },
+      sortable: false,
+    },
+    {
+      name: 'Thao tác',
+      selector: (row) => (
+        <button
+          className="btn btn-link"
+          onClick={() => handleDetails(row.accountId)}
+        >
+          <FaInfoCircle
+            style={{
+              color: "#007bff",
+              cursor: "pointer",
+              fontSize: "24px",
+            }}
+            title="Chi tiết"
+          />
+        </button>
+      ),
+      sortable: false,
+    },
+  ];
+
+  // Filter ebooks based on filter criteria
+  const filteredEbooks = ebooks.filter((ebook) => {
+    const matchesName = ebook.ebookName.toLowerCase().includes(filterText.toLowerCase());
+    const matchesStatus = filterStatus ? ebook.status.toString() === filterStatus : true;
+
+    return matchesName && matchesStatus;
+  });
+
   return (
     <div className="flex-1 ml-0 md:ml-64 p-4">
       <div className="bg-white shadow-lg rounded-lg p-6">
-        <table className="min-w-full table-auto">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>ebookName</th>
-              <th>Price</th>
-              <th>Images</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ebooks && ebooks.length > 0 ? (
-              ebooks.map((item, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{item.ebookName || "Unknown"}</td>
-                  <td>{item.price || "Unknown"}</td>
-                  <td>
-                    <img
-                      src={item.imageUrl}
-                      alt="ebook preview"
-                      className="w-24 h-24 object-cover rounded-md"
-                    />
-                  </td>
+        {/* Filter Section */}
+        <div className="mb-4 flex items-center">
+          <button
+            className="flex items-center text-blue-500 hover:text-blue-700"
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            <FaFilter className="mr-2" />
+            Bộ lọc
+          </button>
+        </div>
 
-                  <td>
-                    <FaBan
-                      style={{
-                        color: item.status === 0 ? "red" : "grey",
-                        cursor: "pointer",
-                        fontSize: "24px",
-                      }}
-                      title="Blocked"
-                      onClick={() => handleStatusChange(item.ebookId, 0)}
-                    />
-                    <FaCheckCircle
-                      style={{
-                        color: item.status === 1 ? "green" : "grey",
-                        cursor: "pointer",
-                        fontSize: "24px",
-                      }}
-                      title="Approved"
-                      onClick={() => handleStatusChange(item.ebookId, 1)}
-                    />
-                    <FaRegClock
-                      style={{
-                        color: item.status === -1 ? "orange" : "grey",
-                        cursor: "pointer",
-                        fontSize: "24px",
-                      }}
-                      title="Uncensored"
-                      onClick={() => handleStatusChange(item.ebookId, -1)}
-                    />
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => handleDetails(item.ebookId)}
-                    >
-                      Details
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="10">No data available</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        {showFilter && (
+          <div className="mb-4 flex space-x-4 w-full max-w-xl">
+            <input
+              type="text"
+              placeholder="Tìm theo tên sách điện tử"
+              className="border border-gray-300 rounded p-2 flex-1"
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+            />
+
+            <select
+              className="border border-gray-300 rounded p-2 flex-1"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="0">Bị khóa</option>
+              <option value="1">Đã xác nhận</option>
+              <option value="-1">Chờ xác nhận</option>
+            </select>
+          </div>
+        )}
+
+        <DataTable
+          title="Danh sách sách điện tử"
+          columns={columns}
+          data={filteredEbooks}
+          progressPending={loading}
+          pagination
+          responsive
+          highlightOnHover
+          pointerOnHover
+        />
       </div>
     </div>
   );

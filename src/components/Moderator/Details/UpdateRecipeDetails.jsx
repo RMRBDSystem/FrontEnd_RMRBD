@@ -5,7 +5,8 @@ import ClockIcon from "../../../../public/icon/iconclock.png";
 import SpoonIcon from "../../../../public/icon/iconsspoon.png";
 import CheckMarkIcon from "../../../../public/icon/iconscheckmark24.png";
 import Cookies from "js-cookie";
-
+import Swal from "sweetalert2"; // Import SweetAlert2
+import { FaSave, FaArrowLeft } from "react-icons/fa";
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
@@ -20,7 +21,7 @@ const RecipeDetail = () => {
   const fetchRecipeDetail = async (id) => {
     const response = await axios.get(
       //`https://rmrbdapi.somee.com/odata/Recipe/${id}`,
-      `https://localhost:7220/odata/Recipe/${id}`,
+      `https://rmrbdapi.somee.com/odata/Recipe/${id}`,
       {
         headers: { "Content-Type": "application/json", Token: "123-abc" },
       }
@@ -36,7 +37,7 @@ const RecipeDetail = () => {
   const fetchAccount = async (createById) => {
     const response = await axios.get(
       //`https://rmrbdapi.somee.com/odata/Account/${createById}`,
-      `https://localhost:7220/odata/Account/${createById}`,
+      `https://rmrbdapi.somee.com/odata/Account/${createById}`,
       {
         headers: { "Content-Type": "application/json", Token: "123-abc" },
       }
@@ -48,7 +49,7 @@ const RecipeDetail = () => {
   const fetchImages = async (id) => {
     const response = await axios.get(
       //`https://rmrbdapi.somee.com/odata/Image/Recipe/${id}`,
-      `https://localhost:7220/odata/Image/Recipe/${id}`,
+      `https://rmrbdapi.somee.com/odata/Image/Recipe/${id}`,
       {
         headers: { "Content-Type": "application/json", Token: "123-abc" },
       }
@@ -61,7 +62,7 @@ const RecipeDetail = () => {
   const fetchTags = async () => {
     //`https://rmrbdapi.somee.com/odata/Tag`
     //`https://localhost:7220/odata/Tag`
-    const response = await axios.get(`https://localhost:7220/odata/Tag`, {
+    const response = await axios.get(`https://rmrbdapi.somee.com/odata/Tag`, {
       headers: { "Content-Type": "application/json", Token: "123-abc" },
     });
     const tagMapData = response.data.reduce((acc, tag) => {
@@ -87,6 +88,14 @@ const RecipeDetail = () => {
 
   // Hàm lưu cập nhật
   const handleSave = async () => {
+    await Swal.fire({
+      title: "Bạn có chắc chắn muốn thay đổi trạng thái?",
+      text: "Điều này sẽ cập nhật trạng thái tài khoản!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Đồng ý",
+      cancelButtonText: "Hủy",
+    });
     const censorId = Cookies.get("UserId");
     try {
       const updatedRecipe = {
@@ -97,23 +106,33 @@ const RecipeDetail = () => {
       };
       console.log(updatedRecipe);
       await axios.put(
-        //`https://rmrbdapi.somee.com/odata/Recipe/${recipeId}`,
-        `https://localhost:7220/odata/Recipe/${recipeId}`,
+        `https://rmrbdapi.somee.com/odata/Recipe/${recipeId}`,
+        //`https://localhost:7220/odata/Recipe/${recipeId}`,
         updatedRecipe,
         {
           headers: { "Content-Type": "application/json", Token: "123-abc" },
         }
       );
-      alert("Recipe updated successfully!");
+      Swal.fire({
+        icon: "success",
+        title: "Thành công!",
+        text: "Công thức đã được cập nhật thành công.",
+        confirmButtonText: "OK",
+      });
     } catch (error) {
       console.error("Error updating recipe:", error);
-      alert("Failed to update recipe. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Thất bại!",
+        text: "Công thức đã cập nhật thất bại.",
+        confirmButtonText: "OK",
+      });
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, [recipeId]); 
+  }, [recipeId]);
 
   if (!recipe || !accountID || images.length === 0) {
     return <div className="text-center text-xl">Loading...</div>;
@@ -286,18 +305,23 @@ const RecipeDetail = () => {
               rows="4"
             />
           </div>
-          <button
-            onClick={handleSave}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
-          >
-            Save
-          </button>
-          <button
-            className="mt-6 px-6 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition"
-            onClick={() => window.history.back()}
-          >
-            Back
-          </button>
+          <div className="flex space-x-4">
+            <button
+              onClick={handleSave}
+              className="flex items-center justify-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform duration-300 hover:scale-105"
+            >
+              <FaSave className="text-lg" />
+              <span className="text-lg">Lưu</span>
+            </button>
+
+            <button
+              className="flex items-center justify-center space-x-2 px-6 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition transform duration-300 hover:scale-105"
+              onClick={() => window.history.back()}
+            >
+              <FaArrowLeft className="text-lg" />
+              <span className="text-lg">Quay lại</span>
+            </button>
+          </div>
         </div>
       </div>
     </>

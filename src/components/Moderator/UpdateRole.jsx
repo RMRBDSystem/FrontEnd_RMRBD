@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import { FaBan, FaCheckCircle, FaRegClock, FaInfoCircle } from "react-icons/fa";
+import {
+  FaBan,
+  FaCheckCircle,
+  FaRegClock,
+  FaInfoCircle,
+  FaFilter,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import DataTable from "react-data-table-component";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const AccountProfile = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [showFilter, setShowFilter] = useState(false); // State to control the filter visibility
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,127 +23,162 @@ const AccountProfile = () => {
   }, []);
 
   const getData = async () => {
-    setLoading(true);
-
-    // Define headers once
     const headers = { "Content-Type": "application/json", token: "123-abc" };
 
     try {
-      // Call API AccountProfile
       const result = await axios.get(
-        "https://localhost:7220/odata/AccountProfile",
+        "https://rmrbdapi.somee.com/odata/AccountProfile",
         { headers }
       );
-      const accountProfiles = result.data;
-      setData(accountProfiles);
+      setData(result.data);
     } catch (error) {
       console.error("Error fetching account data:", error);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   const handleDetails = (accountId) => {
     navigate(`/update-role/${accountId}`);
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // Filter the data based on the search term
+  const filteredData = data.filter((row) =>
+    row.account?.userName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const columns = [
+    {
+      name: "STT",
+      selector: (row, index) => index + 1,
+      sortable: true,
+      width: "80px", // Reduced width for smaller display
+    },
+    {
+      name: "Tên người dùng",
+      selector: (row) => row.account?.userName || "Không có tên",
+      sortable: true,
+      width: "250px", // Adjusted width
+      style: { fontSize: "14px" }, // Reduced font size for smaller text
+    },
+    {
+      name: "Ngày sinh",
+      selector: (row) => row.dateOfBirth.split("T")[0], // Display only the date
+      sortable: true,
+      width: "120px", // Adjusted width for smaller display
+      style: { fontSize: "14px" }, // Reduced font size for smaller text
+    },
+    {
+      name: "Ảnh CMND mặt trước",
+      cell: (row) =>
+        row.frontIdcard ? (
+          <img
+            alt="Ảnh CMND mặt trước"
+            className="w-24 h-24 object-cover rounded-md" // Reduced size for image
+            src={row.frontIdcard}
+          />
+        ) : (
+          "Không có"
+        ),
+      width: "250px", // Adjusted width
+      height: "150px", // Adjusted height
+    },
+    {
+      name: "Số CMND",
+      selector: (row) => row.idcardNumber,
+      sortable: true,
+      width: "120px", // Adjusted width
+      style: { fontSize: "14px" }, // Reduced font size for smaller text
+    },
+    {
+      name: "Trạng thái",
+      cell: (row) =>
+        row.status === 0 ? (
+          <FaBan style={{ color: "red", fontSize: "18px" }} title="Bị khóa" /> // Reduced icon size
+        ) : row.status === 1 ? (
+          <FaCheckCircle
+            style={{ color: "green", fontSize: "18px" }}
+            title="Đã xác nhận"
+          />
+        ) : (
+          <FaRegClock
+            style={{ color: "orange", fontSize: "18px" }}
+            title="Chờ xác nhận"
+          />
+        ),
+      sortable: true,
+      width: "120px", // Adjusted width
+    },
+    {
+      name: "Thao tác",
+      cell: (row) => (
+        <button
+          className="btn btn-link p-0"
+          onClick={() => handleDetails(row.accountId)}
+        >
+          <FaInfoCircle
+            style={{ color: "#007bff", fontSize: "18px" }} // Reduced icon size
+            title="Chi tiết"
+          />
+        </button>
+      ),
+      width: "120px", // Adjusted width
+    },
+  ];
+
 
   return (
-    <div className="flex h-screen justify-center items-start p-4">
-      <ToastContainer />
-
-      {/* Main Content */}
-      <div className="w-full max-w-7xl bg-white shadow-lg rounded-lg p-7">
-        <div className="table-responsive">
-          <table className="table table-bordered table-striped table-hover">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Tên tài khoản</th>
-                <th>Ngày sinh</th>
-                <th>Ảnh CMND mặt trước</th>
-                <th>Số CMND</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data && data.length > 0 ? (
-                data.map((item, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{item.account?.userName || "Không có tên"}</td>
-                    <td>{item.dateOfBirth.split("T")[0]}</td> {/* Display only the date */}
-                    <td>
-                      {item.frontIdcard && (
-                        <img
-                          alt="Ảnh CMND mặt trước"
-                          className="w-32 h-32 object-cover" // Increase image size
-                          src={item.frontIdcard}
-                        />
-                      )}
-                    </td>
-                    <td>{item.idcardNumber}</td>
-                    <td>
-                      {item.status === 0 && (
-                        <FaBan
-                          style={{
-                            color: "red",
-                            cursor: "pointer",
-                            fontSize: "24px",
-                          }}
-                          title="Bị khóa"
-                        />
-                      )}
-                      {item.status === 1 && (
-                        <FaCheckCircle
-                          style={{
-                            color: "green",
-                            cursor: "pointer",
-                            fontSize: "24px",
-                          }}
-                          title="Đã xác nhận"
-                        />
-                      )}
-                      {item.status === -1 && (
-                        <FaRegClock
-                          style={{
-                            color: "orange",
-                            cursor: "pointer",
-                            fontSize: "24px",
-                          }}
-                          title="Chờ được xác nhận"
-                        />
-                      )}
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-link"
-                        onClick={() => handleDetails(item.accountId)}
-                      >
-                        <FaInfoCircle
-                          style={{
-                            color: "#007bff",
-                            cursor: "pointer",
-                            fontSize: "24px",
-                          }}
-                          title="Chi tiết"
-                        />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7">Không có dữ liệu</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+    <div className="flex-1 p-4">
+      <div className="w-full max-w-7xl bg-white shadow-lg rounded-lg p-5">
+        {/* Filter button with icon */}
+        <div className="mb-4 flex items-center justify-between">
+          <button
+            className="flex items-center text-blue-500 hover:text-blue-700"
+            onClick={() => setShowFilter(!showFilter)} // Toggle filter visibility
+          >
+            <FaFilter className="mr-2" />
+            Bộ lọc
+          </button>
         </div>
+
+        {showFilter && (
+          <div className="flex flex-wrap mb-4 gap-4 bg-gray-100 p-4 rounded-md">
+            <input
+              type="text"
+              className="form-control ml-2 p-2 text-sm"
+              placeholder="Tìm kiếm tên người dùng"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        )}
+
+        {/* DataTable component */}
+        <DataTable
+          title="Danh sách tài khoản"
+          columns={columns}
+          data={filteredData} // Use filtered data
+          pagination
+          highlightOnHover
+          striped
+          customStyles={{
+            rows: {
+              style: {
+                fontSize: "14px", // Smaller font size for rows
+                padding: "12px", // Reduced row padding
+              },
+            },
+            headCells: {
+              style: {
+                fontSize: "16px", // Smaller font size for headers
+                padding: "10px", // Reduced header padding
+              },
+            },
+            cells: {
+              style: {
+                padding: "10px", // Reduced cell padding
+              },
+            },
+          }}
+        />
       </div>
     </div>
   );

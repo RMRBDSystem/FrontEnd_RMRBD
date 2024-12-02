@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import Swal from "sweetalert2"; // Import SweetAlert2
 
 const AccountDetails = () => {
   const { accountId } = useParams();
@@ -11,7 +12,6 @@ const AccountDetails = () => {
   const [loading, setLoading] = useState(true);
   const [statusEditing, setStatusEditing] = useState(false);
   const [newStatus, setNewStatus] = useState(null);
-  const [censorNote, setCensorNote] = useState();
 
   useEffect(() => {
     fetchAccountDetails();
@@ -23,12 +23,11 @@ const AccountDetails = () => {
 
     try {
       const result = await axios.get(
-        `https://localhost:7220/odata/AccountProfile/${accountId}`,
+        `https://rmrbdapi.somee.com/odata/AccountProfile/${accountId}`,
         { headers }
       );
       setAccountDetails(result.data);
       setNewStatus(result.data.status);
-      //setNewStatus(result.data.censorNote);
     } catch (error) {
       console.error("Error fetching account details:", error);
     } finally {
@@ -38,22 +37,36 @@ const AccountDetails = () => {
 
   const updateStatus = async () => {
     if (newStatus !== accountDetails.status) {
-      setLoading(true);
-      const headers = { "Content-Type": "application/json", token: "123-abc" };
-      const updatedData = { ...accountDetails, status: newStatus };
+      // Hiển thị xác nhận với SweetAlert2
+      const result = await Swal.fire({
+        title: "Bạn có chắc chắn muốn thay đổi trạng thái?",
+        text: "Điều này sẽ cập nhật trạng thái tài khoản!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+      });
 
-      try {
-        await axios.put(
-          `https://localhost:7220/odata/AccountProfile/${accountId}`,
-          updatedData,
-          { headers }
-        );
-        setAccountDetails({ ...accountDetails, status: newStatus });
-        setStatusEditing(false);
-      } catch (error) {
-        console.error("Error updating status:", error);
-      } finally {
-        setLoading(false);
+      if (result.isConfirmed) {
+        setLoading(true);
+        const headers = { "Content-Type": "application/json", token: "123-abc" };
+        const updatedData = { ...accountDetails, status: newStatus };
+
+        try {
+          await axios.put(
+            `https://rmrbdapi.somee.com/odata/AccountProfile/${accountId}`,
+            updatedData,
+            { headers }
+          );
+          setAccountDetails({ ...accountDetails, status: newStatus });
+          setStatusEditing(false);
+          Swal.fire("Thành công!", "Trạng thái tài khoản đã được cập nhật.", "success");
+        } catch (error) {
+          console.error("Error updating status:", error);
+          Swal.fire("Lỗi", "Có lỗi xảy ra khi cập nhật trạng thái.", "error");
+        } finally {
+          setLoading(false);
+        }
       }
     }
   };
@@ -109,7 +122,7 @@ const AccountDetails = () => {
           <h2 className="font-semibold text-2xl text-gray-700 mb-4">
             Hình ảnh
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             {accountDetails.frontIdcard && (
               <div>
                 <p className="font-medium text-lg mb-2">Mặt trước CMND:</p>
@@ -168,17 +181,6 @@ const AccountDetails = () => {
             <option value={0}>Khóa</option>
           </select>
         </div>
-        {/* Censor Update */}
-        {/* <div>
-          <label className="block text-lg font-semibold">Censor Note:</label>
-          <textarea
-            value={censorNote}
-            onChange={(e) => setCensorNote(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg"
-            rows="4"
-          />
-        </div> */}
-        {/* Action Buttons */}
         <div className="mt-6 text-center space-x-4">
           <button
             onClick={updateStatus}
