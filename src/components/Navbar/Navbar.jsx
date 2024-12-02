@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import LogoA from '/images/LogoA.png';
+import Logo from '/images/Logo.png';
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import NavLinks from './NavLinks';
 import { leftLinks } from '../../data/data';
@@ -264,7 +265,7 @@ const Navbar = () => {
             >
               <div className="flex">
                 <div className="w-1/4 pr-6 border-r">
-                  <h2 className="font-semibold text-gray-800 mb-4 text-lg">Product Catalog</h2>
+                  <h2 className="font-semibold text-gray-800 mb-4 text-lg">Danh Mục Sản Phẩm</h2>
                   <ul className="space-y-3 text-gray-700 font-medium text-base">
                     {Object.keys(categoriesContent).map((category) => (
                       <li
@@ -393,7 +394,7 @@ const Navbar = () => {
                         to="/report"
                         className="block px-4 py-2 hover:bg-gray-200"
                       >
-                        Báo cáo
+                        Khiếu Nại
                       </NavLink>
                     </>
                   )}
@@ -409,7 +410,7 @@ const Navbar = () => {
                         to="/reportmod"
                         className="block px-4 py-2 hover:bg-gray-200"
                       >
-                        Duyệt báo cáo
+                        Duyệt đơn khiếu nại
                       </NavLink>
                     </>
                   )}
@@ -437,7 +438,7 @@ const Navbar = () => {
                         to="/report"
                         className="block px-4 py-2 hover:bg-gray-200"
                       >
-                        Báo cáo
+                        Khiếu Nại
                       </NavLink>
                     </>
                   )}

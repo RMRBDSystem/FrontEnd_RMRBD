@@ -5,7 +5,7 @@ const About = () => {
     return (
         <section className="section bg-amber-50" id="about">
             <div className="section-title">
-                <h2 className="text-gray-600 font-expletus">About us</h2>
+                <h2 className="text-gray-600 font-expletus">Về Chúng Tôi</h2>
                 <div className={`underline bg-gray-800`}></div>
             </div>
             <div className="section-center rounded-3xl">
@@ -19,13 +19,12 @@ const About = () => {
                     </article>
                     <article className="p-4 sm:flex-col self-center">
                         <h3 className="capitalize tracking-widest font-bold text-3xl sm:text-3xl">
-                            Welcome to Recipe Cook System
+                        Chào mừng đến với Hệ Thống Công Thức Nấu Ăn!
                         </h3>
-                        <p className="my-3 text-lg">At Recipe Cook System, we bring the world of cooking right to your fingertips. 
+                        <p className="my-3 text-lg">Tại Hệ Thống Công Thức Nấu Ăn, chúng tôi mang đến thế giới ẩm thực ngay tại đầu ngón tay của bạn.
                         </p>
                         <p>
-                        Offering a wide range of high-quality cookbooks, from authentic Vietnamese recipes to international cuisines. Each book is carefully curated to inspire chefs of all levels.
-                        Discover now and elevate your cooking game!
+                        Cung cấp đa dạng các cuốn sách nấu ăn chất lượng cao, từ các công thức Việt Nam truyền thống đến các món ăn quốc tế. Mỗi cuốn sách được tuyển chọn kỹ lưỡng, nhằm truyền cảm hứng cho các đầu bếp ở mọi trình độ. Khám phá ngay và nâng cao kỹ năng nấu nướng của bạn!
                         </p>
                     </article>
                 </div>

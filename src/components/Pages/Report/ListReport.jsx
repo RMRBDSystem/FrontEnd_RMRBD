@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import { getReportByAccountId } from '../../services/ReportService';
-import { deleteReport } from '../../services/ReportService';
-
+import { useNavigate } from 'react-router-dom';  // Thêm useNavigate để điều hướng
+import { getReportByAccountId, deleteReport } from '../../services/ReportService';
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import Swal from 'sweetalert2';
 
 const ReportList = () => {
-
+    const navigate = useNavigate();  // Khai báo useNavigate để điều hướng
     const [UserId, setUserId] = useState('');
     const [reportList, setReportList] = useState([]);
 
@@ -17,12 +18,13 @@ const ReportList = () => {
                 const reports = await getReportByAccountId(storedUserId);
                 setReportList(reports);
             } else {
-                window.location.href = '/login';
+                // Sử dụng navigate thay vì window.location.href để điều hướng
+                navigate('/login');
             }
         };
 
         fetchData();
-    }, []);
+    }, [navigate]);
 
     const handleDelete = async (id) => {
         try {
@@ -33,71 +35,109 @@ const ReportList = () => {
                     setUserId(storedUserId);
                     const reports = await getReportByAccountId(storedUserId);
                     setReportList(reports);
-                    artalert('Xóa báo cáo thành công');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Xóa báo cáo thành công',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
                 } else {
-                    window.location.href = '/login';
+                    navigate('/login');  // Điều hướng đến login nếu không có UserId
                 }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Xóa báo cáo thất bại',
+                    showConfirmButton: true
+                });
             }
-            else {
-                alert('Xóa báo cáo thất bại');
-            }
-
         } catch (error) {
             console.error('Error deleting report:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi khi xóa báo cáo',
+                text: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.',
+                showConfirmButton: true
+            });
         }
-    }
+    };
 
     return (
+        <section className='min-h-96 section-center max-w-4xl'>
+            <Typography variant="h4" gutterBottom>
+                Danh sách báo cáo
+            </Typography>
 
-        <div>
-            <a href={`/report`} class="btn btn-primary">Tạo báo cáo mới</a>
-            <h1>Report List</h1>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Id</th>
-                        <th scope="col">Tiêu đề</th>
-                        <th scope="col">Ngày tạo</th>
-                        <th scope="col">Trạng thái</th>
-                        <th scope="col">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {reportList.map((element, index) => (
-                        <tr key={index}>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate('/report')}  // Dùng navigate thay vì href
+                sx={{ marginBottom: '16px' }}
+            >
+                Tạo báo cáo mới
+            </Button>
 
-                            <th scope="row">{element.feedBackId}</th>
-                            <td>{element.title}</td>
-                            <td>
-                                {new Date(element.date).toLocaleString('vi-VN', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: false,
-                                })}
-                            </td>
-                            <td>
-                                {element.status === 1 ? <span style={{ color: 'green' }}>Đã sử lý</span> : element.status === -1 ? <span style={{ color: 'yellow' }}>Chưa sử lý</span> : <span style={{ color: 'red' }}>Đã Hủy</span>}
-                            </td>
-                            <td>
-                                <a href={`/reportdetail/${element.feedBackId}`} class="btn btn-primary">Chi tiết</a>
-
-                                {element.status === -1 && (
-                                    <button className="btn btn-danger" onClick={() => handleDelete(element.feedBackId)}>
-                                        Hủy
-                                    </button>
-                                )}
-
-
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><strong>ID</strong></TableCell>
+                            <TableCell><strong>Tiêu đề</strong></TableCell>
+                            <TableCell><strong>Ngày tạo</strong></TableCell>
+                            <TableCell><strong>Trạng thái</strong></TableCell>
+                            <TableCell><strong>Hành động</strong></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {reportList.map((element, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{element.feedBackId}</TableCell>
+                                <TableCell>{element.title}</TableCell>
+                                <TableCell>
+                                    {new Date(element.date).toLocaleString('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false,
+                                    })}
+                                </TableCell>
+                                <TableCell>
+                                    {element.status === 1 ? (
+                                        <span style={{ color: 'green' }}>Đã xử lý</span>
+                                    ) : element.status === -1 ? (
+                                        <span style={{ color: 'yellow' }}>Chưa xử lý</span>
+                                    ) : (
+                                        <span style={{ color: 'red' }}>Đã hủy</span>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        onClick={() => navigate(`/reportdetail/${element.feedBackId}`)}  // Dùng navigate thay vì href
+                                    >
+                                        Chi tiết
+                                    </Button>
+                                    {element.status === -1 && (
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            onClick={() => handleDelete(element.feedBackId)}
+                                            sx={{ marginLeft: '8px' }}
+                                        >
+                                            Hủy
+                                        </Button>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </section>
     );
-}
+};
 
 export default ReportList;

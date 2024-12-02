@@ -30,6 +30,12 @@ import EditRecipe from '../AddRecipe/EditRecipe';
 import RecipeCustomer from "../AddRecipe/RecipeCustomer";
 import RecipeCustomerDetail from "../AddRecipe/RecipeCustomerDetail";
 import RecipeListCustomer from "../AddRecipe/RecipeListCustomer";
+//Moderator
+import Report from "../Pages/Report/Report";
+import ListReport from "../Pages/Report/ListReport";
+import ReportDetail from "../Pages/Report/ReportDetail";
+import ReportMod from "../Pages/Report/ReportMod";
+import ReportResponse from "../Pages/Report/ReportResponse";
 //Admin
 import RecipeDetails from "../Admin/Recipemanagement/RecipeDetail";
 import AdminDashboard from "../Admin/Dashboard";

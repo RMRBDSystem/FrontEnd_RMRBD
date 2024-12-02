@@ -3,7 +3,7 @@ import "../../assets/styles/Components/LoginPage.css"
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
-import  { useEffect, useState  } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "../RouterPage/AuthContext"
@@ -67,27 +67,24 @@ const Login = () => {
           Token: "123-abc",
         },
       });
-      const { role, userId, coin } = response.data;
-
+      const { userRole, userId, coin } = response.data;
+      console.log("role", response.data);
       // Nếu người dùng đã có một vai trò, không cho phép đăng nhập với vai trò khác
       const existingRole = Cookies.get("UserRole");
-      if (existingRole && existingRole !== role) {
+      if (existingRole && existingRole !== userRole) {
         alert("Bạn đã đăng nhập với vai trò khác. Vui lòng đăng xuất trước khi đăng nhập lại.");
         return; // Ngăn không cho tiếp tục đăng nhập
       }
 
       // Lưu vai trò và tên người dùng vào cookie và localStorage
-      Cookies.set("UserRole", role, { expires: 1 });
-      localStorage.setItem("UserRole", role); // Lưu vào localStorage
+      Cookies.set("UserRole", userRole, { expires: 1 });
       Cookies.set("UserName", userName, { expires: 1 });
       Cookies.set("UserId", userId, { expires: 1 });
       Cookies.set("Coin", coin, { expires: 1 });
-      localStorage.setItem("UserName", userName);
-      localStorage.setItem("UserId", userId);
 
       setIsLoggedIn(true);
       // Điều hướng đến dashboard tương ứng
-      navigate(getDashboardPath(role));
+      navigate(getDashboardPath(userRole));
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
     }

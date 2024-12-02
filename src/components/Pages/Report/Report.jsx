@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { saveReportImage } from '../../services/ReportService';
-import { saveReport } from '../../services/ReportService';
-import { redirect } from 'react-router-dom';
-
+import { saveReportImage, saveReport } from '../../services/ReportService';
+import { TextField, Button, Box, Typography, Input } from '@mui/material';
+import Swal from 'sweetalert2';  // Import SweetAlert2
 
 const ReportPage = () => {
     const imageInput = useRef(null);
@@ -12,6 +10,12 @@ const ReportPage = () => {
     const [content, setContent] = useState('');
     const [image, setImage] = useState(null);
     const [UserId, setUserId] = useState('');
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setImage(file);
+        }
+    };
 
     useEffect(() => {
         const storedUserId = Cookies.get('UserId');
@@ -24,9 +28,14 @@ const ReportPage = () => {
         event.preventDefault();
 
         if (!title || !content) {
-            alert("Vui lớng nhập đầy đủ thống tin");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng nhập đầy đủ thông tin',
+                showConfirmButton: true
+            });
             return;
         }
+
         const report = {
             CustomerId: UserId,
             Title: title,
@@ -34,95 +43,139 @@ const ReportPage = () => {
             Status: -1
         };
 
-
-
         try {
             const response = await saveReport(report);
 
             if (!response) {
-                alert("Báo cáo thất bại");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Báo cáo thất bại',
+                    showConfirmButton: true
+                });
                 return;
             }
 
             if (image) {
                 const responseImage = await saveReportImage(response.feedBackId, image);
                 if (responseImage) {
-                    alert("Báo cáo thành công");
-
-                    window.location.href = '/listreport';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cảm ơn vì đã cung cấp ý kiến',
+                        showConfirmButton: true
+                    }).then(() => {
+                        window.location.href = '/listreport';
+                    });
                 }
-
             } else {
-                alert("Báo cáo thành công");
-                window.location.href = '/listreport';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cảm ơn vì đã cung cấp ý kiến',
+                    showConfirmButton: true
+                }).then(() => {
+                    window.location.href = '/listreport';
+                });
             }
         } catch (error) {
-            alert("Báo cáo thất bại");
+            Swal.fire({
+                icon: 'error',
+                title: 'Báo cáo thất bại',
+                text: 'Có lỗi xảy ra. Vui lòng thử lại sau.',
+                showConfirmButton: true
+            });
         }
     };
 
     return (
-        <div className="report-page container text-center">
-            <h1 className="mb-4"><strong>Gửi ý kiến</strong></h1>
-            <form onSubmit={handleSubmit} className="needs-validation was-validated" noValidate>
-                <div className="form-group mb-3">
-                    <label htmlFor="title" className="form-label">Tiêu đề:</label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={title}
-                        onChange={(event) => setTitle(event.target.value)}
-                        required
-                        className="form-control"
-                        placeholder="Tiêu đề"
-                        aria-required="true"
-                        aria-invalid={title === ""}
-                    />
-                    {title === "" && (
-                        <div className="invalid-feedback">Vui lòng nhập tiêu đề</div>
-                    )}
-                </div>
-                <div className="form-group mb-3">
-                    <label htmlFor="content" className="form-label">Nội dung:</label>
-                    <textarea
-                        id="content"
-                        name="content"
-                        value={content}
-                        onChange={(event) => setContent(event.target.value)}
-                        required
-                        className="form-control"
-                    />
-                    {content === "" && (
-                        <div className="invalid-feedback">Vui lòng nhập nội dung</div>
-                    )}
-                </div>
-                <div className="form-group mb-3">
-                    <label htmlFor="image" className="form-label">Gửi ảnh (tùy chọn): </label>
-                    <input
-                        type="file"
-                        id="image"
-                        name="image"
-                        onChange={(event) => setImage(event.target.files[0])}
-                        accept="image/*"
-                        className="form-control-file"
-                        ref={imageInput}
-                    />
-                    {image && (
-                        <div className="mt-3">
-                            <img src={URL.createObjectURL(image)} alt="Uploaded Image" style={{ width: "100px", height: "100px" }} />
-                            <button className="btn btn-danger btn-sm" onClick={() => {
-                                setImage(null);
-                                imageInput.current.value = '';
-                            }}>Clear Image</button>
-                        </div>
-                    )}
-                </div>
+        <section className="section-center">
+            <div className="report-page max-w-4xl container text-center bg-white shadow-lg rounded p-3 my-3 mx-auto">
+                <Typography variant="h5" color="primary" gutterBottom><strong>ĐƠN KHIẾU NẠI</strong></Typography>
 
-                <button type="submit" className="btn btn-primary btn-lg">Gửi báo cáo</button>
-                <a href="/listreport" className="btn btn-danger btn-lg">Xem lịch sử báo cáo</a>
-            </form>
-        </div>
+                <form onSubmit={handleSubmit} noValidate>
+                    {/* Title Input */}
+                    <Box mb={3}>
+                        <TextField
+                            label="Tiêu đề"
+                            id="title"
+                            name="title"
+                            value={title}
+                            onChange={(event) => setTitle(event.target.value)}
+                            required
+                            fullWidth
+                            error={title === ""}
+                            helperText={title === "" ? "Vui lòng nhập tiêu đề" : ""}
+                        />
+                    </Box>
+
+                    {/* Content Textarea */}
+                    <Box mb={3}>
+                        <TextField
+                            label="Nội dung"
+                            id="content"
+                            name="content"
+                            value={content}
+                            onChange={(event) => setContent(event.target.value)}
+                            required
+                            fullWidth
+                            multiline
+                            rows={4}
+                            error={content === ""}
+                            helperText={content === "" ? "Vui lòng nhập nội dung" : ""}
+                        />
+                    </Box>
+
+                    {/* Image Input */}
+                    <Box mb={3}>
+                        <label
+                            htmlFor="fileInput"
+                            className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
+                        >
+                            <h1 className="material-icons text-6xl">cloud_upload</h1>
+                            <p className="text-lg">Tải hình ảnh lên (nếu có)</p>
+                            <input
+                                type="file"
+                                id="fileInput"
+                                multiple
+                                accept="image/*"
+                                onChange={handleFileChange} // Handle file change event
+                                ref={imageInput} // Assign ref to input
+                                style={{ display: 'none' }} // Hide input element if needed
+                            />
+                            {image && (
+                                <Box mt={2}>
+                                    <img
+                                        src={URL.createObjectURL(image)}
+                                        alt="Uploaded Image"
+                                        style={{ width: '100px', height: '100px' }}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        size="small"
+                                        onClick={() => {
+                                            setImage(null);
+                                            imageInput.current.value = ''; // Clear input value
+                                        }}
+                                        sx={{ mt: 1 }}
+                                    >
+                                        Gỡ bỏ
+                                    </Button>
+                                </Box>
+                            )}
+                        </label>
+                    </Box>
+
+                    {/* Submit and History buttons */}
+                    <Box mt={2}>
+                        <Button variant="contained" color="success" size="large" type="submit" sx={{ mr: 2 }}>
+                            Gửi báo cáo
+                        </Button>
+                        <Button variant="outlined" color="error" size="large" href="/listreport">
+                            Xem lịch sử báo cáo
+                        </Button>
+                    </Box>
+                </form>
+            </div>
+        </section>
     );
 };
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { getReportById } from '../../services/ReportService';
-import { updateReport } from '../../services/ReportService';
+import { getReportById, updateReport } from '../../services/ReportService';
+import { Box, Typography, Button, TextareaAutosize, Card, CardContent } from '@mui/material';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 const ReportResponse = () => {
     const { reportId } = useParams();
@@ -26,133 +27,151 @@ const ReportResponse = () => {
     }, [reportId]);
 
     const handleCancel = async (id) => {
-
         if (response) {
             report.status = 0;
             report.response = response;
             report.employeeId = UserId;
             const response2 = await updateReport(id, report);
             if (response2.status) {
-                alert('Cập nhật báo cáo thành công');
-                window.location.href = '/reportmod';
+                // Sử dụng SweetAlert2 để thông báo
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cập nhật báo cáo thành công',
+                    text: 'Trạng thái báo cáo đã được thay đổi thành "Đã hủy".',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '/reportmod';
+                });
             }
         } else {
-            alert('Vui lòng nhập chi tiết phản hồi');
+            // Thông báo lỗi khi không nhập phản hồi
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Vui lòng nhập chi tiết phản hồi!',
+                confirmButtonText: 'OK'
+            });
         }
     }
 
     const handleComplete = async (id) => {
-
         if (response) {
             report.status = 1;
             report.response = response;
             report.employeeId = UserId;
             const response2 = await updateReport(id, report);
             if (response2.status) {
-                alert('Cập nhật báo cáo thành công');
-                window.location.href = '/reportmod';
+                // Thông báo thành công khi hoàn thành
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cập nhật báo cáo thành công',
+                    text: 'Trạng thái báo cáo đã được thay đổi thành "Đã hoàn thành".',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '/reportmod';
+                });
             }
         } else {
-            alert('Vui lòng nhập chi tiết phản hồi');
+            // Thông báo lỗi khi không nhập phản hồi
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Vui lòng nhập chi tiết phản hồi!',
+                confirmButtonText: 'OK'
+            });
         }
     }
 
-
-
     return (
-        <div className="container">
-            <a href="/reportmod" className="btn btn-primary mb-4">Quay lại danh sách</a>
-            <h1 className="text-center mb-4">Chi tiết ý kiến</h1>
+        <Box className="container" sx={{ maxWidth: '1200px', margin: 'auto', padding: 2 }}>
+            <Button variant="contained" color="primary" href="/reportmod" sx={{ mb: 2 }}>
+                Quay lại danh sách
+            </Button>
 
-            <div className="row">
-                <div className="col-md-6">
-                    <div className="card">
-                        <div className="card-body">
-                            <h5 className="card-title">Thông tin ý kiến</h5>
-                            <p className="card-text">
-                                <strong>ID:</strong> {report.feedBackId}
-                            </p>
-                            <p className="card-text">
-                                <strong>Tiêu đề:</strong> {report.title}
-                            </p>
-                            <p className="card-text">
-                                <strong>Nội dung:</strong> {report.content}
-                            </p>
-                            <p className="card-text">
-                                <strong>Ngày tạo:</strong> {new Date(report.date).toLocaleString('vi-VN', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: false,
-                                })}
-                            </p>
-                            <p className="card-text">
-                                <strong>Trạng thái:</strong> {(() => {
-                                    if (report.status === 1) return <span style={{ color: 'green' }}>Đã sử lý</span>;
-                                    else if (report.status === -1) return <span style={{ color: 'yellow' }}>Chưa sử lý</span>;
-                                    else if (report.status === 0) return <span style={{ color: 'red' }}>Đã Hủy</span>;
-                                })()}
-                            </p>
+            <Typography variant="h4" align="center" sx={{ mb: 4 }}>Chi tiết ý kiến</Typography>
 
-
-
-                        </div>
-                    </div>
-                </div>
+            <Box display="flex" justifyContent="space-between" mb={3}>
+                <Card sx={{ width: '48%' }}>
+                    <CardContent>
+                        <Typography variant="h6">Thông tin ý kiến</Typography>
+                        <Typography><strong>ID:</strong> {report.feedBackId}</Typography>
+                        <Typography><strong>Tiêu đề:</strong> {report.title}</Typography>
+                        <Typography><strong>Nội dung:</strong> {report.content}</Typography>
+                        <Typography><strong>Ngày tạo:</strong> {new Date(report.date).toLocaleString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                        })}</Typography>
+                        <Typography><strong>Trạng thái:</strong> 
+                            {(() => {
+                                if (report.status === 1) return <span style={{ color: 'green' }}>Đã sử lý</span>;
+                                else if (report.status === -1) return <span style={{ color: 'yellow' }}>Chưa sử lý</span>;
+                                else if (report.status === 0) return <span style={{ color: 'red' }}>Đã Hủy</span>;
+                            })()}
+                        </Typography>
+                    </CardContent>
+                </Card>
 
                 {report.imageUrl ? (
-                    <div className="col-md-6">
-                        <img src={report.imageUrl} alt="Report Image" className="img-fluid" />
-                    </div>
+                    <Box sx={{ width: '48%' }}>
+                        <img src={report.imageUrl} alt="Report Image" style={{ width: '100%', height: 'auto' }} />
+                    </Box>
                 ) : (
-                    <div className="col-md-6">
-                        Không có ảnh
-                    </div>
+                    <Box sx={{ width: '48%' }}>
+                        <Typography variant="body1">Không có ảnh</Typography>
+                    </Box>
                 )}
-            </div>
+            </Box>
 
-            <div>
-                <h1 className="text-center mb-4">Phản hồi</h1>
-                {report.status === -1 && (
-                    <textarea className="card-text" value={response} onChange={(e) => setResponse(e.target.value)}>
-                        {report.response}
-                    </textarea>
-                )}
+            <Typography variant="h5" align="center" sx={{ mb: 3 }}>Phản hồi</Typography>
 
-                {report.response && (
-                    <p>
-                        <strong>Phản hồi:</strong> {report.response}
-                    </p>
-                )}
+            {report.status === -1 && (
+                <TextareaAutosize
+                    minRows={4}
+                    placeholder="Nhập phản hồi..."
+                    value={response}
+                    onChange={(e) => setResponse(e.target.value)}
+                    style={{ width: '100%', padding: '10px' }}
+                />
+            )}
 
+            {report.response && (
+                <Box mt={2}>
+                    <Typography variant="body1"><strong>Phản hồi:</strong> {report.response}</Typography>
+                </Box>
+            )}
 
-                <div className="row">
+            <Box display="flex" justifyContent="center" mt={4}>
+                <Box sx={{ width: '200px', mx: 2 }}>
+                    {report.status === -1 && (
+                        <Button 
+                            variant="contained" 
+                            color="error" 
+                            fullWidth 
+                            onClick={() => handleCancel(report.feedBackId)}
+                        >
+                            Từ chối
+                        </Button>
+                    )}
+                </Box>
 
-                    <div className="row">
-                        <div className="col-md-3"></div>
-                        <div className="col-md-3">
-                            {report.status === -1 && (
-                                <button className="btn btn-danger" onClick={() => handleCancel(report.feedBackId)}>
-                                    Từ chối
-                                </button>
-
-                            )}
-                        </div>
-                        <div className="col-md-3">
-                            {report.status === -1 && (
-                                <button className="btn btn-success" onClick={() => handleComplete(report.feedBackId)}>
-                                    Hoàn thành
-                                </button>
-                            )}
-                        </div>
-                        <div className="col-md-3"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+                <Box sx={{ width: '200px', mx: 2 }}>
+                    {report.status === -1 && (
+                        <Button 
+                            variant="contained" 
+                            color="success" 
+                            fullWidth 
+                            onClick={() => handleComplete(report.feedBackId)}
+                        >
+                            Hoàn thành
+                        </Button>
+                    )}
+                </Box>
+            </Box>
+        </Box>
     );
 };
 
