@@ -43,10 +43,10 @@ const Report = () => {
           onMouseLeave={() => setIsSidebarOpen(false)}
         >
           <div className="p-2 flex justify-center">
-            <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
+            <img src="/images/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
           </div>
           <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management", "Ebook Test"].map((item, index) => {
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management", "Ebook Test","Recipe Management"].map((item, index) => {
               let path;
               switch (item) {
                 case "Account Management":

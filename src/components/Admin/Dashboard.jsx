@@ -5,10 +5,6 @@ import { IoIosNotifications } from "react-icons/io";
 import { FaSearch } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
 import axios from 'axios';
-import AccountManagement from './AccountManagement';
-import IncomeManagement from './IncomeManagement';
-import Reports from './Reports';
-import CategoryManagement from './CategoryManagement';
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -86,10 +82,10 @@ const Dashboard = () => {
           onMouseLeave={() => setIsSidebarOpen(false)}
         >
           <div className="p-2 flex justify-center">
-            <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
+            <img src="/images/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
           </div>
           <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => (
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management","Recipe Management"].map((item, index) => (
               <div key={index}>
                 <Link 
                   to={`/admin/${item.replace(/ & /g, '-').replace(/ /g, '-').toLowerCase()}`} 
@@ -154,11 +150,6 @@ const Dashboard = () => {
 
           <Routes>
             {/* Specific Routes */}
-            <Route path="/account-management" element={<AccountManagement />} />
-            <Route path="/income-management" element={<IncomeManagement />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/category-management" element={<CategoryManagement />} />
-
             {/* Main Dashboard Route */}
             <Route path="/" element={
               <>

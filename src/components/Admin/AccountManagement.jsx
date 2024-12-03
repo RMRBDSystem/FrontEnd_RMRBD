@@ -287,12 +287,12 @@ const AccountManagement = () => {
         >
           <div className={`transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
             <div className="p-4 flex justify-center">
-              <img src="/src/assets/Logo.png" alt="Logo" className="w-40" />
+              <img src="/images/Logo.png" alt="Logo" className="w-40" />
             </div>
           </div>
           
           <nav className="mt-10 flex flex-col">
-            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management"].map((item, index) => {
+            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management","Recipe Management"].map((item, index) => {
                 let path;
                 switch (item) {
                 case "Account Management":

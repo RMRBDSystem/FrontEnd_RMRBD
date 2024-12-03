@@ -1,8 +1,3 @@
-// Importing styles using @use
-@use './Slide';
-@use './LoadingPage';
-
-// Global styles
 * {
     margin: 0;
     padding: 0;
@@ -13,3 +8,8 @@ body {
     font-size: 12px;
     background: #ededed;
 }
+
+
+
+@import './Slide.scss';
+@import './LoadingPage.scss'

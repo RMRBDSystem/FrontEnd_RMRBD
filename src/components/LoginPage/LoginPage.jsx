@@ -1,21 +1,21 @@
-import "../Style/LoginPage.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../Picture/LogoA.png";
+import "../../assets/styles/Components/LoginPage.css"
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
-import React, { useEffect } from "react";
+import  { useEffect, useState  } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-
+import { useAuth } from "../RouterPage/AuthContext"
 const Login = () => {
   const navigate = useNavigate();
-
+  const { setIsLoggedIn } = useAuth();
   useEffect(() => {
     // Kiểm tra cookie UserRole để xác định trạng thái đăng nhập
     const userRole = Cookies.get("UserRole");
     if (userRole) {
       // Nếu đã đăng nhập, điều hướng đến trang tương ứng
+      setIsLoggedIn(true);
       navigate(getDashboardPath(userRole));
     }
 
@@ -36,21 +36,23 @@ const Login = () => {
     };
   }, [navigate]);
 
-  // Đường dẫn mang tính chất tượng trưng, nên đổi lại
   const getDashboardPath = (role) => {
     switch (role) {
-      case "Moderator":
-        return "/moderatorDashboard";
-      case "Order Distributor":
-        return "/orderDistributorDashboard";
-      case "Admin":
-        return "/admindashboard";
-      case "Customer":
-        return "/homepageDashboard";
+      // case "Moderator":
+      //   return "/homepageDashboard";
+      // case "Order Distributor":
+      //   return "/homepageDashboard";
+      // case "Admin":
+      //   return "/homepageDashboard";
+      // case "Customer":
+      //   return "/homepageDashboard";
+      // case "Seller":
+      //   return "/homepageDashboard";
       default:
-        return "/";
+        return "/home";
     }
   };
+
 
   const handleLogin = async ({ credential }) => {
     const { sub: googleId, email, name: userName } = jwtDecode(credential);
@@ -65,7 +67,7 @@ const Login = () => {
           Token: "123-abc",
         },
       });
-      const { role } = response.data;
+      const { role, userId, coin } = response.data;
 
       // Nếu người dùng đã có một vai trò, không cho phép đăng nhập với vai trò khác
       const existingRole = Cookies.get("UserRole");
@@ -78,7 +80,12 @@ const Login = () => {
       Cookies.set("UserRole", role, { expires: 1 });
       localStorage.setItem("UserRole", role); // Lưu vào localStorage
       Cookies.set("UserName", userName, { expires: 1 });
+      Cookies.set("UserId", userId, { expires: 1 });
+      Cookies.set("Coin", coin, { expires: 1 });
+      localStorage.setItem("UserName", userName);
+      localStorage.setItem("UserId", userId);
 
+      setIsLoggedIn(true);
       // Điều hướng đến dashboard tương ứng
       navigate(getDashboardPath(role));
     } catch (error) {
@@ -91,7 +98,7 @@ const Login = () => {
       <div className="container d-flex justify-content-center align-items-center min-vh-100">
         <div className="login-box p-4">
           <div className="logo">
-            <img src={logo} className="img-fluid " alt="RecipeCook Logo" />
+            <img src="/images/LogoA.png" className="img-fluid " alt="RecipeCook LogoA" />
           </div>
           <div>
             <h2 className="text-center mb-3">Log in</h2>

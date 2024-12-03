@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Navigation, Autoplay } from 'swiper/modules';
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
-import B01 from '../../assets/recipe/hamburger-01.png';
-import B02 from '../../assets/recipe/hamburger-02.png';
-import B03 from '../../assets/recipe/hamburger-03.png';
-import B04 from '../../assets/recipe/hamburger-04.png';
-import B05 from '../../assets/recipe/hamburger-05.png';
+import B01 from '/images/recipe/hamburger-01.png';
+import B02 from '/images/recipe/hamburger-02.png';
+import B03 from '/images/recipe/hamburger-03.png';
+import B04 from '/images/recipe/hamburger-04.png';
+import B05 from '/images/recipe/hamburger-05.png';
 
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
@@ -84,10 +84,10 @@ const Slide = () => {
                     </SwiperSlide>
                 ))}
                 <div className='slider-controler'>
-                    <div className='swiper-button-prev'>
+                    <div className='swiper-button-prev text-white'>
                         <ArrowLeft size={30} />
                     </div>
-                    <div className='swiper-button-next'>
+                    <div className='swiper-button-next text-white'>
                         <ArrowRight size={30} />
                     </div>
                 </div>

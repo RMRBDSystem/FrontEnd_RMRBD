@@ -1,7 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import BackgroundImage from '../../../assets/Background.jpg';
-import Logo from '../../../assets/Logo.png';
 import { IoMdSearch } from 'react-icons/io';
 import { AiOutlineUser } from "react-icons/ai";
 
@@ -44,8 +42,6 @@ const AddBook = () => {
   const [isbn, setIsbn] = useState('');
   const [category, setCategory] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // State for error message
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const profileButtonRef = useRef(null);
@@ -64,22 +60,9 @@ const AddBook = () => {
     setImageUrl(e.target.value);
   };
 
-  const resetForm = () => {
-    setBookName('');
-    setDescription('');
-    setUnitsInStock('');
-    setPrice('');
-    setCensorId('');
-    setIsbn('');
-    setCategory('');
-    setImageUrl('');
-    setSuccessMessage('');
-    setErrorMessage(''); // Reset error message
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+  
     const categoryIdMapping = {
       "Appetizers": 1,
       "Soups": 2,
@@ -100,8 +83,9 @@ const AddBook = () => {
       ISBN: isbn,
       CategoryId: categoryIdMapping[category] || null,
       ImageUrl: imageUrl,
-      book: { 
+      book: { // Ensure to include a book field if required
         BookName: bookName,
+        // Include other necessary fields here as per API requirements
       }
     };
   
@@ -111,34 +95,31 @@ const AddBook = () => {
       const response = await fetch('https://rmrbdapi.somee.com/odata/Book', {
         method: 'POST',
         headers: {
-          'Token': '123-abc'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) {
         const errorResponse = await response.json();
         console.error('Response Error:', errorResponse);
-        if (response.status === 400) {
-          throw new Error('Bad Request: ' + (errorResponse.message || 'Invalid input.'));
-        } else if (response.status === 401) {
-          throw new Error('Unauthorized: Please log in.');
-        } else if (response.status === 500) {
-          throw new Error('Server Error: Please try again later.');
-        } else {
-          throw new Error('Unexpected Error: ' + (errorResponse.title || response.statusText));
-        }
+        throw new Error(`Failed to add book: ${errorResponse.title || response.statusText}`);
       }
   
       console.log('Book added successfully');
-      resetForm(); // Reset form after successful submission
-      setSuccessMessage('Book added successfully!'); // Set success message
-      setErrorMessage(''); // Clear any previous error messages
-
+      // Reset form after successful submission
+      setBookName('');
+      setDescription('');
+      setUnitsInStock('');
+      setPrice('');
+      setCensorId('');
+      setIsbn('');
+      setCategory('');
+      setImageUrl('');
+  
     } catch (error) {
       console.error('Error:', error);
-      setErrorMessage(`Error: ${error.message}`); // Set error message to display
-      alert(`Error: ${error.message}`); // Display error to the user
+      throw error; // Rethrow the error to be caught by ErrorBoundary
     }
   };
 
@@ -222,8 +203,6 @@ const AddBook = () => {
       <div className="flex-grow" style={{ backgroundImage: `url(${BackgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="bg-white mx-4 p-4 shadow-md mt-20" style={{ minHeight: 'calc(100vh - 200px)' }}>
           <h2 className="text-2xl font-bold ml-4" style={{ fontFamily: 'Roboto, sans-serif' }}>Add new book</h2>
-          {successMessage && <p className="text-green-500">{successMessage}</p>} {/* Display success message */}
-          {errorMessage && <p className="text-red-500">{errorMessage}</p>} {/* Display error message */}
           <div className="border-b border-black w-auto mx-auto mt-1" />
 
           <form onSubmit={handleSubmit} className="mt-4">
@@ -285,7 +264,6 @@ const AddBook = () => {
                   className="w-full border border-gray-300 p-2"
                   placeholder="Enter units in stock"
                   required
-                  min="0"
                 />
               </div>
 
@@ -344,11 +322,20 @@ const AddBook = () => {
             </div>
 
             {/* Submit and Cancel Buttons */}
-            <div className="mt-4 flex items-center space-x-4">
+            <div className="mt-4 flex space-x-4">
               <button
                 type="button"
                 className="bg-gray-400 text-white px-4 py-2 rounded"
-                onClick={resetForm}
+                onClick={() => {
+                  setBookName('');
+                  setDescription('');
+                  setUnitsInStock('');
+                  setPrice('');
+                  setCensorId('');
+                  setIsbn('');
+                  setCategory('');
+                  setImageUrl('');
+                }}
               >
                 Cancel
               </button>
@@ -358,9 +345,6 @@ const AddBook = () => {
               >
                 Submit
               </button>
-              {successMessage && (
-                <p className="text-green-500 ml-4">{successMessage}</p> // Display success message next to submit button
-              )}
             </div>
           </form>
         </div>

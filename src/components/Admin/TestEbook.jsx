@@ -1,352 +1,437 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch } from "react-icons/fa";
-import { IoIosNotifications } from "react-icons/io";
-import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 const TestEbook = () => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [ebooks, setEbooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]); // To store users (creators)
   const [newEbook, setNewEbook] = useState({
     EbookName: '',
     Description: '',
-    Price: '',
-    Pdfurl: '',
-    Images: [],  // Changed from ImageUrl to Images for multiple uploads
+    Price: 0,
+    Pdf: null,  // Store the PDF file
+    Image: [],
     CategoryId: '',
-    CreateById: 1,
+    CreateById: '',
+    CensorId: '',
+    pdfurl: ''  // Store the existing PDF URL when editing
   });
+
   const [modalOpen, setModalOpen] = useState(false);
-  const [notifications] = useState(["Notification 1", "Notification 2"]);
-  const location = useLocation();
-  
+  const [editMode, setEditMode] = useState(false);
+  const [selectedEbookId, setSelectedEbookId] = useState(null);
+
   const fileInputRef = useRef(null);
 
-  const handleToggleNotifications = () => {
-    setShowNotifications(prev => !prev);
-  };
-
+  // Fetch ebooks and categories
   const fetchEbooks = async () => {
     try {
       const response = await axios.get('https://rmrbdapi.somee.com/odata/ebook', {
         headers: {
-          'Content-Type': 'application/json',
           'Token': '123-abc',
         },
       });
-      setEbooks(response.data.value || []);
+
+      console.log("Fetched ebooks:", response.data);
+
+      if (Array.isArray(response.data)) {
+        setEbooks(response.data);
+      } else {
+        console.warn('Unexpected API response structure:', response.data);
+        setEbooks([]);
+      }
     } catch (error) {
-      console.error('Error fetching ebooks:', error);
+      console.error('Error fetching ebooks:', error.response ? error.response.data : error.message);
     }
   };
 
-  const addEbook = async (e) => {
-    e.preventDefault();
+  // Fetch categories
+  const fetchCategories = async () => {
     try {
-      const response = await axios.post('https://rmrbdapi.somee.com/odata/ebook', newEbook, {
+      const response = await axios.get('https://rmrbdapi.somee.com/odata/BookCategory', {
         headers: {
-          'Content-Type': 'application/json',
           'Token': '123-abc',
         },
       });
-      setEbooks(prev => [...prev, response.data]);
-      setNewEbook({
-        EbookName: '',
-        Description: '',
-        Price: '',
-        Pdfurl: '',
-        Images: [], // Reset to an empty array
-        CategoryId: '',
-        CreateById: 1,
+      console.log("Fetched categories:", response.data);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  // Fetch users (creators)
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('https://rmrbdapi.somee.com/odata/Account', {
+        headers: {
+          'Token': '123-abc',
+        },
       });
-      setModalOpen(false);
+      console.log("Fetched users:", response.data);
+      setUsers(response.data); 
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  // Function to format the price with commas
+  const formatPrice = (price) => {
+    if (price === '') return '';
+    return new Intl.NumberFormat().format(price);
+  };
+
+  // Handle Price change with formatting
+  const handlePriceChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    setNewEbook((prev) => ({
+      ...prev,
+      Price: value ? parseInt(value, 10) : 0,
+    }));
+  };
+
+  // Add new ebook with PDF
+  const addEbook = async (e) => {
+    e.preventDefault();
+    try {
+      const ebookData = new FormData();
+      ebookData.append('EbookName', newEbook.EbookName);
+      ebookData.append('Description', newEbook.Description);
+      ebookData.append('Price', parseInt(newEbook.Price, 10));
+      ebookData.append('Status', newEbook.Status);
+      ebookData.append('categoryId', parseInt(newEbook.CategoryId, 10));
+      ebookData.append('CreateById', newEbook.CreateById);
+      ebookData.append('CensorId', newEbook.CensorId);
+
+      if (newEbook.Image[0]) {
+        ebookData.append('image', newEbook.Image[0]);
+      }
+
+      if (newEbook.Pdf) {
+        ebookData.append('document', newEbook.Pdf);
+      }
+
+      const response = await axios.post('https://rmrbdapi.somee.com/odata/UploadPDF', ebookData, {
+        headers: {
+          'Token': '123-abc',
+        },
+      });
+
+      setEbooks(prev => [...prev, { ...response.data, pdfurl: response.data.pdfurl }]);
+      resetForm();
     } catch (error) {
       console.error('Error adding ebook:', error);
     }
   };
 
-  const handleDrop = (acceptedFiles) => {
-    const newImages = [...newEbook.Images];
-    Array.from(acceptedFiles).forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newImages.push(reader.result);
-        setNewEbook({ ...newEbook, Images: newImages });
-      };
-      reader.readAsDataURL(file);
+  // Edit ebook with existing PDF or new file
+  const editEbook = async (e) => {
+    e.preventDefault();
+
+    const ebookData = new FormData();
+    ebookData.append('ebookName', newEbook.EbookName);
+    ebookData.append('description', newEbook.Description);
+    ebookData.append('price', parseInt(newEbook.Price, 10));
+    ebookData.append('createById', newEbook.CreateById);
+    ebookData.append('ebookId', selectedEbookId);
+
+    if (newEbook.Image[0]) {
+      ebookData.append('image', newEbook.Image[0]);
+    }
+
+    if (newEbook.Pdf) {
+      ebookData.append('document', newEbook.Pdf);
+    }
+
+    try {
+      const response = await axios.put(
+        `http://rmrbdapi.somee.com/odata/Ebook/${selectedEbookId}`,
+        ebookData,
+        {
+          headers: {
+            'Token': '123-abc',
+          },
+        }
+      );
+      setEbooks((prev) =>
+        prev.map((ebook) =>
+          ebook.ebookId === selectedEbookId
+            ? { ...ebook, ...response.data }
+            : ebook
+        )
+      );
+      resetForm();
+    } catch (error) {
+      console.error("Error updating ebook:", error.response ? error.response.data : error.message);
+      alert(`Error updating ebook: ${error.response ? error.response.data.message : error.message}`);
+    }
+  };
+
+  const handleEditButtonClick = (ebook) => {
+    setEditMode(true);
+    setSelectedEbookId(ebook.ebookId);
+    setNewEbook({
+      EbookName: ebook.ebookName,
+      Description: ebook.description,
+      Price: ebook.price,
+      Status: ebook.status,
+      Pdf: null,
+      Image: ebook.imageUrl ? [ebook.imageUrl] : [],
+      CategoryId: ebook.categoryId,
+      CreateById: ebook.createById,
+      CensorId: ebook.censorId,
+      pdfurl: ebook.pdfurl || '', 
     });
+    setModalOpen(true);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const resetForm = () => {
+    setNewEbook({
+      EbookName: '',
+      Description: '',
+      Price: '', // Reset Price field
+      Pdf: null,  // Reset PDF field
+      Image: [],  // Reset image field
+      CategoryId: '',
+      CreateById: 1,
+      CensorId: '',
+      pdfurl: ''  // Reset PDF URL
+    });
+    setModalOpen(false);
+    setEditMode(false);
+    setSelectedEbookId(null);
   };
 
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewEbook((prev) => ({ ...prev, Image: [file] }));
+    }
   };
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewEbook((prev) => ({ ...prev, Pdf: file }));
+    }
   };
 
   useEffect(() => {
     fetchEbooks();
+    fetchCategories();  
+    fetchUsers(); 
   }, []);
+
+  const getCreatorName = (createById) => {
+    const creatorId = Number(createById);
+    const user = users.find(user => Number(user.accountId) === creatorId);
+    console.log(`Matching CreateById: ${createById} with AccountID: ${user ? user.accountId : 'No Match'}`);
+    return user ? user.userName : 'Unknown';
+  };
 
   return (
     <div className="flex flex-col min-h-screen font-roboto">
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside 
-          className={`bg-white text-black flex flex-col transition-all duration-300 ${isSidebarOpen ? 'w-1/5' : 'w-16'}`}
-          onMouseEnter={() => setIsSidebarOpen(true)}
-          onMouseLeave={() => setIsSidebarOpen(false)}
-        >
-          <div className="p-2 flex justify-center">
-            <img src="/src/assets/Logo.png" alt="Logo" className={`transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'} w-40`} />
-          </div>
-          <nav className="mt-10">
-            {["Dashboard", "Account Management", "Income Management", "Feedback & Comments", "Reports", "Category Management", "Ebook Test"].map((item, index) => {
-              let path;
-              switch (item) {
-                case "Account Management":
-                  path = '/admin/account-management';
-                  break;
-                case "Income Management":
-                  path = '/admin/income-management';
-                  break;
-                case "Category Management":
-                  path = '/admin/category-management';
-                  break;
-                case "Ebook Test":
-                  path = '/admin/ebook-test';
-                  break;
-                default:
-                  path = `/admin/${item.replace(/ /g, '').toLowerCase()}`;
-              }
+      <main className="flex-1 bg-gray-50 flex flex-col">
+        <div className="p-4">
+          <button onClick={() => setModalOpen(true)} className="bg-orange-500 text-white p-2 rounded">
+            Add New Ebook
+          </button>
+        </div>
 
-              return (
-                <div key={index}>
-                  <Link 
-                    to={path} 
-                    className={`block py-2.5 px-4 rounded transition-colors duration-200 
-                      ${location.pathname === path ? 
-                        "text-orange-500 font-semibold border-b-2 border-orange-500" : 
-                        "text-black"}`}
-                    style={{ opacity: isSidebarOpen ? 1 : 0 }}
-                  >
-                    {isSidebarOpen ? item : <span className="text-transparent">{item.charAt(0)}</span>}
-                  </Link>
-                  {isSidebarOpen && <div className={`border-b border-gray-300 ${item !== "Feedback & Comments" ? "mb-2" : ""}`} />}
-                </div>
-              );
-            })}
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 bg-gray-50 flex flex-col">
-          <header className="p-4 bg-white flex justify-between items-center">
-            <h1 className="text-orange-500 text-xl font-bold">Ebook Test</h1>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Search ebooks..." 
-                  className="rounded-md px-3 py-2 text-gray-800 pr-10" 
-                  name="ebookSearch"
-                />
-                <button className="absolute right-0 top-0 bottom-0 text-black rounded-r-md px-3 flex items-center">
-                  <FaSearch />
-                </button>
-              </div>
-              <button onClick={handleToggleNotifications} className="text-black flex items-center relative">
-                <IoIosNotifications size={24} />
-                {notifications.length > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">{notifications.length}</span>
-                )}
-              </button>
-              <div className="text-black flex items-center">
-                <div className="ml-2">Admin1</div>
-              </div>
-            </div>
-          </header>
-
-          {showNotifications && (
-            <div className="absolute right-4 top-16 bg-white shadow-lg rounded-lg p-4 w-64 z-50">
-              <h2 className="font-semibold mb-2">Notifications</h2>
-              {notifications.length > 0 ? (
-                <ul className="space-y-1">
-                  {notifications.map((note, index) => (
-                    <li key={index} className="text-gray-800">{note}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No notifications</p>
-              )}
-            </div>
-          )}
-
-          {/* Add Ebook Button */}
-          <div className="p-4">
-            <button onClick={() => setModalOpen(true)} className="bg-orange-500 text-white p-2 rounded">
-              Add New Ebook
-            </button>
-          </div>
-
-          {/* Ebook List */}
-          <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Ebook List</h2>
-            <table className="min-w-full bg-white border">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border-b text-left">Ebook Name</th>
-                  <th className="py-2 px-4 border-b text-left">Description</th>
-                  <th className="py-2 px-4 border-b text-left">Price</th>
-                  <th className="py-2 px-4 border-b text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ebooks.length > 0 ? (
-                  ebooks.map(ebook => (
-                    <tr key={ebook.EbookId}>
-                      <td className="py-2 px-4 border-b">{ebook.EbookName}</td>
-                      <td className="py-2 px-4 border-b">{ebook.Description}</td>
-                      <td className="py-2 px-4 border-b">{ebook.Price}</td>
+        <div className="p-4">
+          <h2 className="text-lg font-semibold mb-4">Ebook List</h2>
+          <table className="min-w-full bg-white border">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b text-left">Image</th>
+                <th className="py-2 px-4 border-b text-left">Ebook Name</th>
+                <th className="py-2 px-4 border-b text-left">Description</th>
+                <th className="py-2 px-4 border-b text-left">Price</th>
+                <th className="py-2 px-4 border-b text-left">Category</th>
+                <th className="py-2 px-4 border-b text-left">Created By</th> {/* New Column */}
+                <th className="py-2 px-4 border-b text-left">PDF Link</th>
+                <th className="py-2 px-4 border-b text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ebooks.length > 0 ? (
+                ebooks.map((ebook) => {
+                  const category = categories.find(
+                    (cat) => cat.categoryId === ebook.categoryId
+                  );
+                  return (
+                    <tr key={ebook.ebookId}>
                       <td className="py-2 px-4 border-b">
-                        <button onClick={() => updateEbook(ebook.EbookId, { /* Your updated data here */ })} className="text-red-500">Edit</button>
+                        {ebook.imageUrl && (
+                          <img
+                            src={ebook.imageUrl}
+                            alt={ebook.ebookName}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        )}
+                      </td>
+                      <td className="py-2 px-4 border-b">{ebook.ebookName}</td>
+                      <td className="py-2 px-4 border-b">{ebook.description}</td>
+                      <td className="py-2 px-4 border-b">{ebook.price === 0 ? 'Free' : formatPrice(ebook.price)}</td>
+                      <td className="py-2 px-4 border-b">
+                        {category ? category.name : 'No Category'}
+                      </td>
+                      <td className="py-2 px-4 border-b">{getCreatorName(ebook.createById)}</td>
+                      <td className="py-2 px-4 border-b">
+                        {ebook.pdfurl && ebook.pdfurl !== "" ? (
+                          <a 
+                            href={ebook.pdfurl.startsWith('http') ? ebook.pdfurl : `https://rmrbdapi.somee.com${ebook.pdfurl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-blue-500 text-white rounded px-3 py-1 text-center hover:bg-blue-600 transition"
+                          >
+                            View PDF
+                          </a>
+                        ) : (
+                          <span className="text-red-500">PDF not available</span>
+                        )}
+                      </td>
+                      <td className="py-2 px-4 border-b">
+                        <button
+                          onClick={() => handleEditButtonClick(ebook)}
+                          className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 transition"
+                        >
+                          Edit
+                        </button>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="text-center py-2">No ebooks found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center py-4">No ebooks available</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {/* Modal for adding/editing ebook */}
+        {modalOpen && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+              <h3 className="text-lg font-semibold">{editMode ? 'Edit Ebook' : 'Add Ebook'}</h3>
+              <form onSubmit={editMode ? editEbook : addEbook}>
+                {/* Ebook Name */}
+                <div className="mb-4">
+                  <label htmlFor="ebookName" className="block text-gray-700">Ebook Name</label>
+                  <input
+                    id="ebookName"
+                    type="text"
+                    value={newEbook.EbookName}
+                    onChange={(e) => setNewEbook({ ...newEbook, EbookName: e.target.value })}
+                    required
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
 
-          {/* Modal for Adding Ebook */}
-          {modalOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-96">
-                <h2 className="text-lg font-semibold mb-4">Add New Ebook</h2>
-                <form onSubmit={addEbook}>
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Ebook Name</label>
-                    <input 
-                      type="text" 
-                      value={newEbook.EbookName} 
-                      onChange={e => setNewEbook({ ...newEbook, EbookName: e.target.value })} 
-                      className="border rounded-md w-full p-2" 
-                      required 
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Description</label>
-                    <textarea 
-                      value={newEbook.Description} 
-                      onChange={e => setNewEbook({ ...newEbook, Description: e.target.value })} 
-                      className="border rounded-md w-full p-2" 
-                      required 
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Price</label>
-                    <input 
-                      type="number" 
-                      value={newEbook.Price} 
-                      onChange={e => setNewEbook({ ...newEbook, Price: e.target.value })} 
-                      className="border rounded-md w-full p-2" 
-                      required 
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-gray-700">PDF URL</label>
-                    <input 
-                      type="text" 
-                      value={newEbook.Pdfurl} 
-                      onChange={e => setNewEbook({ ...newEbook, Pdfurl: e.target.value })} 
-                      className="border rounded-md w-full p-2" 
-                      required 
-                    />
-                  </div>
-                  <div 
-                    className="mb-4" 
-                    onDragOver={handleDragOver} 
-                    onDragEnter={handleDragEnter} 
-                    onDragLeave={handleDragLeave} 
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      handleDrop(e.dataTransfer.files);
-                    }} 
-                    onClick={() => fileInputRef.current.click()} 
-                    style={{ 
-                      border: '2px dashed gray', 
-                      borderRadius: '8px', 
-                      padding: '20px', 
-                      textAlign: 'center' 
-                    }}
+                {/* Description */}
+                <div className="mb-4">
+                  <label htmlFor="description" className="block text-gray-700">Description</label>
+                  <textarea
+                    id="description"
+                    value={newEbook.Description}
+                    onChange={(e) => setNewEbook({ ...newEbook, Description: e.target.value })}
+                    required
+                    className="w-full border p-2 rounded"
+                  ></textarea>
+                </div>
+
+                {/* Price */}
+                <div className="mb-4">
+                  <label htmlFor="price" className="block text-gray-700">Price</label>
+                  <input
+                    id="price"
+                    type="text"
+                    value={formatPrice(newEbook.Price)}  // Format the price value here
+                    onChange={handlePriceChange}  // Use the new handlePriceChange function
+                    required
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+
+                {/* Category */}
+                <div className="mb-4">
+                  <label htmlFor="category" className="block text-gray-700">Category</label>
+                  <select
+                    id="category"
+                    value={newEbook.CategoryId}
+                    onChange={(e) => setNewEbook({ ...newEbook, CategoryId: e.target.value })}
+                    required
+                    className="w-full border p-2 rounded"
                   >
-                    <p className="text-gray-700">Drag & drop images here or click to select</p>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      multiple  // Allow multiple file selection
-                      onChange={(e) => handleDrop(e.target.files)} 
-                      style={{ display: 'none' }} 
-                      ref={fileInputRef} 
-                    />
-                  </div>
-
-                  {/* Image Previews */}
-                  <div className="flex flex-wrap">
-                    {newEbook.Images.map((image, index) => (
-                      <div key={index} className="relative mr-2 mb-2">
-                        <img 
-                          src={image} 
-                          alt={`Preview ${index}`} 
-                          className="w-24 h-24 object-cover border rounded" 
-                        />
-                        <button 
-                          onClick={() => {
-                            const updatedImages = newEbook.Images.filter((_, i) => i !== index);
-                            setNewEbook({ ...newEbook, Images: updatedImages });
-                          }} 
-                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                          aria-label="Remove image"
-                        >
-                          &times;
-                        </button>
-                      </div>
+                    <option value="">Select Category</option>
+                    {categories.map((category) => (
+                      <option key={category.categoryId} value={category.categoryId}>
+                        {category.name}
+                      </option>
                     ))}
-                  </div>
+                  </select>
+                </div>
 
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Category ID</label>
-                    <input 
-                      type="number" 
-                      value={newEbook.CategoryId} 
-                      onChange={e => setNewEbook({ ...newEbook, CategoryId: e.target.value })} 
-                      className="border rounded-md w-full p-2" 
-                      required 
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <button type="submit" className="bg-blue-500 text-white rounded-md px-4 py-2 mr-2">Add</button>
-                    <button type="button" onClick={() => setModalOpen(false)} className="bg-gray-300 text-black rounded-md px-4 py-2">Cancel</button>
-                  </div>
-                </form>
-              </div>
+                {/* PDF File Upload */}
+                <div className="mb-4">
+                  <label htmlFor="pdfFile" className="block text-gray-700">Upload PDF</label>
+                  <input
+                    id="pdfFile"
+                    type="file"
+                    accept=".pdf"
+                    onChange={handlePdfChange}
+                    className="w-full border p-2 rounded"
+                  />
+                  {newEbook.Pdf && newEbook.Pdf instanceof File && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-600">New PDF: {newEbook.Pdf.name}</p>
+                    </div>
+                  )}
+                  {newEbook.pdfurl && !newEbook.Pdf && !editMode && (
+                    <div className="mt-2">
+                      <a href={newEbook.pdfurl} target="_blank" rel="noopener noreferrer" className="text-blue-500">View Current PDF</a>
+                    </div>
+                  )}
+                </div>
+
+                {/* Image File Upload */}
+                <div className="mb-4">
+                  <label htmlFor="imageFile" className="block text-gray-700">Upload Image</label>
+                  <input
+                    id="imageFile"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full border p-2 rounded"
+                  />
+                  {newEbook.Image[0] && newEbook.Image[0] instanceof File && (
+                    <div className="mt-2">
+                      <img src={URL.createObjectURL(newEbook.Image[0])} alt="Preview" className="w-32 h-32 object-cover rounded" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="bg-gray-400 text-white px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    {editMode ? 'Update Ebook' : 'Add Ebook'}
+                  </button>
+                </div>
+              </form>
             </div>
-          )}
-        </main>
-      </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 };

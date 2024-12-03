@@ -3,8 +3,7 @@ import Button from "./Button";
 
 const Footer = () => {
   return (
-    <div className="bg-black">
-      <footer className="text-white py-2 bg-gradient-to-t from-slate-900 to-transparent top-0">
+      <footer className="text-white py-2 bg-transparent top-0">
         <div className="container mx-auto px-20 lg:px-20 py-20 flex flex-col gap-10 md:flex-row justify-between border-t border-slate-800">
           <div className="flex">
             <p className="font-bold text-center">
@@ -127,7 +126,6 @@ const Footer = () => {
           <span className="text-gray-400 leading-10">FPT University &copy; 2024</span>
         </div>
       </footer>
-    </div>
   );
 };
 
