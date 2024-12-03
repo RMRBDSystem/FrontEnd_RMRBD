@@ -1,6 +1,12 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { FaBan, FaCheckCircle, FaRegClock, FaInfoCircle, FaFilter } from "react-icons/fa";
+import {
+  FaBan,
+  FaCheckCircle,
+  FaRegClock,
+  FaInfoCircle,
+  FaFilter,
+} from "react-icons/fa";
 import Cookies from "js-cookie";
 import DataTable from "react-data-table-component";
 
@@ -40,22 +46,22 @@ const EbookList = () => {
 
   const columns = [
     {
-      name: '#',
+      name: "#",
       selector: (row, index) => index + 1,
       sortable: true,
     },
     {
-      name: 'Tên sách điện tử',
+      name: "Tên sách điện tử",
       selector: (row) => row.ebookName || "Unknown",
       sortable: true,
     },
     {
-      name: 'Giá',
+      name: "Giá",
       selector: (row) => row.price || "Unknown",
       sortable: true,
     },
     {
-      name: 'Ảnh',
+      name: "Ảnh",
       selector: (row) => (
         <img
           src={row.imageUrl}
@@ -66,7 +72,7 @@ const EbookList = () => {
       sortable: false,
     },
     {
-      name: 'Trạng thái',
+      name: "Trạng thái",
       selector: (row) => {
         if (row.status === 0) {
           return (
@@ -108,7 +114,7 @@ const EbookList = () => {
       sortable: false,
     },
     {
-      name: 'Thao tác',
+      name: "Thao tác",
       selector: (row) => (
         <button
           className="btn btn-link"
@@ -130,15 +136,19 @@ const EbookList = () => {
 
   // Filter ebooks based on filter criteria
   const filteredEbooks = ebooks.filter((ebook) => {
-    const matchesName = ebook.ebookName.toLowerCase().includes(filterText.toLowerCase());
-    const matchesStatus = filterStatus ? ebook.status.toString() === filterStatus : true;
+    const matchesName = ebook.ebookName
+      .toLowerCase()
+      .includes(filterText.toLowerCase());
+    const matchesStatus = filterStatus
+      ? ebook.status.toString() === filterStatus
+      : true;
 
     return matchesName && matchesStatus;
   });
 
   return (
-    <div className="flex-1 ml-0 md:ml-64 p-4">
-      <div className="bg-white shadow-lg rounded-lg p-6">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl">
         {/* Filter Section */}
         <div className="mb-4 flex items-center">
           <button
@@ -151,17 +161,16 @@ const EbookList = () => {
         </div>
 
         {showFilter && (
-          <div className="mb-4 flex space-x-4 w-full max-w-xl">
+          <div className="mb-4 flex flex-wrap items-center gap-4 w-full bg-gray-100 p-4 rounded-md">
             <input
               type="text"
               placeholder="Tìm theo tên sách điện tử"
-              className="border border-gray-300 rounded p-2 flex-1"
+              className="border border-gray-300 rounded p-2 flex-1 min-w-[200px]"
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
             />
-
             <select
-              className="border border-gray-300 rounded p-2 flex-1"
+              className="border border-gray-300 rounded p-2 flex-1 min-w-[200px]"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
@@ -170,6 +179,15 @@ const EbookList = () => {
               <option value="1">Đã xác nhận</option>
               <option value="-1">Chờ xác nhận</option>
             </select>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              onClick={() => {
+                setFilterText("");
+                setFilterStatus("");
+              }}
+            >
+              Xóa lọc
+            </button>
           </div>
         )}
 

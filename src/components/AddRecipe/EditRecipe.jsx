@@ -3,7 +3,19 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useParams } from "react-router-dom";
-
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
+import Swal from "sweetalert2";
+import {
+  Container,
+  TextField,
+  Button,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Typography,
+  Box,
+} from "@mui/material";
 const EditRecipe = () => {
   const [recipe, setRecipe] = useState(null);
   const [recipeName, setRecipeName] = useState("");
@@ -33,7 +45,7 @@ const EditRecipe = () => {
   const fetchRecipeData = async () => {
     try {
       const recipeResult = await axios.get(
-        `https://localhost:7220/odata/Recipe/${id}`,
+        `https://rmrbdapi.somee.com/odata/Recipe/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -69,7 +81,7 @@ const EditRecipe = () => {
   // Lấy tất cả các tag có `status = 1`
   const fetchActiveTags = async () => {
     try {
-      const response = await axios.get("https://localhost:7220/odata/Tag", {
+      const response = await axios.get("https://rmrbdapi.somee.com/odata/Tag", {
         params: {
           $filter: "status eq 1",
         },
@@ -91,7 +103,7 @@ const EditRecipe = () => {
       );
     } catch (error) {
       console.error("Error fetching tags:", error);
-      toast.error("Failed to load tags.");
+      Swal.fire("Lỗi", "Lỗi khi tải thẻ", "error");
     }
   };
 
@@ -101,10 +113,19 @@ const EditRecipe = () => {
   }, [id]);
 
   // Xử lý khi chọn tag
+  // Handle the selection change for tags
   const handleTagSelection = (e) => {
-    const selectedOptions = [...e.target.selectedOptions];
-    setSelectedTagIds(selectedOptions.map((option) => parseInt(option.value))); // Chuyển sang số
-    setSelectedTagNames(selectedOptions.map((option) => option.text));
+    const tagId = parseInt(e.target.value);
+    const isChecked = e.target.checked;
+
+    // Cập nhật selectedTagIds khi chọn/bỏ chọn tag
+    if (isChecked) {
+      setSelectedTagIds((prevSelected) => [...prevSelected, tagId]);
+    } else {
+      setSelectedTagIds((prevSelected) =>
+        prevSelected.filter((id) => id !== tagId)
+      );
+    }
   };
 
   // Cập nhật công thức khi submit
@@ -130,7 +151,7 @@ const EditRecipe = () => {
     try {
       // Cập nhật recipe
       await axios.put(
-        `https://localhost:7220/odata/Recipe/${id}`,
+        `https://rmrbdapi.somee.com/odata/Recipe/${id}`,
         updatedRecipe,
         {
           headers: {
@@ -142,7 +163,7 @@ const EditRecipe = () => {
 
       // Lấy các tag hiện tại của recipe từ cơ sở dữ liệu
       const oldTagsResponse = await axios.get(
-        `https://localhost:7220/odata/RecipeTag/${id}`,
+        `https://rmrbdapi.somee.com/odata/RecipeTag/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -157,7 +178,7 @@ const EditRecipe = () => {
       for (const tagId of oldTagIds) {
         if (!selectedTagIds.includes(tagId)) {
           await axios.delete(
-            `https://localhost:7220/odata/RecipeTag/${id}/${tagId}`,
+            `https://rmrbdapi.somee.com/odata/RecipeTag/${id}/${tagId}`,
             {
               headers: {
                 "Content-Type": "application/json",
@@ -172,7 +193,7 @@ const EditRecipe = () => {
       for (const tagId of selectedTagIds) {
         if (!oldTagIds.includes(tagId)) {
           await axios.post(
-            `https://localhost:7220/odata/RecipeTag`,
+            `https://rmrbdapi.somee.com/odata/RecipeTag`,
             { tagId, recipeId: id },
             {
               headers: {
@@ -186,9 +207,9 @@ const EditRecipe = () => {
 
       // Gọi lại fetchRecipeData để làm mới danh sách tag
       await fetchRecipeData();
-
-      toast.success("Recipe updated successfully!");
-      navigate("/recipecustomer-list");
+      Swal.fire("Thành công", "Cập nhật công thức thành công!", "success").then(
+        () => navigate("/recipecustomer-list")
+      );
     } catch (error) {
       toast.error("Error updating recipe!");
       console.error("Error:", error);
@@ -198,128 +219,217 @@ const EditRecipe = () => {
   if (!recipe) return <div>Loading...</div>;
 
   return (
-    <div>
+    <>
       <ToastContainer />
-      <h2>Edit Recipe</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Recipe Name:</label>
-          <input
-            type="text"
-            value={recipeName}
-            onChange={(e) => setRecipeName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Price:</label>
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Number of Services:</label>
-          <input
-            type="number"
-            value={numberOfService}
-            onChange={(e) => setNumberOfService(e.target.value)}
-            required
-          />
-        </div>
+      <Navbar />
+      <Container
+        style={{
+          color: "Black",
+          backgroundColor: "#fff",
+          padding: "20px",
+          maxWidth: "900px",
+          margin: "auto",
+        }}
+      >
+        <Typography variant="h4" align="center" gutterBottom>
+          Edit Recipe
+        </Typography>
 
-        <div>
-          <label>Nutrition:</label>
-          <textarea
-            value={nutrition}
-            onChange={(e) => setNutrition(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Tutorial:</label>
-          <textarea
-            value={tutorial}
-            onChange={(e) => setTutorial(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Video URL:</label>
-          <input
-            type="text"
-            value={video}
-            onChange={(e) => setVideo(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Description:</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Ingredient:</label>
-          <textarea
-            value={ingredient}
-            onChange={(e) => setIngredient(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Create Date:</label>
-          <input
-            type="date"
-            value={createDate}
-            readOnly // Trường không thể chỉnh sửa
-          />
-        </div>
-        <div>
-          <label>Total Time (in minutes):</label>
-          <input
-            type="number"
-            value={totalTime}
-            onChange={(e) => setTotalTime(e.target.value)}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <Box mb={2}>
+            <TextField
+              label="Recipe Name"
+              variant="outlined"
+              fullWidth
+              value={recipeName}
+              onChange={(e) => setRecipeName(e.target.value)}
+              required
+              sx={{ color: "black" }}
+            />
+          </Box>
 
-        <div>
-          <label>Updated Date:</label>
-          <input type="date" value={updatedDate} readOnly />
-        </div>
+          <Box mb={2}>
+            <TextField
+              label="Price"
+              variant="outlined"
+              fullWidth
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+              sx={{ color: "black" }}
+            />
+          </Box>
 
-        <div>
-          <label>Tags:</label>
-          <select multiple value={selectedTagIds} onChange={handleTagSelection}>
-            {tags.map((tag) => (
-              <option key={tag.tagId} value={tag.tagId}>
-                {tag.tagName}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <strong>Old Tags:</strong>
-          <ul>
-            {recipe?.recipeTags?.length > 0 ? (
-              recipe.recipeTags.map((tag, index) => (
-                <li key={index}>{tagMap[tag.tagId] || "Unknown"}</li>
-              ))
-            ) : (
-              <li>null</li>
-            )}
-          </ul>
-        </div>
-        <div>
-          <strong>Selected Tags:</strong>
-          <p>{selectedTagNames.join(", ")}</p>
-        </div>
+          <Box mb={2}>
+            <TextField
+              label="Number of Services"
+              variant="outlined"
+              fullWidth
+              type="number"
+              value={numberOfService}
+              onChange={(e) => setNumberOfService(e.target.value)}
+              required
+              sx={{ color: "black" }}
+            />
+          </Box>
 
-        <div>
-          <button type="submit">Save</button>
-        </div>
-      </form>
-    </div>
+          <Box mb={2}>
+            <TextField
+              label="Nutrition"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={4}
+              value={nutrition}
+              onChange={(e) => setNutrition(e.target.value)}
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <TextField
+              label="Tutorial"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={4}
+              value={tutorial}
+              onChange={(e) => setTutorial(e.target.value)}
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <TextField
+              label="Video URL"
+              variant="outlined"
+              fullWidth
+              value={video}
+              onChange={(e) => setVideo(e.target.value)}
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <TextField
+              label="Description"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <TextField
+              label="Ingredient"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={4}
+              value={ingredient}
+              onChange={(e) => setIngredient(e.target.value)}
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <TextField
+              label="Create Date"
+              variant="outlined"
+              fullWidth
+              type="date"
+              value={createDate}
+              readOnly
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <TextField
+              label="Total Time (in minutes)"
+              variant="outlined"
+              fullWidth
+              type="number"
+              value={totalTime}
+              onChange={(e) => setTotalTime(e.target.value)}
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <TextField
+              label="Updated Date"
+              variant="outlined"
+              fullWidth
+              type="date"
+              value={updatedDate}
+              readOnly
+              sx={{ color: "black" }}
+            />
+          </Box>
+
+          <Box mb={2}>
+            <Typography variant="subtitle1">Tags</Typography>
+            <FormGroup>
+              {tags.map((tag) => (
+                <FormControlLabel
+                  key={tag.tagId}
+                  control={
+                    <Checkbox
+                      checked={selectedTagIds.includes(tag.tagId)} // Kiểm tra nếu tagId đã được chọn
+                      onChange={handleTagSelection} // Gọi hàm khi người dùng thay đổi checkbox
+                      value={tag.tagId} // Gửi tagId khi checkbox thay đổi
+                    />
+                  }
+                  label={tag.tagName}
+                />
+              ))}
+            </FormGroup>
+          </Box>
+
+          <Box mb={2}>
+            <Typography variant="h6" color="black">
+              Old Tags:
+            </Typography>
+            <ul>
+              {recipe?.recipeTags?.length > 0 ? (
+                recipe.recipeTags.map((tag, index) => (
+                  <li key={index} style={{ color: "black" }}>
+                    {tagMap[tag.tagId] || "Unknown"}
+                  </li>
+                ))
+              ) : (
+                <li style={{ color: "black" }}>No tags</li>
+              )}
+            </ul>
+          </Box>
+
+          <Box mb={2}>
+            <Typography variant="h6" color="black">
+              Selected Tags:
+            </Typography>
+            <p style={{ color: "black" }}>{selectedTagNames.join(", ")}</p>
+          </Box>
+
+          <Box mb={2}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              style={{ color: "black" }}
+            >
+              Save
+            </Button>
+          </Box>
+        </form>
+      </Container>
+      <Footer />
+    </>
   );
 };
 

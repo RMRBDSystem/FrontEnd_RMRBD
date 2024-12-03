@@ -36,7 +36,6 @@ const RecipeDetail = () => {
   // Hàm lấy thông tin tài khoản
   const fetchAccount = async (createById) => {
     const response = await axios.get(
-      //`https://rmrbdapi.somee.com/odata/Account/${createById}`,
       `https://rmrbdapi.somee.com/odata/Account/${createById}`,
       {
         headers: { "Content-Type": "application/json", Token: "123-abc" },
@@ -48,7 +47,6 @@ const RecipeDetail = () => {
   // Hàm lấy mảng hình ảnh
   const fetchImages = async (id) => {
     const response = await axios.get(
-      //`https://rmrbdapi.somee.com/odata/Image/Recipe/${id}`,
       `https://rmrbdapi.somee.com/odata/Image/Recipe/${id}`,
       {
         headers: { "Content-Type": "application/json", Token: "123-abc" },
@@ -60,8 +58,6 @@ const RecipeDetail = () => {
 
   // Hàm lấy tên tag
   const fetchTags = async () => {
-    //`https://rmrbdapi.somee.com/odata/Tag`
-    //`https://localhost:7220/odata/Tag`
     const response = await axios.get(`https://rmrbdapi.somee.com/odata/Tag`, {
       headers: { "Content-Type": "application/json", Token: "123-abc" },
     });

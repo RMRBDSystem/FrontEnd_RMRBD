@@ -1,16 +1,18 @@
-import "../Style/LoginPage.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../Picture/LogoA.png";
+import "../../assets/styles/Components/LoginPage.css";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
-import  { useEffect,useState  } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useAuth } from "../RouterPage/AuthContext"
+import { useAuth } from "../RouterPage/AuthContext";
+import Swal from "sweetalert2"; // Import SweetAlert2
+
 const Login = () => {
   const navigate = useNavigate();
   const { setIsLoggedIn } = useAuth();
+
   useEffect(() => {
     // Kiểm tra cookie UserRole để xác định trạng thái đăng nhập
     const userRole = Cookies.get("UserRole");
@@ -40,17 +42,16 @@ const Login = () => {
   const getDashboardPath = (role) => {
     switch (role) {
       default:
-        return "/homepageDashboard";
+        return "/home";
     }
   };
-
 
   const handleLogin = async ({ credential }) => {
     const { sub: googleId, email, name: userName } = jwtDecode(credential);
     const data = { googleId, userName, email };
 
-    const url = `https://localhost:7220/odata/Login`; // test localhost
-    // const url = `https://rmrbdapi.somee.com/odata/Login`;
+    // const url = `https://localhost:7220/odata/Login`; // test localhost
+    const url = `https://rmrbdapi.somee.com/odata/Login`;
     try {
       const response = await axios.post(url, data, {
         headers: {
@@ -58,25 +59,36 @@ const Login = () => {
           Token: "123-abc",
         },
       });
-      const { role,userId } = response.data;
-
+      const { userRole, userId, coin } = response.data;
+      console.log("role", response.data);
       // Nếu người dùng đã có một vai trò, không cho phép đăng nhập với vai trò khác
       const existingRole = Cookies.get("UserRole");
-      if (existingRole && existingRole !== role) {
-        alert("Bạn đã đăng nhập với vai trò khác. Vui lòng đăng xuất trước khi đăng nhập lại.");
+      if (existingRole && existingRole !== userRole) {
+        // Thay thế alert bằng SweetAlert2
+        Swal.fire({
+          icon: "error",
+          title: "Role Mismatch",
+          text: "Bạn đã đăng nhập với vai trò khác. Vui lòng đăng xuất trước khi đăng nhập lại.",
+        });
         return; // Ngăn không cho tiếp tục đăng nhập
       }
 
       // Lưu vai trò và tên người dùng vào cookie và localStorage
-      Cookies.set("UserRole", role, { expires: 1 });
-      localStorage.setItem("UserRole", role); // Lưu vào localStorage
+      Cookies.set("UserRole", userRole, { expires: 1 });
       Cookies.set("UserName", userName, { expires: 1 });
       Cookies.set("UserId", userId, { expires: 1 });
+      Cookies.set("Coin", coin, { expires: 1 });
+
       setIsLoggedIn(true);
-      // Điều hướng đến dashboard tương ứng
-      navigate(getDashboardPath(role));
+      navigate(getDashboardPath(userRole));
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
+      // Hiển thị lỗi khi đăng nhập không thành công
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.",
+      });
     }
   };
 
@@ -85,7 +97,11 @@ const Login = () => {
       <div className="container d-flex justify-content-center align-items-center min-vh-100">
         <div className="login-box p-4">
           <div className="logo">
-            <img src={logo} className="img-fluid " alt="RecipeCook Logo" />
+            <img
+              src="/images/LogoA.png"
+              className="img-fluid "
+              alt="RecipeCook LogoA"
+            />
           </div>
           <div>
             <h2 className="text-center mb-3">Log in</h2>

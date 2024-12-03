@@ -3,16 +3,16 @@ import { Outlet } from "react-router-dom";
 import NavbarModerator from "./components/Navbar/NavbarModerator";
 import SidebarModerator from "./components/Moderator/SidebarModerator";
 import Footer from "./components/Footer/Footer";
-import Breadcrumb from './components/Breadcrumb/Breadcrumb';
+import Breadcrumb from "./components/Breadcrumb/Breadcrumb";
 
 function Layout() {
   return (
     <>
       <div className="flex flex-col">
         <NavbarModerator />
-        
+
         <main>
-        <Breadcrumb/>
+          <Breadcrumb />
           <div className="flex flex-1 overflow-y-auto bg-gray-100">
             {/* Sidebar */}
             <SidebarModerator />

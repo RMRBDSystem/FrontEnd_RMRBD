@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import Cookies from "js-cookie";
 import DataTable from "react-data-table-component";
+import { useNavigate } from "react-router-dom";
 
 const BookList = () => {
   const [Books, setBooks] = useState([]);
@@ -17,6 +18,7 @@ const BookList = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [nameFilter, setNameFilter] = useState(""); // State for name filter
   const [statusFilter, setStatusFilter] = useState(""); // State for status filter
+  const navigate = useNavigate();
 
   useEffect(() => {
     setcensorID(Cookies.get("UserId"));
@@ -47,6 +49,9 @@ const BookList = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-GB"); // Adjust locale if necessary
   };
+  const handleDetails = (bookId) => {
+    navigate(`/update-book/${bookId}`);
+  };
 
   // Columns for DataTable
   const columns = [
@@ -60,7 +65,6 @@ const BookList = () => {
       selector: (row) => row.bookName || "Unknown",
       sortable: true,
       filterable: true,
-
     },
     {
       name: "Ngày đăng",
@@ -111,7 +115,7 @@ const BookList = () => {
       selector: (row) => (
         <button
           className="btn btn-link"
-          onClick={() => console.log("View details for", row.bookId)}
+          onClick={() => handleDetails(row.bookId)}
         >
           <FaInfoCircle
             style={{ color: "#007bff", fontSize: "24px" }}
@@ -132,8 +136,8 @@ const BookList = () => {
   });
 
   return (
-    <div className="flex-1 ml-0 md:ml-64 p-4">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-7xl mx-auto">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl">
         <div className="mb-4 flex items-center">
           <button
             className="flex items-center text-blue-500 hover:text-blue-700"
@@ -144,18 +148,18 @@ const BookList = () => {
           </button>
         </div>
         {showFilter && (
-          <div className="mb-4 flex flex-wrap gap-4">
+          <div className="mb-4 flex flex-wrap items-center gap-4 bg-gray-100 p-4 rounded-md">
             {/* Filter by Book Name */}
             <input
               type="text"
               placeholder="Tìm kiếm theo tên sách"
-              className="border p-2 rounded flex-1"
+              className="border border-gray-300 p-2 rounded flex-1 min-w-[200px]"
               value={nameFilter}
               onChange={(e) => setNameFilter(e.target.value)}
             />
             {/* Filter by Status */}
             <select
-              className="border p-2 rounded flex-1"
+              className="border border-gray-300 p-2 rounded flex-1 min-w-[200px]"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -164,6 +168,16 @@ const BookList = () => {
               <option value="1">Đã xác nhận</option>
               <option value="-1">Chờ được xác nhận</option>
             </select>
+            {/* Clear Filter Button */}
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              onClick={() => {
+                setNameFilter("");
+                setStatusFilter("");
+              }}
+            >
+              Xóa lọc
+            </button>
           </div>
         )}
 

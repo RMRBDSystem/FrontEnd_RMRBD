@@ -1,7 +1,13 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
-import { FaBan, FaCheckCircle, FaRegClock, FaInfoCircle, FaFilter } from "react-icons/fa";
+import {
+  FaBan,
+  FaCheckCircle,
+  FaRegClock,
+  FaInfoCircle,
+  FaFilter,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const RecipeList = () => {
@@ -14,14 +20,17 @@ const RecipeList = () => {
 
   const fetchRecipes = async () => {
     try {
-      const response = await axios.get("https://rmrbdapi.somee.com/odata/Recipe", {
-        headers: { "Content-Type": "application/json", token: "123-abc" },
-      });
+      const response = await axios.get(
+        "https://rmrbdapi.somee.com/odata/Recipe",
+        {
+          headers: { "Content-Type": "application/json", token: "123-abc" },
+        }
+      );
       setRecipes(response.data);
       setFilteredRecipes(response.data);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách công thức:", error);
-    } 
+    }
   };
 
   useEffect(() => {
@@ -31,7 +40,9 @@ const RecipeList = () => {
   useEffect(() => {
     const filtered = recipes.filter((recipe) => {
       const matchesKeyword =
-        recipe.recipeName?.toLowerCase().includes(filterKeyword.toLowerCase()) ||
+        recipe.recipeName
+          ?.toLowerCase()
+          .includes(filterKeyword.toLowerCase()) ||
         recipe.ingredient?.toLowerCase().includes(filterKeyword.toLowerCase());
 
       const matchesStatus =
@@ -106,17 +117,22 @@ const RecipeList = () => {
     {
       name: "Thao tác",
       cell: (row) => (
-        <button className="btn btn-link" onClick={() => handleDetails(row.recipeId)}>
-          <FaInfoCircle style={{ color: "#007bff", fontSize: "24px" }} title="Chi tiết" />
+        <button
+          className="btn btn-link"
+          onClick={() => handleDetails(row.recipeId)}
+        >
+          <FaInfoCircle
+            style={{ color: "#007bff", fontSize: "24px" }}
+            title="Chi tiết"
+          />
         </button>
       ),
     },
   ];
 
-
   return (
-    <div className="flex flex-col md:flex-row justify-center  items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
-      <div className="bg-white shadow-lg rounded-lg p-6">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl">
         {/* Nút hiển thị/ẩn bộ lọc */}
         <div className="mb-4 flex items-center">
           <button
@@ -130,16 +146,16 @@ const RecipeList = () => {
 
         {/* Phần bộ lọc */}
         {showFilter && (
-          <div className="flex flex-wrap mb-4 gap-4 bg-gray-100 p-4 rounded-md">
+          <div className="flex flex-wrap items-center mb-4 gap-4 bg-gray-100 p-4 rounded-md">
             <input
               type="text"
               placeholder="Tìm kiếm tên công thức hoặc nguyên liệu..."
-              className="border p-2 rounded w-full md:w-1/3"
+              className="border p-2 rounded flex-1 min-w-[200px]"
               value={filterKeyword}
               onChange={(e) => setFilterKeyword(e.target.value)}
             />
             <select
-              className="border p-2 rounded w-full md:w-1/4"
+              className="border p-2 rounded flex-1 min-w-[200px]"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -148,6 +164,15 @@ const RecipeList = () => {
               <option value="0">Bị khóa</option>
               <option value="1">Đã xác nhận</option>
             </select>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              onClick={() => {
+                setFilterKeyword("");
+                setStatusFilter("");
+              }}
+            >
+              Xóa lọc
+            </button>
           </div>
         )}
 

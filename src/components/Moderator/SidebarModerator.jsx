@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaTimes, FaBars } from "react-icons/fa";
-import { FiHome, FiBookOpen, FiUsers, FiBook, FiList } from "react-icons/fi"; // Add more icons as needed
+import {  FiBookOpen, FiUsers, FiBook, FiList } from "react-icons/fi"; // Add more icons as needed
 import { Link } from "react-router-dom"; // Import Link for navigation
 
 const Sidebar = () => {

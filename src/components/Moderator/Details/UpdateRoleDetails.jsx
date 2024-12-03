@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import Swal from "sweetalert2"; // Import SweetAlert2
+import { FaSave, FaArrowLeft } from "react-icons/fa";
 
 const AccountDetails = () => {
   const { accountId } = useParams();
@@ -49,7 +50,10 @@ const AccountDetails = () => {
 
       if (result.isConfirmed) {
         setLoading(true);
-        const headers = { "Content-Type": "application/json", token: "123-abc" };
+        const headers = {
+          "Content-Type": "application/json",
+          token: "123-abc",
+        };
         const updatedData = { ...accountDetails, status: newStatus };
 
         try {
@@ -60,7 +64,11 @@ const AccountDetails = () => {
           );
           setAccountDetails({ ...accountDetails, status: newStatus });
           setStatusEditing(false);
-          Swal.fire("Thành công!", "Trạng thái tài khoản đã được cập nhật.", "success");
+          Swal.fire(
+            "Thành công!",
+            "Trạng thái tài khoản đã được cập nhật.",
+            "success"
+          );
         } catch (error) {
           console.error("Error updating status:", error);
           Swal.fire("Lỗi", "Có lỗi xảy ra khi cập nhật trạng thái.", "error");
@@ -181,18 +189,21 @@ const AccountDetails = () => {
             <option value={0}>Khóa</option>
           </select>
         </div>
-        <div className="mt-6 text-center space-x-4">
+        <div className="flex justify-center items-center space-x-4 center">
           <button
             onClick={updateStatus}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300 shadow-xl transform hover:scale-105 transition duration-300"
+            className="flex items-center justify-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform duration-300 hover:scale-105"
           >
-            Lưu
+            <FaSave className="text-lg" />
+            <span className="text-lg">Lưu</span>
           </button>
+
           <button
-            onClick={() => navigate(-1)}
-            className="px-6 py-2 bg-gray-800 text-white rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 shadow-xl transform hover:scale-105 transition duration-300"
+            className="flex items-center justify-center space-x-2 px-6 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition transform duration-300 hover:scale-105"
+            onClick={() => window.history.back()}
           >
-            Quay lại
+            <FaArrowLeft className="text-lg" />
+            <span className="text-lg">Quay lại</span>
           </button>
         </div>
       </div>

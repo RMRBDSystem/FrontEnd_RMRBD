@@ -15,7 +15,7 @@ const AccountProfile = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); // State for search term
   const [showFilter, setShowFilter] = useState(false); // State to control the filter visibility
-
+  const [statusFilter, setStatusFilter] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const AccountProfile = () => {
       setData(result.data);
     } catch (error) {
       console.error("Error fetching account data:", error);
-    } 
+    }
   };
 
   const handleDetails = (accountId) => {
@@ -41,9 +41,15 @@ const AccountProfile = () => {
   };
 
   // Filter the data based on the search term
-  const filteredData = data.filter((row) =>
-    row.account?.userName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = data.filter((row) => {
+    const matchesName = row.account?.userName
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      !statusFilter || row.status?.toString() === statusFilter;
+
+    return matchesName && matchesStatus;
+  });
 
   const columns = [
     {
@@ -124,57 +130,76 @@ const AccountProfile = () => {
     },
   ];
 
-
   return (
-    <div className="flex-1 p-4">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-7xl bg-white shadow-lg rounded-lg p-5">
-        {/* Filter button with icon */}
+        {/* Filter Button */}
         <div className="mb-4 flex items-center justify-between">
           <button
             className="flex items-center text-blue-500 hover:text-blue-700"
-            onClick={() => setShowFilter(!showFilter)} // Toggle filter visibility
+            onClick={() => setShowFilter(!showFilter)}
           >
             <FaFilter className="mr-2" />
             Bộ lọc
           </button>
         </div>
 
+        {/* Filter Section */}
         {showFilter && (
-          <div className="flex flex-wrap mb-4 gap-4 bg-gray-100 p-4 rounded-md">
+          <div className="flex flex-wrap items-center mb-4 gap-4 bg-gray-100 p-4 rounded-md">
             <input
               type="text"
-              className="form-control ml-2 p-2 text-sm"
+              className="border p-2 rounded flex-1 min-w-[200px]"
               placeholder="Tìm kiếm tên người dùng"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            <select
+              className="border p-2 rounded flex-1 min-w-[200px]"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="-1">Chờ xác nhận</option>
+              <option value="0">Bị khóa</option>
+              <option value="1">Đã xác nhận</option>
+            </select>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("");
+              }}
+            >
+              Xóa lọc
+            </button>
           </div>
         )}
 
-        {/* DataTable component */}
+        {/* DataTable */}
         <DataTable
           title="Danh sách tài khoản"
           columns={columns}
-          data={filteredData} // Use filtered data
+          data={filteredData}
           pagination
           highlightOnHover
           striped
           customStyles={{
             rows: {
               style: {
-                fontSize: "14px", // Smaller font size for rows
-                padding: "12px", // Reduced row padding
+                fontSize: "14px",
+                padding: "12px",
               },
             },
             headCells: {
               style: {
-                fontSize: "16px", // Smaller font size for headers
-                padding: "10px", // Reduced header padding
+                fontSize: "16px",
+                padding: "10px",
               },
             },
             cells: {
               style: {
-                padding: "10px", // Reduced cell padding
+                padding: "10px",
               },
             },
           }}
