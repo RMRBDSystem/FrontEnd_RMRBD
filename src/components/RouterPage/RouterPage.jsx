@@ -16,19 +16,22 @@ import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import AddEbookPageForCustomer from "../AddItems/EbookCustomer";
 import Book from '../Pages/Book/Book';
 import BookDetail from '../Pages/Book/BookDetail';
+import Cart from '../Cart/ShoppingCart';
+import Checkout from "../Cart/Checkout";
+import Orders from "../Cart/Orders/Orders";
+import OrderFullDetails from '../Cart/Orders/OrderFullDetails';
 //import Addbook from '../Pages/Add Items/AddBook';
 import Recipe from "../Pages/Recipe/Recipe";
-import Checkout from "../Cart/Checkout";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
 import UpdateProfile from '../AccountProfile/AccountProfile';
 import EditRecipeForCustomer from "../Pages/Recipe/EditSavedRecipe";
+import SellerOrders from "../Cart/Orders/SellerOrders";
 //Recharge
 import RechargePage from '../Pages/Recharge/Recharge';
 import CoinTransaction from "../Pages/Recharge/CoinTransaction";
 import TermsOfPurchase from '../Pages/Recharge/TermsOfPurchase';
 import PaymentSuccess from '../Pages/Recharge/PaymentSuccess'
 import PaymentFailed from '../Pages/Recharge/PaymentFailed'
-import Cart from '../Cart/ShoppingCart';
 //Seller
 import EditRecipe from '../AddRecipe/EditRecipe';
 import RecipeCustomer from "../AddRecipe/RecipeCustomer";
@@ -107,8 +110,6 @@ export default function RouterPage() {
             <Route path="/book/:bookId" element={<BookDetail />} />
             <Route path="/coinTransaction" element={<CoinTransaction />} />
             <Route path="/termsofpurchase" element={<TermsOfPurchase />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
             <Route path="/edit-recipe" element={<EditRecipe />} />
             <Route path="/recipe-customer" element={<RecipeCustomer />} />
             <Route path="/recipe-customer-detail" element={<RecipeCustomerDetail />} />
@@ -144,6 +145,46 @@ export default function RouterPage() {
               element={
                 <ProtectedRoute allowedRoles={["Customer", "Seller"]}>
                   <RechargePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <Checkout/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <Cart/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <Orders/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/seller-orders"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <SellerOrders/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders/:orderId"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <OrderFullDetails/>
                 </ProtectedRoute>
               }
             />
