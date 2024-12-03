@@ -23,7 +23,14 @@ const CategoryManagement = () => {
             'Token': '123-abc',
           },
         });
-        setCategories(response.data || []);
+
+        // Log the entire response to check its structure
+        console.log('API Response:', response.data);
+
+        // If the categories are inside a "value" field (common in OData responses), make sure to extract it
+        const fetchedCategories = response.data || [];
+        setCategories(fetchedCategories);
+
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -55,7 +62,7 @@ const CategoryManagement = () => {
           'Token': '123-abc',
         },
       });
-      setCategories(prev => prev.map(cat => (cat.categoryId === id ? response.data : cat)));
+      setCategories(prev => prev.map(category => (category.categoryId === id ? response.data : category)));
       setEditingCategoryId(null);
       setEditingCategoryName('');
     } catch (error) {
@@ -65,7 +72,7 @@ const CategoryManagement = () => {
 
   const startEditing = (categoryId, categoryName) => {
     setEditingCategoryId(categoryId);
-    setEditingCategoryName(categoryName);
+    setEditingCategoryName(categoryName); // Load the current data into the form
   };
 
   return (
