@@ -61,18 +61,27 @@
   background-color: #f9f9f9; /* Màu nền từng mục thông báo */
   border-radius: 10px;
   margin-bottom: 10px;
+  position: relative; /* Allow positioning of child elements */
 }
 
 .notification-item .notification-content {
+  text-align: left;
+  padding: 5px;
   font-size: 14px;
-  margin-bottom: 5px;
   color: #333; /* Màu chữ chính */
+  flex: 1; /* Take available vertical space */
+  display: flex;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  height: 50px;
 }
 
 .notification-item .notification-time {
   font-size: 12px;
   align-self: flex-end; /* Canh phải thời gian */
   color: #888; /* Màu chữ thời gian */
+  display: flex;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  height: 15px;
 }
 ::-webkit-scrollbar {
   width: 5px;
@@ -106,7 +115,7 @@
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: 1px;
-  right: 1px;
+  top: -5px;
+  right: -7px;
   color: white;
 }

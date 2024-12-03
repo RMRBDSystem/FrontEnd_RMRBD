@@ -6,7 +6,7 @@ const TOKEN = '123-abc';
 const apiInstance = axios.create({
     baseURL: API_URL,
     headers: {
-        'Token': TOKEN, // Thêm header Token
+        'Token': TOKEN, 
     },
 });
 
@@ -16,9 +16,19 @@ export const getAccountById = async (accountId) => {
     }
     try {
         const response = await apiInstance.get(`/Account/${accountId}`);
-        return response.data; // Trả về dữ liệu người dùng
+        return response.data;
     } catch (error) {
         console.error(`Error fetching Account with ID ${accountId}:`, error);
+        throw error;
+    }
+};
+
+export const updateAccount = async (account) => {
+    try {
+        const response = await apiInstance.put(`/Account/info/${account.accountId}`, account);
+        return response;
+    } catch (error) {
+        console.error(`Error updating Account with ID ${account.accountId}:`, error);
         throw error;
     }
 };

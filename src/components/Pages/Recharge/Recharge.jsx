@@ -65,11 +65,11 @@ const RechargePage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const storedUserId = localStorage.getItem('UserId');
+      const storedUserId = Cookies.get('UserId');
       if (storedUserId) {
         setUserId(storedUserId);
       }
-      const storedUserName = localStorage.getItem('UserName');
+      const storedUserName = Cookies.get('UserName');
       if (storedUserName) {
         setUserName(storedUserName);
       }
