@@ -102,7 +102,7 @@ export const updateReport = async (id, data) => {
           Token: "123-abc"
         },
       });
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Error updating Report:", error);
       throw new Error("Failed to update Report.");

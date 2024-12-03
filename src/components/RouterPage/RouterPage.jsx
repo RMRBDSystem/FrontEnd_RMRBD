@@ -7,6 +7,10 @@ import { AuthProvider } from "./AuthContext";
 import Login from "../LoginPage/LoginPage";
 import HomePage from "../HomePage/HomePage";
 import FAQPage from "../Pages/FAQ";
+import WithDrawMod from "../Pages/Withdraw/WithdrawMod";
+import WithdrawResponse from "../Pages/Withdraw/WithdrawResponse";
+import WithDrawRequest from "../Pages/Withdraw/WithdrawRequest";
+import WithdrawList from "../Pages/Withdraw/WithdrawList";
 //Customer
 import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import AddEbookPageForCustomer from "../AddItems/EbookCustomer";
@@ -115,6 +119,10 @@ export default function RouterPage() {
             <Route path="/reportmod" element={<ReportMod />} />
             <Route path="/reportresponse/:reportId" element={<ReportResponse />} />
             <Route path="/report" element={<Report />} />
+            <Route path="/withdrawrequest" element={<WithDrawRequest />} />
+            <Route path="/withdrawlist" element={<WithdrawList />} />
+            <Route path="/withdrawmod" element={<WithDrawMod />} />
+            <Route path="/withdrawresponse/:coinTransactionId" element={<WithdrawResponse />} />
             <Route
               path="/recipecustomer-list"
               element={

@@ -16,110 +16,109 @@ import "./navbar.css"
 import { useSocket } from "../../App"
 import { getNotificationbyAccountId } from "../services/NotificationService"
 const categoriesContent = {
-  "Cooking Recipes": (
+  "Công Thức Nấu Ăn": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
       <div>
-        <h3 className="font-semibold text-base">MAIN DISHES</h3>
+        <h3 className="font-semibold text-base">MÓN ĂN CHÍNH</h3>
         <ul className="space-y-1 text-sm">
-          <li>Braised Pork Belly</li>
-          <li>Braised Fish in Clay Pot</li>
-          <li>Honey Grilled Chicken</li>
-          <li>Beef Pho</li>
-          <li className="text-blue-500">View All</li>
+          <li>Thịt ba chỉ kho</li>
+          <li>Cá kho tộ</li>
+          <li>Gà nướng mật ong</li>
+          <li>Phở bò</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">SOUPS</h3>
+        <h3 className="font-semibold text-base">MÓN CANH</h3>
         <ul className="space-y-1 text-sm">
-          <li>Sour Snakehead Fish Soup</li>
-          <li>Bitter Melon Stuffed Soup</li>
-          <li>Cabbage Roll Soup</li>
-          <li>Seaweed Soup</li>
-          <li className="text-blue-500">View All</li>
+          <li>Canh cá quả chua</li>
+          <li>Canh khổ qua nhồi</li>
+          <li>Canh cuốn bắp cải</li>
+          <li>Canh rong biển</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">SNACKS</h3>
+        <h3 className="font-semibold text-base">MÓN ĂN VẶT</h3>
         <ul className="space-y-1 text-sm">
-          <li>Steamed Rice Rolls</li>
-          <li>Spring Rolls</li>
-          <li>Vietnamese Pancakes</li>
-          <li>Mini Pancakes</li>
-          <li className="text-blue-500">View All</li>
+          <li>Bánh cuốn hấp</li>
+          <li>Gỏi cuốn</li>
+          <li>Bánh xèo</li>
+          <li>Bánh căn mini</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
     </div>
   ),
-  "Cooking Books": (
+  "Sách Dạy Nấu Ăn": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
       <div>
-        <h3 className="font-semibold text-base">VIETNAMESE CUISINE</h3>
+        <h3 className="font-semibold text-base">ẨM THỰC VIỆT NAM</h3>
         <ul className="space-y-1 text-sm">
-          <li>Pho and Noodle Dishes</li>
-          <li>Central Vietnam Specialties</li>
-          <li>Traditional Dishes</li>
-          <li>Vietnamese Desserts</li>
-          <li className="text-blue-500">View All</li>
+          <li>Phở và các món bún</li>
+          <li>Đặc sản miền Trung</li>
+          <li>Món ăn truyền thống</li>
+          <li>Tráng miệng Việt Nam</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">INTERNATIONAL CUISINE</h3>
+        <h3 className="font-semibold text-base">ẨM THỰC QUỐC TẾ</h3>
         <ul className="space-y-1 text-sm">
-          <li>Japanese Dishes</li>
-          <li>Korean Cuisine</li>
-          <li>Italian Dishes</li>
-          <li>French Dishes</li>
-          <li className="text-blue-500">View All</li>
+          <li>Món ăn Nhật Bản</li>
+          <li>Ẩm thực Hàn Quốc</li>
+          <li>Món ăn Ý</li>
+          <li>Món ăn Pháp</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">VEGETARIAN & HEALTH</h3>
+        <h3 className="font-semibold text-base">ĂN CHAY & SỨC KHỎE</h3>
         <ul className="space-y-1 text-sm">
-          <li>Basic Vegetarian Dishes</li>
-          <li>Salads & Juices</li>
-          <li>Healthy Eating Plans</li>
-          <li>Low-Calorie Recipes</li>
-          <li className="text-blue-500">View All</li>
+          <li>Món ăn chay cơ bản</li>
+          <li>Salad & Nước ép</li>
+          <li>Kế hoạch ăn uống lành mạnh</li>
+          <li>Công thức món ăn ít calo</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
     </div>
   ),
-  "E-Book Library": (
+  "Sách Điện Tử": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
       <div>
-        <h3 className="font-semibold text-base">RECIPE BOOKS</h3>
+        <h3 className="font-semibold text-base">SÁCH CÔNG THỨC NẤU ĂN</h3>
         <ul className="space-y-1 text-sm">
-          <li>Vietnamese Recipes</li>
-          <li>Asian Recipes</li>
-          <li>European Recipes</li>
-          <li>Dessert Recipes</li>
-          <li className="text-blue-500">View All</li>
+          <li>Công thức nấu ăn Việt Nam</li>
+          <li>Công thức nấu ăn Châu Á</li>
+          <li>Công thức nấu ăn Châu Âu</li>
+          <li>Công thức món tráng miệng</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">COOKING TECHNIQUES</h3>
+        <h3 className="font-semibold text-base">KỸ THUẬT NẤU ĂN</h3>
         <ul className="space-y-1 text-sm">
-          <li>Grilling Recipes</li>
-          <li>Stir-Frying Techniques</li>
-          <li>Baking Practices</li>
-          <li>Ingredient Preparation</li>
-          <li className="text-blue-500">View All</li>
+          <li>Công thức nướng</li>
+          <li>Kỹ thuật xào</li>
+          <li>Thực hành làm bánh</li>
+          <li>Chuẩn bị nguyên liệu</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
       <div>
-        <h3 className="font-semibold text-base">HEALTH & NUTRITION</h3>
+        <h3 className="font-semibold text-base">SỨC KHỎE & DINH DƯỠNG</h3>
         <ul className="space-y-1 text-sm">
-          <li>Daily Nutrition</li>
-          <li>Weight Loss Meal Plans</li>
-          <li>Child Nutrition Plans</li>
-          <li>Sports Nutrition</li>
-          <li className="text-blue-500">View All</li>
+          <li>Dinh dưỡng hàng ngày</li>
+          <li>Kế hoạch ăn uống giảm cân</li>
+          <li>Kế hoạch dinh dưỡng cho trẻ em</li>
+          <li>Dinh dưỡng cho thể thao</li>
+          <li className="text-blue-500">Xem tất cả</li>
         </ul>
       </div>
     </div>
   ),
 };
-
 
 const Navbar = () => {
 
@@ -129,7 +128,7 @@ const Navbar = () => {
   const [stickyNavbar, setStickyNavbar] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("Cooking Books");
+  const [activeCategory, setActiveCategory] = useState("Sách Dạy Nấu Ăn");
   const navigate = useNavigate();
   const userRole = Cookies.get("UserRole");
   const accountonlineId = Cookies.get("UserId");
@@ -140,7 +139,7 @@ const Navbar = () => {
   }, [stickyNavbar]);
 
   const handleScroll = () => {
-    setStickyNavbar(window.pageYOffset > 800);
+    setStickyNavbar(window.pageYOffset > 500);
   };
   //Notification
   const { socket } = useSocket(); // Access `socket` and `user` from context
@@ -185,13 +184,13 @@ const Navbar = () => {
   }
   const handleCategoryClick = (category) => {
     setActiveCategory(category);
-    if (category === "Cooking Books") {
+    if (category === "Sách Dạy Nấu Ăn") {
       navigate("/book")
     }
-    if (category == "Cooking Recipes") {
+    if (category == "Công Thức Nấu Ăn") {
       navigate("/recipe")
     }
-    if (category == "E-Book Library") {
+    if (category == "Sách Điện Tử") {
       navigate("/ebook")
     }
   };
@@ -407,6 +406,12 @@ const Navbar = () => {
                       >
                         Duyệt đơn khiếu nại
                       </NavLink>
+                      <NavLink
+                        to="/withdrawmod"
+                        className="block px-4 py-2 hover:bg-gray-200"
+                      >
+                        Duyệt rút xu
+                      </NavLink>
                     </>
                   )}
                   {userRole === "Seller" && (
@@ -428,6 +433,12 @@ const Navbar = () => {
                         className="block px-4 py-2 hover:bg-gray-200"
                       >
                         Công thức của tôi
+                      </NavLink>
+                      <NavLink
+                        to="/withdrawrequest"
+                        className="block px-4 py-2 hover:bg-gray-200"
+                      >
+                        Yêu cầu rút tiền
                       </NavLink>
                       <NavLink
                         to="/report"

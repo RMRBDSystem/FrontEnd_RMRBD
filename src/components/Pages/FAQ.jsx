@@ -4,131 +4,133 @@ const FAQPage = () => {
   const sections = [
     {
       id: "subscriber",
-      title: "Becoming a Subscriber",
+      title: "Trở thành Người Đăng Ký",
       content: (
         <>
           <p className="text-lg mb-4">
-            <strong>Q: How do I subscribe?</strong>
+            <strong>H: Làm thế nào để tôi đăng ký?</strong>
             <br />
-            A: Visit our subscription page to explore options that best suit your culinary needs. You can choose from monthly or annual plans for access to exclusive recipes and e-books.
+            Đ: Truy cập trang đăng ký của chúng tôi để khám phá các lựa chọn phù hợp nhất với nhu cầu ẩm thực của bạn. Bạn có thể chọn giữa các gói đăng ký hàng tháng hoặc hàng năm để truy cập vào các công thức nấu ăn và sách điện tử độc quyền.
           </p>
           <p className="text-lg">
-            <strong>Q: Is international access available?</strong>
+            <strong>H: Có hỗ trợ truy cập quốc tế không?</strong>
             <br />
-            A: Yes, subscriptions are available globally. Prices will be shown in your local currency during checkout.
+            Đ: Có, đăng ký có sẵn cho người dùng trên toàn cầu. Giá sẽ được hiển thị bằng đồng tiền địa phương của bạn khi thanh toán.
           </p>
         </>
       ),
     },
     {
       id: "subscription",
-      title: "Subscription Benefits",
+      title: "Lợi Ích Của Đăng Ký",
       content: (
         <>
           <p className="text-lg mb-4">
-            <strong>Q: What benefits do I receive as a subscriber?</strong>
+            <strong>H: Tôi sẽ nhận được những lợi ích gì khi đăng ký?</strong>
             <br />
-            A: Subscribers enjoy unlimited access to thousands of curated recipes, in-depth cooking guides, and exclusive content. You also receive free or discounted access to premium e-books and printed cookbooks from top chefs.
+            Đ: Người đăng ký sẽ được truy cập không giới hạn vào hàng nghìn công thức nấu ăn được chọn lọc, các hướng dẫn nấu ăn chi tiết và nội dung độc quyền. Bạn cũng sẽ nhận được quyền truy cập miễn phí hoặc giảm giá vào sách điện tử cao cấp và sách nấu ăn in từ các đầu bếp hàng đầu.
           </p>
           <p className="text-lg">
-            <strong>Q: Do I get access to new content?</strong>
+            <strong>H: Tôi có thể truy cập vào nội dung mới không?</strong>
             <br />
-            A: Yes, we frequently update our collection with new recipes, culinary guides, and special editions of e-books.
+            Đ: Có, chúng tôi thường xuyên cập nhật bộ sưu tập với các công thức nấu ăn mới, các hướng dẫn ẩm thực, và các ấn bản đặc biệt của sách điện tử.
           </p>
         </>
       ),
     },
     {
       id: "account-management",
-      title: "Account Creation & Management",
+      title: "Tạo Tài Khoản & Quản Lý Tài Khoản",
       content: (
         <>
           <p className="text-lg mb-4">
-            <strong>Q: How do I create an account?</strong>
+            <strong>H: Làm thế nào để tôi tạo tài khoản?</strong>
             <br />
-            A: Upon subscribing, you'll receive a welcome email with a link to set up your account. Follow the instructions to create a username and password for easy access to all your purchases.
+            Đ: Sau khi đăng ký, bạn sẽ nhận được một email chào mừng với liên kết để thiết lập tài khoản của mình. Làm theo hướng dẫn để tạo tên người dùng và mật khẩu, giúp bạn dễ dàng truy cập vào tất cả các giao dịch mua của mình.
           </p>
           <p className="text-lg">
-            <strong>Q: How can I update my personal information?</strong>
+            <strong>H: Làm thế nào để tôi cập nhật thông tin cá nhân?</strong>
             <br />
-            A: Log into your account dashboard where you can update your email, password, or other account details. If you encounter issues, feel free to contact our support team.
+            Đ: Đăng nhập vào bảng điều khiển tài khoản của bạn, nơi bạn có thể cập nhật email, mật khẩu hoặc các thông tin tài khoản khác. Nếu gặp vấn đề, bạn có thể liên hệ với đội ngũ hỗ trợ của chúng tôi.
           </p>
         </>
       ),
     },
     {
       id: "purchase",
-      title: "Purchasing Recipes and Cookbooks",
+      title: "Mua Công Thức Nấu Ăn và Sách Nấu Ăn",
       content: (
         <>
           <p className="text-lg mb-4">
-            <strong>Q: How do I buy individual recipes or e-books?</strong>
+            <strong>H: Làm thế nào để tôi mua các công thức nấu ăn hoặc sách điện tử riêng lẻ?</strong>
             <br />
-            A: Simply browse our store, select the items you’re interested in, and add them to your cart. You can purchase them individually without a subscription, though members enjoy exclusive discounts.
+            Đ: Chỉ cần duyệt qua cửa hàng của chúng tôi, chọn các mục bạn quan tâm và thêm vào giỏ hàng. Bạn có thể mua chúng riêng lẻ mà không cần đăng ký, tuy nhiên, các thành viên sẽ nhận được giảm giá đặc biệt.
           </p>
           <p className="text-lg">
-            <strong>Q: Do you offer gift options?</strong>
+            <strong>H: Các bạn có cung cấp thẻ quà tặng không?</strong>
             <br />
-            A: Yes, you can purchase e-book or recipe gift cards for friends and family. Personalized gift messages are available during checkout.
+            Đ: Có, bạn có thể mua thẻ quà tặng sách điện tử hoặc công thức nấu ăn cho bạn bè và gia đình. Thông điệp quà tặng cá nhân hóa có sẵn khi thanh toán.
           </p>
         </>
       ),
     },
     {
       id: "billing",
-      title: "Billing & Refunds",
+      title: "Thanh Toán & Hoàn Tiền",
       content: (
         <>
           <p className="text-lg mb-4">
-            <strong>Q: What payment methods are accepted?</strong>
+            <strong>H: Các phương thức thanh toán nào được chấp nhận?</strong>
             <br />
-            A: We accept major credit cards, PayPal, and Google Pay. Recurring subscriptions will be charged automatically based on your billing cycle.
+            Đ: Chúng tôi chấp nhận các thẻ tín dụng lớn, PayPal và Google Pay. Các gói đăng ký sẽ được tự động thanh toán dựa trên chu kỳ thanh toán của bạn.
           </p>
           <p className="text-lg">
-            <strong>Q: How do refunds work?</strong>
+            <strong>H: Chính sách hoàn tiền hoạt động như thế nào?</strong>
             <br />
-            A: Refunds may be available for specific cases and are processed within 7-10 business days. Please contact customer support if you believe you're eligible for a refund.
+            Đ: Hoàn tiền có thể có sẵn cho các trường hợp cụ thể và sẽ được xử lý trong vòng 7-10 ngày làm việc. Vui lòng liên hệ với bộ phận hỗ trợ khách hàng nếu bạn tin rằng bạn đủ điều kiện nhận hoàn tiền.
           </p>
         </>
       ),
     },
     {
       id: "app-access",
-      title: "App Access",
+      title: "Truy Cập Ứng Dụng",
       content: (
         <>
           <p className="text-lg mb-4">
-            <strong>Q: Can I access my purchases through the app?</strong>
+            <strong>H: Tôi có thể truy cập các giao dịch mua của mình qua ứng dụng không?</strong>
             <br />
-            A: Yes, subscribers can access their recipes and e-books directly through our app. Simply sign in with the email linked to your account.
+            Đ: Có, người đăng ký có thể truy cập các công thức nấu ăn và sách điện tử trực tiếp qua ứng dụng của chúng tôi. Chỉ cần đăng nhập bằng email liên kết với tài khoản của bạn.
           </p>
           <p className="text-lg">
-            <strong>Q: Is the app available on all devices?</strong>
+            <strong>H: Ứng dụng có sẵn trên tất cả các thiết bị không?</strong>
             <br />
-            A: Our app is currently available on iOS and Android devices. Download it from the Apple App Store or Google Play.
+            Đ: Ứng dụng của chúng tôi hiện có sẵn trên các thiết bị iOS và Android. Tải xuống từ Apple App Store hoặc Google Play.
           </p>
         </>
       ),
     },
     {
       id: "contact",
-      title: "Contact Us",
+      title: "Liên Hệ Với Chúng Tôi",
       content: (
         <>
           <p className="text-lg">
-            If you have further questions, feel free to contact us:
+            Nếu bạn có câu hỏi thêm, vui lòng liên hệ với chúng tôi:
           </p>
           <ul className="text-lg mt-4 space-y-2">
             <li><strong>Email:</strong> support@recipehub.com</li>
-            <li><strong>Phone:</strong> (555) 123-4567</li>
-            <li><strong>Support Hours:</strong> Monday to Friday, 9am - 5pm</li>
+            <li><strong>Điện thoại:</strong> (555) 123-4567</li>
+            <li><strong>Giờ hỗ trợ:</strong> Thứ Hai đến Thứ Sáu, từ 9 sáng đến 5 chiều</li>
           </ul>
         </>
       ),
     }
   ];
 
-  const [openSections, setOpenSections] = useState(sections.map(section => section.id));
+
+  // Khởi tạo openSections là một mảng rỗng, chỉ mở khi người dùng nhấp vào
+  const [openSections, setOpenSections] = useState([]);
 
   const toggleSection = (sectionId) => {
     setOpenSections((prevOpenSections) =>
@@ -139,73 +141,72 @@ const FAQPage = () => {
   };
 
   return (
-      <div className="min-h-screen bg-gray-50 py-6 flex flex-col justify-center relative overflow-hidden sm:py-12">
-        <img
-          src="https://play.tailwindcss.com/img/beams.jpg"
-          alt=""
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-none"
-          width="1308"
-        />
-        <div className="relative z-10 max-w-5xl mx-auto p-8 mb-12 mt-24">
-          <h1 className="inline-block py-1 px-3 mb-4 text-xs font-semibold text-center text-orange-900 bg-orange-50 rounded-full">
-            Frequently Asked Questions: Recipe and Cookbook Marketplace
-          </h1>
-          <p className="font-heading text-5xl xs:text-6xl md:text-7xl font-bold">
-            You ask? We <span className="font-serif italic">answer.</span>
-          </p>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center relative overflow-hidden">
+      <img
+        src="https://play.tailwindcss.com/img/beams.jpg"
+        alt=""
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-none"
+        width="1920"
+      />
+      <div className="section-center relative z-10 max-w-5xl p-8 mb-12 mt-24">
+        <h1 className="inline-block py-1 px-3 mb-4 text-xs font-semibold text-center text-orange-900 bg-orange-50 rounded-full">
+          Câu hỏi thường gặp: Thị trường công thức nấu ăn và sách nấu ăn
+        </h1>
+        <p className="font-heading text-5xl xs:text-6xl md:text-7xl font-bold">
+          Bạn hỏi? Chúng tôi <span className="font-serif italic">trả lời.</span>
+        </p>
+        {/* Section Navigation */}
+        <nav className="mb-12 mt-12">
+          <h2 className="text-2xl font-semibold mb-4">
+            Chuyển đến mục:</h2>
+          <ul className="text-lg space-y-2">
+            {sections.map((section) => (
+              <li key={section.id}>
+                <a href={`#${section.id}`} className="text-blue-600 hover:underline">
+                  {section.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-          {/* Section Navigation */}
-          <nav className="mb-12 mt-12">
-            <h2 className="text-2xl font-semibold mb-4">Jump to a Section:</h2>
-            <ul className="text-lg space-y-2">
-              {sections.map((section) => (
-                <li key={section.id}>
-                  <a href={`#${section.id}`} className="text-blue-600 hover:underline">
-                    {section.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Accordion Sections */}
-          {sections.map((section) => (
-            <div
-              key={section.id}
-              className={`accordion border border-solid border-gray-300 p-4 rounded-xl mb-8 ${
-                openSections.includes(section.id) ? "bg-indigo-50 border-indigo-600" : ""
+        {/* Accordion Sections */}
+        {sections.map((section) => (
+          <div
+            key={section.id}
+            className={`accordion border border-solid border-gray-300 p-4 rounded-xl mb-8 ${openSections.includes(section.id) ? "bg-indigo-50 border-indigo-600" : ""
               }`}
+          >
+            <button
+              className="accordion-toggle inline-flex items-center justify-between text-left text-lg font-normal leading-8 text-gray-900 w-full transition duration-500 "
+              onClick={() => toggleSection(section.id)}
+              aria-expanded={openSections.includes(section.id)}
             >
-              <button
-                className="accordion-toggle inline-flex items-center justify-between text-left text-lg font-normal leading-8 text-gray-900 w-full transition duration-500 "
-                onClick={() => toggleSection(section.id)}
-                aria-expanded={openSections.includes(section.id)}
+              <h5>{section.title}</h5>
+              <svg
+                className={`w-6 h-6 text-gray-900 transition duration-500 ${openSections.includes(section.id) ? "hidden" : "block"}`}
+                viewBox="0 0 24 24"
+                fill="none"
               >
-                <h5>{section.title}</h5>
-                <svg
-                  className={`w-6 h-6 text-gray-900 transition duration-500 ${openSections.includes(section.id) ? "hidden" : "block"}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path d="M6 12H18M12 18V6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"></path>
-                </svg>
-                <svg
-                  className={`w-6 h-6 text-gray-900 transition duration-500 ${openSections.includes(section.id) ? "block" : "hidden"}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path d="M6 12H18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"></path>
-                </svg>
-              </button>
-              {openSections.includes(section.id) && (
-                <div className="accordion-content w-full overflow-hidden mt-4">
-                  {section.content}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                <path d="M6 12H18M12 18V6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"></path>
+              </svg>
+              <svg
+                className={`w-6 h-6 text-gray-900 transition duration-500 ${openSections.includes(section.id) ? "block" : "hidden"}`}
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path d="M6 12H18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"></path>
+              </svg>
+            </button>
+            {openSections.includes(section.id) && (
+              <div className="accordion-content w-full overflow-hidden mt-4">
+                {section.content}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
+    </div>
   );
 };
 

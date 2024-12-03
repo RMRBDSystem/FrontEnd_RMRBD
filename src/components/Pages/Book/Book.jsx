@@ -87,7 +87,7 @@ function Book() {
   };
 
   return (
-    <section className="section-center">
+    <section className="section-center min-h-screen">
       <div className="container px-4 mx-auto">
         <div className="flex flex-col lg:flex-row items-start justify-between -mx-4">
           {/* Sidebar */}

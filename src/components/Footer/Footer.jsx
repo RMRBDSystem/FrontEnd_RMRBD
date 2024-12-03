@@ -9,13 +9,22 @@ const Footer = () => {
             <a href="/" className="flex items-center">
               <img
                 src="/images/LogoA.png"
-                className="h-8 me-3"
+                className="h-32 me-3"
                 alt="Logo RecipeCook"
               />
-              <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-                RecipeCook
+              <span className="self-center text-2xl font-semibold dark:text-white block">
+                Recipe Cook
               </span>
             </a>
+            <div className='inline-flex pt-2 text-xl'>
+                <span className="material-icons mx-1">
+                  call
+                </span> 0903560433
+                <span className="material-icons mx-2">
+                  email
+                </span> huytronglee@gmail.com
+            </div>
+
           </div>
           <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
             <div>
@@ -42,14 +51,14 @@ const Footer = () => {
               <ul className="text-gray-500 dark:text-gray-400 font-medium">
                 <li className="mb-4">
                   <a
-                    href="https://github.com/HuyTrongLe"
+                    href="https://github.com/HuyTrongLe/FrontEnd_DA"
                     className="hover:underline"
                   >
                     Github
                   </a>
                 </li>
                 <li>
-                  <a href="https://discord.gg/4eeurUVvTy" className="hover:underline">
+                  <a href="https://discord.gg/T2BJsX4VJf" className="hover:underline">
                     Discord
                   </a>
                 </li>

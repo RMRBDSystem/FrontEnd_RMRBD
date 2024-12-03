@@ -54,7 +54,7 @@ const ImageFilter = () => {
   };
 
   return (
-    <section className="bg-gray-900 w-full flex flex-col py-5">
+    <section className="min-h-screen bg-gray-900 w-full flex flex-col py-5">
       <div className="section-center flex w-full items-start md:justify-center md:gap-6 gap-3 flex-wrap items-start">
         {buttonCaptions.map((filter) => (
           <Button
