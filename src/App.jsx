@@ -1,61 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Landing from './components/LandingPage/Landing';
-import HomePage from './components/Homepage/HomePage';
-import Meals from './components/Pages/Meals';
-import FAQ from './components/Pages/FAQ';
-import AccountManagement from './components/Admin/AccountManagement';
-import Feedback from './components/Admin/Feedback';
-import Dashboard from './components/Admin/Dashboard';
-import Report from './components/Admin/Reports';
-import IncomeManagement from './components/Admin/IncomeManagement';
-import CategoryManagement from './components/Admin/CategoryManagement';
-import Navbar from './components/Navbar/Navbar';
-import Footer from './components/Footer/Footer';
-import LoadingPage from './components/Loader/LoadingPage';
-import './components/Style/Global.scss';
+import { useState, useEffect, useContext, createContext } from "react";
+import LoadingPage from './components/Loader/LoadingPage.jsx';
+import RouterPage from './components/RouterPage/RouterPage.jsx';
+import './assets/styles/Global.scss';
+import { io } from "socket.io-client";
+import {getAccountById } from "../src/components/services/AccountService.js";
+import Cookies from 'js-cookie';
 
-function Layout() {
-  return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/meals" element={<Meals />} />
-        <Route path="/FAQ" element={<FAQ />} />
-        <Route path="/admin/account-management" element={<AccountManagement />} />
-        <Route path="/admin/feedback&comments" element={<Feedback />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/reports" element={<Report />} />
-        <Route path="/admin/income-management" element={<IncomeManagement />} />
-        <Route path="/admin/category-management" element={<CategoryManagement />} />
-      </Routes>
-      <Footer />
-    </>
-  );
-}
+// Context for socket
+export const SocketContext = createContext();
+
+// Custom hook for accessing socket context
+export const useSocket = () => useContext(SocketContext);
 
 const App = () => {
+  const accountOnlineId = Cookies.get("UserId");
+  const [accountOnline, setAccountOnline] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [socket, setSocket] = useState(null);
 
+  // Initialize socket connection
   useEffect(() => {
-    setTimeout(() => setIsLoading(false), 3000);
+    // const newSocket = io("https://socket-db-c8gm.onrender.com");
+    const newSocket = io("http://localhost:5174/");
+    setSocket(newSocket);
+    // Show loading for 1 second
+    setTimeout(() => setIsLoading(false), 1000);
+
+    // Cleanup: Disconnect socket on component unmount
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
 
+  // Fetch accounts from API
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const account = await getAccountById(accountOnlineId); // Await data fetching
+        setAccountOnline(account.userName);
+      } catch (err) {
+        console.error("Error fetching accounts:", err);
+      }
+    };
+
+    if (accountOnlineId) {
+      fetchAccounts();
+    }
+  }, [accountOnlineId]);
+
+  // Emit 'newUser' event when socket and accountList are available
+  useEffect(() => {
+    if (socket) {
+      socket.emit("newUser", accountOnline); // Emit current user
+    }
+  }, [socket, accountOnline]);
+
+  // Show loading page while app is initializing
   if (isLoading) {
     return <LoadingPage />;
   }
 
   return (
-    <div>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/*" element={<Layout />} /> {/* Catch all paths under Layout */}
-          <Route path="*" element={<Error />} /> {/* Catch-all for undefined routes */}
-        </Routes>
-      </Router>
-    </div>
+    <SocketContext.Provider value={{ socket, accountOnline }}>
+      <div className="App">
+        <RouterPage />
+      </div>
+    </SocketContext.Provider>
   );
 };
 
