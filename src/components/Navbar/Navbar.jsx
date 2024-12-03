@@ -132,6 +132,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const userRole = Cookies.get("UserRole");
   const accountonlineId = Cookies.get("UserId");
+  const [accountData, setAccountData] = useState({});
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -156,6 +157,7 @@ const Navbar = () => {
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
       }
+      fetchAccountData(accountonlineId);
     };
 
     fetchNotification();
@@ -163,9 +165,14 @@ const Navbar = () => {
 
   useEffect(() => {
     if (socket) {
-      socket.on("getNotification", (data) => {
+      const handleNotification = (data) => {
         setNotifications((prev) => [data, ...prev]);
-      });
+      };
+      socket.on("getNotification", handleNotification);
+      // Clean up event listener when the component unmounts or socket changes
+      return () => {
+        socket.off("getNotification", handleNotification);
+      };
     }
   }, [socket])
 
@@ -192,6 +199,21 @@ const Navbar = () => {
     }
     if (category == "Sách Điện Tử") {
       navigate("/ebook")
+    }
+  };
+  const fetchAccountData = async (userId) => {
+    try {
+      const response = await axios.get(
+        `https://rmrbdapi.somee.com/odata/Account/${userId}`,
+        {
+          headers: { "Content-Type": "application/json", Token: "123-abc" },
+        }
+      );
+      const data = response.data;
+      setAccountData(data);
+      console.log("Account Data:", data); // Debug log
+    } catch (error) {
+      console.error(error);
     }
   };
   const handleLogout = async () => {
@@ -353,10 +375,15 @@ const Navbar = () => {
             >
               <div onClick={toggleDropdown} className="flex items-center cursor-pointer">
                 <img
-                  src="/images/avatar.png" // Hình ảnh mặc định
+                  src={accountData.avatar || "https://via.placeholder.com/50"}
                   alt="User Avatar"
                   className="w-12 h-12 object-cover rounded-full"
                 />
+                <span
+                  className={`ml-2 text-sm font-medium text-white`}
+                >
+                  {accountData.userName}
+                </span>
               </div>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-md text-black z-10">

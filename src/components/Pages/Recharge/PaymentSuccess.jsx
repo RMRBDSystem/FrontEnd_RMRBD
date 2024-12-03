@@ -41,7 +41,7 @@ const Success = () => {
       <h2 className="text-2xl font-bold text-green-500 mb-4">Thanh toán thành công!</h2>
       <p className="text-gray-800">Cảm ơn bạn đã hoàn tất thanh toán.</p>
       <p className="text-sm text-gray-500 mt-4">Bạn có thể xem lịch sử giao dịch của mình trong tài khoản.</p>
-      <a href="/home" className="mt-6 inline-block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+      <a href="/" className="mt-6 inline-block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
         Trở về trang chủ
       </a>
     </div>

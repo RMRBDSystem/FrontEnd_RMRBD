@@ -6,8 +6,7 @@ const Breadcrumb = () => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
-  // Kiểm tra nếu ở trang Home (đường dẫn /home)
-  if (location.pathname === "/home" || location.pathname === "/") {
+  if (location.pathname === "/" || location.pathname === "/") {
     return null; // Không hiển thị breadcrumb khi ở trang Home
   }
 

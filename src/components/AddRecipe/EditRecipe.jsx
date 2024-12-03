@@ -3,6 +3,9 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useParams } from "react-router-dom";
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
+import Swal from "sweetalert2";
 import {
   Container,
   TextField,
@@ -100,7 +103,7 @@ const EditRecipe = () => {
       );
     } catch (error) {
       console.error("Error fetching tags:", error);
-      toast.error("Failed to load tags.");
+      Swal.fire("Lỗi", "Lỗi khi tải thẻ", "error");
     }
   };
 
@@ -204,8 +207,9 @@ const EditRecipe = () => {
 
       // Gọi lại fetchRecipeData để làm mới danh sách tag
       await fetchRecipeData();
-      toast.success("Recipe updated successfully!");
-      navigate("/recipecustomer-list");
+      Swal.fire("Thành công", "Cập nhật công thức thành công!", "success").then(
+        () => navigate("/recipecustomer-list")
+      );
     } catch (error) {
       toast.error("Error updating recipe!");
       console.error("Error:", error);

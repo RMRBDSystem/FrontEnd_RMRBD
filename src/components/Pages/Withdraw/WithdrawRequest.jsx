@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import { getAccountById } from '../../services/AccountService';
 import { addCoinTransaction } from '../../services/Transaction';
-import { getNotDonWithdrawCoinTransactionByAccountId } from "../../services/Transaction";
+
+import { updateAccount } from "../../services/AccountService";
+
 import Swal from 'sweetalert2';
 
 const WithDrawRequest = () => {
@@ -42,24 +44,20 @@ const WithDrawRequest = () => {
     const handleSubmit = async (event) => {
 
         event.preventDefault();
-        const WithDrawRequest = await getNotDonWithdrawCoinTransactionByAccountId(Cookies.get('UserId'));
-        console.log(WithDrawRequest);
         if (amount > account.coin) {
             setError('Số xu muốn rút không được vượt quá số xu hiện có: ' + account.coin);
         } else if (Math.round(amount * conversionRate) < 50000) {
             setError('Số tiền muốn rút phải là 50,000đ hoặc hơn');
-        } else if (WithDrawRequest.length >= 1) {
-            Swal.fire({
-                title: 'Bạn có yêu cầu rút xu chưa hoàn thành!',
-                text: 'Vui lòng kiểm tra lại!',
-                icon: 'warning',
-                confirmButtonText: 'OK',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '/withdrawlist';
-                }
-            });
         } else {
+
+            const account = await getAccountById(UserId);
+            account.coin = account.coin - amount;
+            const response2 = await updateAccount(account);
+            if (!response2.status) {
+                setError('Rút xu thất bại');
+                return;
+            }
+
             const Cointransactionrequest = {
                 CustomerId: UserId,
                 MoneyFluctuations: Math.round(amount * conversionRate),
@@ -68,6 +66,8 @@ const WithDrawRequest = () => {
                 Status: -1
             }
             const response = await addCoinTransaction(Cointransactionrequest);
+
+
             if (response.status) {
                 Swal.fire({
                     title: 'Gửi yêu cầu rút xu thành công!',
@@ -120,7 +120,7 @@ const WithDrawRequest = () => {
                                     </span>Danh sách yêu cầu</button>
                                 </div>
                                 <form onSubmit={handleSubmit}>
-                                    <p className="card-text font-semibold text-xl mb-2">Tài khoản khả dụng: <span className='text-2xl text-green-500'>{account.coin} XU</span></p>
+                                    <p className="card-text font-semibold text-xl mb-2">Tài khoản khả dụng: <span className='text-2xl text-green-500'>{account.coin - amount} XU</span></p>
                                     <div className="form-group font-medium text-red-500">
                                         <label htmlFor="amount">Số xu muốn rút:</label>
                                         <input type="number" className="form-control" id="amount" value={amount} min="0" onChange={(event) => setAmount(event.target.value)} />

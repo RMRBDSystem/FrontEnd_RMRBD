@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import Layout from '../../Layout';
+import LayoutModerator from '../../LayoutModerator';
 import { AuthProvider } from "./AuthContext";
 //Page
 import Login from "../LoginPage/LoginPage";
@@ -24,6 +25,8 @@ import OrderFullDetails from '../Cart/Orders/OrderFullDetails';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
 import UpdateProfile from '../AccountProfile/AccountProfile';
+import UpdateAccount from '../AccountProfile/UpdateAccount';
+import ViewRoleUpdateSubmit from '../AccountProfile/ViewRoleUpdateSubmit';
 import EditRecipeForCustomer from "../Pages/Recipe/EditSavedRecipe";
 import SellerOrders from "../Cart/Orders/SellerOrders";
 //Recharge
@@ -37,12 +40,20 @@ import EditRecipe from '../AddRecipe/EditRecipe';
 import RecipeCustomer from "../AddRecipe/RecipeCustomer";
 import RecipeCustomerDetail from "../AddRecipe/RecipeCustomerDetail";
 import RecipeListCustomer from "../AddRecipe/RecipeListCustomer";
+import BookListCustomer from '../CustomerBook/ListBookCustomer'
 //Moderator
 import Report from "../Pages/Report/Report";
 import ListReport from "../Pages/Report/ListReport";
 import ReportDetail from "../Pages/Report/ReportDetail";
 import ReportMod from "../Pages/Report/ReportMod";
 import ReportResponse from "../Pages/Report/ReportResponse";
+import UpdateEbook from "../Moderator/UpdateEBook";
+import UpdateBook from "../Moderator/UpdateBook";
+import UpdateRecipeDetails from "../Moderator/Details/UpdateRecipeDetails";
+import UpdateRoleDetails from "../Moderator/Details/UpdateRoleDetails";
+import UpdateRecipe from "../Moderator/UpdateRecipe";
+import UpdateInformation from "../Moderator/UpdateInformation";
+import UpdateBookDetails from "../Moderator/Details/UpdateBookDetails";
 //Admin
 import RecipeDetails from "../Admin/Recipemanagement/RecipeDetail";
 import AdminDashboard from "../Admin/Dashboard";
@@ -101,7 +112,6 @@ export default function RouterPage() {
             <Route path="/recipe-detail/:recipeId" element={<RecipeDetails />} />
             <Route path="/recipe-customer-detail/:recipeId" element={<RecipeCustomerDetail />} />
             <Route path="/update-account" element={<UpdateProfile />} />
-            <Route path="/update-role" element={<UpdateRole />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/recipe" element={<Recipe />} />
@@ -124,6 +134,8 @@ export default function RouterPage() {
             <Route path="/withdrawlist" element={<WithdrawList />} />
             <Route path="/withdrawmod" element={<WithDrawMod />} />
             <Route path="/withdrawresponse/:coinTransactionId" element={<WithdrawResponse />} />
+            <Route path="/update-information" element={<UpdateAccount />} />
+            <Route path="/form-updated-role" element={<ViewRoleUpdateSubmit />} />
             <Route
               path="/recipecustomer-list"
               element={
@@ -152,7 +164,7 @@ export default function RouterPage() {
               path="/checkout"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <Checkout/>
+                  <Checkout />
                 </ProtectedRoute>
               }
             />
@@ -160,7 +172,7 @@ export default function RouterPage() {
               path="/cart"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <Cart/>
+                  <Cart />
                 </ProtectedRoute>
               }
             />
@@ -168,7 +180,7 @@ export default function RouterPage() {
               path="/orders"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <Orders/>
+                  <Orders />
                 </ProtectedRoute>
               }
             />
@@ -176,7 +188,7 @@ export default function RouterPage() {
               path="/seller-orders"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <SellerOrders/>
+                  <SellerOrders />
                 </ProtectedRoute>
               }
             />
@@ -184,7 +196,7 @@ export default function RouterPage() {
               path="/orders/:orderId"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <OrderFullDetails/>
+                  <OrderFullDetails />
                 </ProtectedRoute>
               }
             />
@@ -197,18 +209,18 @@ export default function RouterPage() {
               }
             />
             <Route
-              path="/update-role"
-              element={
-                <ProtectedRoute allowedRoles={["Moderator"]}>
-                  <UpdateRole />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/recipe-customer-list"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
                   <RecipeListCustomer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/book-list-customer"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <BookListCustomer />
                 </ProtectedRoute>
               }
             />
@@ -229,6 +241,28 @@ export default function RouterPage() {
                   <AddEbookPageForCustomer />
                 </ProtectedRoute>
               }
+            />
+          </Route>
+          <Route element={<LayoutModerator />}>
+            <Route path="/update-ebook" element={<UpdateEbook />} />
+            <Route path="/update-book" element={<UpdateBook />} />
+            <Route path="/update-role" element={<UpdateRole />} />
+            <Route path="/update-recipe" element={<UpdateRecipe />} />
+            <Route
+              path="/update-moderator-information"
+              element={<UpdateInformation />}
+            />
+            <Route
+              path="/update-recipe/:recipeId"
+              element={<UpdateRecipeDetails />}
+            />
+            <Route
+              path="/update-role/:accountId"
+              element={<UpdateRoleDetails />}
+            />
+            <Route
+              path="/update-book/:bookId"
+              element={<UpdateBookDetails />}
             />
           </Route>
         </Routes>
