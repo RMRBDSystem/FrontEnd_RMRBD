@@ -5,6 +5,7 @@ import './assets/styles/Global.scss';
 import { io } from "socket.io-client";
 import {getAccountById } from "../src/components/services/AccountService.js";
 import Cookies from 'js-cookie';
+import { CartProvider } from './components/Cart/components/CartContext';
 
 // Context for socket
 export const SocketContext = createContext();
@@ -61,11 +62,13 @@ const App = () => {
   }
 
   return (
-    <SocketContext.Provider value={{ socket, accountOnline }}>
-      <div className="App">
-        <RouterPage />
-      </div>
-    </SocketContext.Provider>
+    <CartProvider>
+      <SocketContext.Provider value={{ socket, accountOnline }}>
+        <div className="App">
+          <RouterPage />
+        </div>
+      </SocketContext.Provider>
+    </CartProvider>
   );
 };
 
