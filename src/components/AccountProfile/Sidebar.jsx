@@ -41,6 +41,16 @@ const Sidebar = () => {
 
   const menuItems = [
     {
+      path: "/recipe-customer-list",
+      label: "Công thức đã đăng",
+      icon: <FiBookOpen />,
+    },
+    {
+      path: "/list-saved-recipe",
+      label: "Công thức đã lưu",
+      icon: <FiHeart />,
+    },
+    {
       path: "/update-information",
       label: "Thông tin cá nhân",
       icon: <FiUser />,
@@ -50,16 +60,8 @@ const Sidebar = () => {
       label: "Thông tin đã yêu cầu",
       icon: <FiSettings />,
     },
-    {
-      path: "/list-saved-recipe",
-      label: "Công thức đã lưu",
-      icon: <FiHeart />,
-    },
-    {
-      path: "/recipe-customer-list",
-      label: "Công thức đã đăng",
-      icon: <FiBookOpen />,
-    },
+
+
     {
       path: "/book-list-customer",
       label: "Sách đã đăng",
@@ -91,11 +93,10 @@ const Sidebar = () => {
             <li key={item.path} className="border-b border-gray-300 pb-2">
               <Link
                 to={item.path}
-                className={`flex items-center transition duration-300 ease-in-out ${
-                  location.pathname === item.path
-                    ? "text-orange-800 font-bold"
-                    : "text-orange-600"
-                } hover:text-orange-800 hover:translate-x-2`}
+                className={`flex items-center transition duration-300 ease-in-out ${location.pathname === item.path
+                  ? "text-orange-800 font-bold"
+                  : "text-orange-600"
+                  } hover:text-orange-800 hover:translate-x-2`}
               >
                 <span className="mr-2">{item.icon}</span>
                 {item.label}

@@ -65,46 +65,45 @@ const ViewRoleUpdateSubmit = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row justify-center min-h-screen items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
+    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
       {/* Sidebar */}
       <Sidebar />
-
-      <div className="flex-1 bg-white shadow-lg max-w-6xl w-full p-6">
-        <div className="bg-white rounded-lg shadow-lg w-full p-8">
-          <h2 className="text-3xl font-semibold text-gray-800 text-start mb-8">
+      <section className="flex flex-col">
+        <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
+          <h2 className="text-2xl font-bold text-gray-800">
             Thông tin đã gửi
           </h2>
-          <div className="mt-8 text-xs text-gray-500 border-b border-gray-300 pb-4 opacity-50">
+          <div className="mt-4 text-xs text-gray-500 border-b border-gray-300 opacity-50">
             <p>
               Lưu ý: Các thông tin trên sẽ được kiểm duyệt trong thời gian sớm
               nhất. Nếu có bất kỳ thay đổi nào, chúng tôi sẽ thông báo qua email
               hoặc tin nhắn cho bạn.
             </p>
           </div>
-          <div className="space-y-8 mt-4">
+          <div className="space-y-4 mt-4">
             {/* ID Card Number */}
             <div className="flex justify-start items-center space-x-4 border-b border-gray-300 pb-4">
-              <label className="block text-base font-medium text-gray-700 mb-1 w-1/4">
+              <label className="block text-base font-medium text-gray-700 mb-1">
                 Mã CCCD
               </label>
-              <p className="px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 w-3/4">
+              <p className="px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 w-1/6">
                 {accountProfile.idcardNumber || "Chưa có"}
               </p>
             </div>
 
             {/* Date of Birth */}
             <div className="flex justify-start items-center space-x-4 border-b border-gray-300 pb-4">
-              <label className="block text-base font-medium text-gray-700 mb-1 w-1/4">
+              <label className="block text-base font-medium text-gray-700 mb-1">
                 Ngày sinh
               </label>
-              <p className="px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 w-3/4">
+              <p className="px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 w-1/6">
                 {formatDate(accountProfile.dateOfBirth)}
               </p>
             </div>
 
             {/* Status */}
             <div className="flex justify-start items-center space-x-4 border-b border-gray-300 pb-4">
-              <label className="block text-base font-medium text-gray-700 mb-1 w-1/4">
+              <label className="block text-base font-medium text-gray-700 mb-1">
                 Trạng thái
               </label>
               <div className="flex items-center w-3/4">
@@ -140,10 +139,10 @@ const ViewRoleUpdateSubmit = () => {
               </div>
             </div>
             <div className="flex justify-start items-center space-x-4 border-b border-gray-300 pb-4">
-              <label className="block text-base font-medium text-gray-700 mb-1 w-1/4">
+              <label className="block text-base font-medium text-gray-700 mb-1 mr-8">
                 Lưu ý
               </label>
-              <div className="flex items-center w-3/4">
+              <div className="flex items-center py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700">
                 {accountProfile.censorNote}
               </div>
             </div>
@@ -222,8 +221,8 @@ const ViewRoleUpdateSubmit = () => {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </div >
   );
 };
 

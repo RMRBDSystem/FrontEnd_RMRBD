@@ -159,10 +159,9 @@ const BookList = () => {
     <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
       {/* Sidebar */}
       <Sidebar />
-      <div className="justify-center items-center bg-gray-100">
+      <section className="flex flex-col">
         <div
-          className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl"
-          style={{ minWidth: "1000px" }}
+          className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col text-xl"
         >
           {/* Add Book Button */}
 
@@ -228,7 +227,7 @@ const BookList = () => {
             pointerOnHover
           />
         </div>
-      </div>
+      </section>
     </div>
   );
 };

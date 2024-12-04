@@ -248,7 +248,7 @@ export default function RouterPage() {
               }
             />
             <Route
-              path="/address-edit"
+              path="/address"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
                   <AddressEdit />

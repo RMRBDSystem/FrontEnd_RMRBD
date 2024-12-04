@@ -171,11 +171,11 @@ const ShowRecipes = () => {
   );
   const [searchQuery, setSearchQuery] = useState("");
   return (
-    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-5">
+    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
       {/* Sidebar */}
       <Sidebar />
-      <section className="flex flex-col section-center">
-        <div className="max-w-7xl mx-auto bg-white p-4 rounded-lg shadow-md flex flex-col">
+      <section className="flex flex-col">
+        <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
           <ToastContainer />
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-800">

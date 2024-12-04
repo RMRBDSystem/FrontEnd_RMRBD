@@ -161,8 +161,7 @@ const EbookList = () => {
       <Sidebar />
       <div className="justify-center items-center bg-gray-100">
         <div
-          className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl"
-          style={{ minWidth: "1000px" }}
+          className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col text-xl"
         >
           {/* Add Ebook Button */}
 
@@ -225,7 +224,6 @@ const EbookList = () => {
             pagination
             responsive
             highlightOnHover
-            pointerOnHover
           />
         </div>
       </div>
