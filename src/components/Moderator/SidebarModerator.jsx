@@ -10,28 +10,35 @@ const Sidebar = () => {
   const menuItems = [
     {
       id: "update-role",
-      label: "Cập nhật vai trò",
+      label: "Quản lý vai trò",
       icon: <FiUsers />,
       path: "/update-role",
     },
     {
       id: "update-recipe",
-      label: "Cập nhật công thức",
+      label: "Quản lý công thức",
       icon: <FiList />,
       path: "/update-recipe",
     },
     {
       id: "update-book",
-      label: "Cập nhật sách",
+      label: "Quản lý sách",
       icon: <FiBook />,
       path: "/update-book",
     },
     {
+      id: "update-account-mod",
+      label: "Quản lý tài khoản",
+      icon: <FiUsers />,
+      path: "/update-account-mod",
+    },
+    {
       id: "update-ebook",
-      label: "Cập nhật sách điện tử",
+      label: "Quản lý sách điện tử",
       icon: <FiBookOpen />,
       path: "/update-ebook",
     },
+    
   ];
 
   return (

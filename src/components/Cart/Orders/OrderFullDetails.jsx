@@ -155,24 +155,6 @@ const OrderFullDetails = () => {
           </div>
         </div>
 
-        {/* Additional order details can be added here */}
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold mb-4">Thông Tin Đơn Hàng</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-600">Mã Vận Đơn:</p>
-              <p className="font-medium">{orderDetails.orderCode || 'N/A'}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Ngày Đặt Hàng:</p>
-              <p className="font-medium">
-                {formatDateTime(orderDetails.purchaseDate)}
-              </p>
-            </div>
-            {/* Add more order details as needed */}
-          </div>
-        </div>
-
         <div className="mt-4 flex justify-between items-center">
           <div>
             <span className="font-semibold">Tình Trạng: </span>

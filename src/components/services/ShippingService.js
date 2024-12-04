@@ -130,64 +130,85 @@ export const getShippingOrderDetails = async (orderCode) => {
  */
 export const createShippingOrder = async (bookDetails, selectedAddress, senderAddress, codAmount = 0) => {
   try {
+    console.log('Creating shipping order with:', { bookDetails, selectedAddress, senderAddress, codAmount });
+
     // Format sender information
     const senderInfo = {
       from_name: senderAddress.accountName || "Sender",
       from_phone: senderAddress.phoneNumber,
       from_address: senderAddress.addressDetail,
-      from_ward_name: senderAddress.wardName,
-      from_district_name: senderAddress.districtName,
-      from_province_name: senderAddress.provinceName,
-      return_phone: senderAddress.phoneNumber,
-      return_address: senderAddress.addressDetail,
-      return_district_id: parseInt(senderAddress.districtCode),
-      return_ward_code: senderAddress.wardCode,
+      from_ward_code: String(senderAddress.wardCode),
+      from_district_id: parseInt(senderAddress.districtCode),
+      from_province_id: parseInt(senderAddress.provinceCode),
     };
 
     // Get recipient name from selectedAddress
-    const recipientName = selectedAddress.accountName || selectedAddress.userName;
+    const recipientName = selectedAddress.accountName || selectedAddress.userName || selectedAddress.recipientName;
     if (!recipientName) {
       throw new Error('Recipient name is required');
     }
 
-    // Format recipient information
-    const recipientInfo = {
-      to_name: recipientName,
-      to_phone: selectedAddress.phoneNumber,
-      to_address: selectedAddress.addressDetail,
-      to_ward_code: selectedAddress.wardCode,
-      to_district_id: parseInt(selectedAddress.districtCode),
-    };
+    // Calculate total weight and dimensions for all books in the group
+    const totalWeight = bookDetails.reduce((sum, book) => {
+      const bookWeight = Math.max((book?.weight || 0), 1);
+      return sum + (bookWeight * (book?.quantity || 1));
+    }, 0);
+    
+    const maxDimensions = bookDetails.reduce((dims, book) => ({
+      length: Math.max(dims.length, book?.length || 1),
+      width: Math.max(dims.width, book?.width || 1),
+      height: dims.height + ((book?.height || 1) * (book?.quantity || 1)), // Stack books height
+    }), { length: 1, width: 1, height: 0 });
+
+    // Calculate total value for insurance
+    const totalValue = bookDetails.reduce((sum, book) => {
+      return sum + ((book?.price || 0) * (book?.quantity || 1));
+    }, 0);
 
     // Basic order data structure based on GHN documentation
     const orderData = {
-      payment_type_id: codAmount > 0 ? 2 : 1, // Use 1 for xu payment, 2 for COD
+      payment_type_id: codAmount > 0 ? 2 : 1, // 2 for COD, 1 for pre-paid
       note: "Book Order",
       required_note: "KHONGCHOXEMHANG",
-      to_name: recipientInfo.to_name,
-      to_phone: recipientInfo.to_phone,
-      to_address: recipientInfo.to_address,
-      to_ward_code: recipientInfo.to_ward_code,
-      to_district_id: recipientInfo.to_district_id,
+      client_order_code: "", // Optional: You can generate a unique code here
+      to_name: recipientName,
+      to_phone: selectedAddress.phoneNumber,
+      to_address: selectedAddress.addressDetail,
+      to_ward_code: String(selectedAddress.wardCode),
+      to_district_id: parseInt(selectedAddress.districtCode),
       from_name: senderInfo.from_name,
       from_phone: senderInfo.from_phone,
       from_address: senderInfo.from_address,
-      from_ward_code: senderAddress.wardCode,
-      from_district_id: parseInt(senderAddress.districtCode),
-      cod_amount: parseInt(codAmount),
+      from_ward_code: senderInfo.from_ward_code,
+      from_district_id: senderInfo.from_district_id,
+      cod_amount: Math.max(0, parseInt(codAmount) || 0),
       content: "Book Order",
-      weight: 200,
-      length: 20,
-      width: 20,
-      height: 10,
+      weight: Math.max(Math.min(Math.ceil(totalWeight), 30000), 1),
+      length: Math.max(Math.min(Math.ceil(maxDimensions.length), 150), 10),
+      width: Math.max(Math.min(Math.ceil(maxDimensions.width), 150), 10),
+      height: Math.max(Math.min(Math.ceil(maxDimensions.height), 150), 10),
+      pick_station_id: 0,
+      deliver_station_id: 0,
+      insurance_value: Math.min(totalValue, 5000000), // Max 5M VND for insurance
       service_id: 0,
       service_type_id: 2,
+      order_value: totalValue,
       items: bookDetails.map(book => ({
         name: book.bookName,
-        quantity: 1,
-        price: book.price
+        code: book.bookId?.toString(),
+        quantity: book.quantity || 1,
+        price: book.price || 0,
+        length: Math.max(book?.length || 1, 1),
+        width: Math.max(book?.width || 1, 1),
+        height: Math.max(book?.height || 1, 1),
+        weight: Math.max(book?.weight || 1, 1),
+        category: {
+          level1: "Books"
+        }
       }))
     };
+
+    console.log('Shipping order payload:', orderData);
 
     // Create instance with specific headers
     const instance = axios.create({

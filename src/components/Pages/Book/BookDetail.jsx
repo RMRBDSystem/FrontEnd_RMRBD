@@ -15,6 +15,9 @@ import { getProvinceName, fetchDistrictName, fetchWardName } from '../../service
 import { ToastContainer, toast } from 'react-toastify';
 import { useSocket } from "../../../App"
 import {createNotification} from "../../services/NotificationService"
+import Swal from 'sweetalert2';
+import { useCart } from '../../Cart/components/CartContext';
+
 const BookDetail = () => {
     const { bookId } = useParams();
     const [book, setBook] = useState(null);
@@ -133,6 +136,8 @@ const BookDetail = () => {
 
         fetchBookData();
     }, [bookId, accountId]);
+    const { cartItems, updateCartItems } = useCart();
+
     const addToCart = async () => {
         try {
             const customerId = Cookies.get('UserId');
@@ -142,11 +147,13 @@ const BookDetail = () => {
             }
 
             const clientAddressId = address?.addressId;
-            const totalPrice = book.price;
-            const shipFee = 0; // Shipping fee
+            if (!clientAddressId) {
+                toast.error('Không tìm thấy địa chỉ giao hàng!');
+                return;
+            }
 
-            // Fetch all orders for the customer
-            const existingOrderResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrder?$filter=customerId eq ${customerId}`, {
+            // Fetch existing orders
+            const existingOrderResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrder`, {
                 method: 'GET',
                 headers: {
                     'Token': '123-abc',
@@ -155,60 +162,19 @@ const BookDetail = () => {
             });
 
             if (!existingOrderResponse.ok) {
-                console.error('Failed to fetch existing orders:', existingOrderResponse.status);
-                throw new Error('Failed to check for existing orders');
+                throw new Error('Failed to fetch existing orders');
             }
 
             const allOrdersData = await existingOrderResponse.json();
+            const cartOrders = allOrdersData.filter(order => 
+                order.customerId === parseInt(customerId) && 
+                order.orderCode === null
+            );
 
-            // Filter for unpaid orders (status === 1)
-            const unpaidOrders = allOrdersData.filter(order => order.status === 1);
+            let orderIdToUse = cartOrders.length > 0 ? cartOrders[0].orderId : null;
 
-            // Check for an order with the same `clientAddressId`
-            const matchingOrder = unpaidOrders.find(order => parseInt(order.clientAddressId, 10) === parseInt(clientAddressId, 10));
-
-            let orderIdToUse = matchingOrder ? matchingOrder.orderId : null;
-
-            if (orderIdToUse) {
-                // Update the existing order logic...
-                // First, check if the book is already in the order's details
-                const orderDetailResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${orderIdToUse} and bookId eq ${book.bookId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Token': '123-abc',
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const orderDetailData = await orderDetailResponse.json();
-
-                if (orderDetailData.length === 0) {
-                    // Book is not in the order, so add it to the order details
-                    const addBookResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
-                        method: 'POST',
-                        headers: {
-                            'Token': '123-abc',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            orderId: orderIdToUse,
-                            bookId: book.bookId,
-                            quantity: 1, // Default to 1, adjust if needed
-                            price: book.price,
-                        }),
-                    });
-
-                    if (!addBookResponse.ok) {
-                        console.error('Failed to add book to order details:', addBookResponse.status);
-                        throw new Error('Failed to add book to order details');
-                    }
-
-                    console.log('Book added to the existing order');
-                } else {
-                    console.log('Book is already in the order');
-                }
-            } else {
-                // Create a new order logic...
+            if (!orderIdToUse) {
+                // Create new order
                 const newOrderResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrder', {
                     method: 'POST',
                     headers: {
@@ -216,49 +182,71 @@ const BookDetail = () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        customerId: customerId,
-                        totalPrice: totalPrice,
-                        shipFee: shipFee,
-                        price: totalPrice,
-                        clientAddressId: clientAddressId,
+                        customerId: parseInt(customerId),
+                        totalPrice: book.price,
+                        shipFee: 0,
+                        price: book.price,
                         status: 1,
+                        orderCode: null,
                         purchaseDate: new Date().toISOString(),
                     }),
                 });
 
                 if (!newOrderResponse.ok) {
-                    console.error('Failed to create new order:', newOrderResponse.status);
-                    throw new Error('Failed to create new order');
+                    const errorText = await newOrderResponse.text();
+                    throw new Error(`Failed to create new order: ${errorText}`);
                 }
 
                 const newOrderData = await newOrderResponse.json();
-                const newOrderId = newOrderData.orderId;
+                orderIdToUse = newOrderData.orderId;
+            }
 
-                // Add book to the new order's details
-                const addBookResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
-                    method: 'POST',
+            // Add book to order
+            const addBookResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
+                method: 'POST',
+                headers: {
+                    'Token': '123-abc',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId: orderIdToUse,
+                    bookId: book.bookId,
+                    quantity: 1,
+                    price: book.price,
+                    totalPrice: book.price
+                }),
+            });
+
+            if (!addBookResponse.ok) {
+                throw new Error('Failed to add book to order details');
+            }
+
+            // After successfully adding the item
+            if (addBookResponse.ok) {
+                // Fetch updated cart items
+                const updatedOrderDetailsResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${orderIdToUse}`, {
                     headers: {
                         'Token': '123-abc',
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        orderId: newOrderId,
-                        bookId: book.bookId,
-                        quantity: 1, // Default to 1, adjust if needed
-                        price: book.price,
-                    }),
                 });
 
-                if (!addBookResponse.ok) {
-                    console.error('Failed to add book to new order details:', addBookResponse.status);
-                    throw new Error('Failed to add book to new order details');
+                if (updatedOrderDetailsResponse.ok) {
+                    const updatedCartItems = await updatedOrderDetailsResponse.json();
+                    updateCartItems(updatedCartItems); // Update the global cart state
                 }
 
-                console.log('New order created and book added');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thêm giỏ thành công!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
             }
+
         } catch (error) {
             console.error('Error adding to cart:', error);
-            toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+            toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng');
         }
     };
     // Calculate how many stars are filled based on averageRate

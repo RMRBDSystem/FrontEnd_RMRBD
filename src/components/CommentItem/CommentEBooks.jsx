@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {useSocket} from "../../App"
 import {createNotification} from "../services/NotificationService"
 import {getAccountById} from "../services/AccountService"
-import {getEbookById} from "../services/BookService"
+import {getEbookById} from "../services/EbookService"
 import Swal from 'sweetalert2';
 
 const Comments = ({ebookId,createById,roleaccountonline}) => {

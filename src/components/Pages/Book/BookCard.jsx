@@ -5,15 +5,178 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarOutline } from "@fortawesome/free-regular-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "../../../assets/styles/Components/BookCard.css";
+import Swal from 'sweetalert2';
+import Cookies from 'js-cookie';
+import { useCart } from '../../Cart/components/CartContext';
 
 function BookCard({ book }) {
   const navigate = useNavigate();
   const maxStars = 5;
   const filledStars = Math.round(book.bookRate || 0);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const { updateCartItems } = useCart();
 
-  const handleAddToCart = () => {
-    setIsAddedToCart(true);
+  const handleAddToCart = async () => {
+    try {
+      const customerId = Cookies.get('UserId');
+      if (!customerId) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Vui lòng đăng nhập để thêm vào giỏ hàng!',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        return;
+      }
+
+      // Fetch all orders for the customer that are in cart status (orderCode is null)
+      const existingOrderResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrder`, {
+        method: 'GET',
+        headers: {
+          'Token': '123-abc',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!existingOrderResponse.ok) {
+        throw new Error('Failed to fetch existing orders');
+      }
+
+      const allOrdersData = await existingOrderResponse.json();
+      
+      // Filter orders for current customer and cart status (orderCode is null)
+      const cartOrders = allOrdersData.filter(order => 
+        order.customerId === parseInt(customerId) && 
+        order.orderCode === null
+      );
+
+      let orderIdToUse = cartOrders.length > 0 ? cartOrders[0].orderId : null;
+
+      if (orderIdToUse) {
+        // Check if book is already in order
+        const orderDetailResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${orderIdToUse} and bookId eq ${book.bookId}`, {
+          method: 'GET',
+          headers: {
+            'Token': '123-abc',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!orderDetailResponse.ok) {
+          throw new Error('Failed to check order details');
+        }
+
+        const orderDetailData = await orderDetailResponse.json();
+
+        if (orderDetailData.length === 0) {
+          // Add book to existing order
+          const addBookResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
+            method: 'POST',
+            headers: {
+              'Token': '123-abc',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderId: orderIdToUse,
+              bookId: book.bookId,
+              quantity: 1,
+              price: book.price,
+              totalPrice: book.price // Add totalPrice field
+            }),
+          });
+
+          if (!addBookResponse.ok) {
+            throw new Error('Failed to add book to order details');
+          }
+
+          // Fetch updated cart items
+          const updatedOrderDetailsResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${orderIdToUse}`, {
+            headers: {
+              'Token': '123-abc',
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (updatedOrderDetailsResponse.ok) {
+            const updatedCartItems = await updatedOrderDetailsResponse.json();
+            updateCartItems(updatedCartItems); // Update the global cart state
+          }
+        }
+      } else {
+        // Create new order
+        const newOrderResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrder', {
+          method: 'POST',
+          headers: {
+            'Token': '123-abc',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerId: parseInt(customerId),
+            totalPrice: book.price,
+            shipFee: 0,
+            price: book.price,
+            status: 1,
+            orderCode: null, // Ensure orderCode is null for cart items
+            purchaseDate: new Date().toISOString(),
+          }),
+        });
+
+        if (!newOrderResponse.ok) {
+          throw new Error('Failed to create new order');
+        }
+
+        const newOrderData = await newOrderResponse.json();
+        
+        // Add book to new order
+        const addBookResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
+          method: 'POST',
+          headers: {
+            'Token': '123-abc',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId: newOrderData.orderId,
+            bookId: book.bookId,
+            quantity: 1,
+            price: book.price,
+            totalPrice: book.price // Add totalPrice field
+          }),
+        });
+
+        if (!addBookResponse.ok) {
+          throw new Error('Failed to add book to new order details');
+        }
+
+        // Fetch updated cart items
+        const updatedOrderDetailsResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${newOrderData.orderId}`, {
+          headers: {
+            'Token': '123-abc',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (updatedOrderDetailsResponse.ok) {
+          const updatedCartItems = await updatedOrderDetailsResponse.json();
+          updateCartItems(updatedCartItems); // Update the global cart state
+        }
+      }
+
+      setIsAddedToCart(true);
+      Swal.fire({
+        icon: 'success',
+        title: 'Thêm giỏ thành công!',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Có lỗi xảy ra khi thêm vào giỏ hàng!',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
   };
 
   const handleRemoveFromCart = () => {

@@ -7,11 +7,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import axiosRetry from 'axios-retry';
 import { getProvinceName, fetchDistrictName, fetchWardName } from '../services/AddressService';
 import { Link } from 'react-router-dom';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaStore } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import DeleteConfirmationModal from '../../components/Cart/components/DeleteConfirmationModal';
 import { motion } from 'framer-motion';
 import LoadingOverlay from '../shared/LoadingOverlay';
+import Swal from 'sweetalert2';
+import { useCart } from './components/CartContext';
 
 const ShoppingCart = () => {
   const [orders, setOrders] = useState([]);
@@ -21,12 +22,10 @@ const ShoppingCart = () => {
   const [selectedOrders, setSelectedOrders] = useState(new Set());
   const [addressDetails, setAddressDetails] = useState({}); // Store address details for each order
   const [totalPrice, setTotalPrice] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [orderToDelete, setOrderToDelete] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const navigate = useNavigate();
+  const { updateCartItems } = useCart();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -137,80 +136,106 @@ const ShoppingCart = () => {
     }
   }, [userId]);
 
-  const handleShowModal = (orderDetailId) => {
-    setOrderToDelete(orderDetailId);  
-    setShowModal(true);  
+  const handleDeleteClick = (orderDetailId) => {
+    Swal.fire({
+      title: 'Xác nhận xóa',
+      text: 'Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleConfirmDelete(orderDetailId);
+      }
+    });
   };
 
-  axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+  const handleConfirmDelete = async (orderDetailId) => {
+    try {
+      const orderToRemove = orders.find(order => order.orderDetailId === orderDetailId);
+      if (!orderToRemove) {
+        throw new Error('Order detail not found');
+      }
 
-  // Confirm Deletion
-  const handleConfirmDelete = async () => {
-    if (orderToDelete) {
-      try {
-        // Find the order detail in our current state to get its orderId
-        const orderToRemove = orders.find(order => order.orderDetailId === orderToDelete);
-        if (!orderToRemove) {
-          throw new Error('Order detail not found');
+      // Step 1: Delete the specific BookOrderDetail
+      await axios.delete(
+        `https://rmrbdapi.somee.com/odata/BookOrderdetail/${orderDetailId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Token: "123-abc",
+          },
+        }
+      );
+
+      // Step 2: Remove the deleted BookOrderDetail from the state (UI)
+      setOrders(prevOrders => {
+        const updatedOrders = prevOrders.filter(order => order.orderDetailId !== orderDetailId);
+        
+        // Step 3: Find the orderId associated with the deleted orderDetailId
+        const orderToCheck = prevOrders.find(order => order.orderDetailId === orderDetailId);
+        
+        if (orderToCheck && orderToCheck.orderId)  {
+          const remainingDetails = updatedOrders.filter(order => order.orderId === orderToCheck.orderId);
+          
+          // Step 4: If no remaining orderDetailId, delete the orderId (parent order)
+          if (remainingDetails.length === 0) {
+            console.log(`Order ${orderToCheck.orderId} has no remaining orderDetails. Deleting the entire order...`);
+
+            axios.delete(`https://rmrbdapi.somee.com/odata/BookOrder/${orderToCheck.orderId}`, {
+              headers: {
+                "Content-Type": "application/json",
+                Token: "123-abc",
+              },
+            })
+            .then(() => {
+              console.log(`Order ${orderToCheck.orderId} deleted successfully.`);
+              Swal.fire({
+                icon: 'success',
+                title: 'Đã xóa thành công!',
+                text: `Đơn hàng ${orderToCheck.orderId} đã được xóa vì không còn sản phẩm.`,
+                showConfirmButton: false,
+                timer: 1500
+              });
+            })
+            .catch((err) => {
+              console.error("Failed to delete BookOrder:", err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Không thể xóa đơn hàng.',
+                showConfirmButton: false,
+                timer: 1500
+              });
+            });
+            
+            return updatedOrders.filter(order => order.orderId !== orderToCheck.orderId);
+          }
         }
 
-        // Step 1: Delete the specific BookOrderDetail
-        await axios.delete(
-          `https://rmrbdapi.somee.com/odata/BookOrderdetail/${orderToDelete}`,  // Note: changed to 'BookOrderdetail'
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
+        return updatedOrders;
+      });
 
-        // Step 2: Remove the deleted BookOrderDetail from the state (UI)
-        setOrders(prevOrders => {
-          const updatedOrders = prevOrders.filter(order => order.orderDetailId !== orderToDelete);
-          
-          // Step 3: Find the orderId associated with the deleted orderDetailId
-          const orderToCheck = prevOrders.find(order => order.orderDetailId === orderToDelete);
-          
-          if (orderToCheck && orderToCheck.orderId)  {
-            const remainingDetails = updatedOrders.filter(order => order.orderId === orderToCheck.orderId);
-            
-            // Step 4: If no remaining orderDetailId, delete the orderId (parent order)
-            if (remainingDetails.length === 0) {
-              console.log(`Order ${orderToCheck.orderId} has no remaining orderDetails. Deleting the entire order...`);
-  
-              // Make the API call to delete the BookOrder (orderId)
-              axios.delete(`https://rmrbdapi.somee.com/odata/BookOrder/${orderToCheck.orderId}`, {
-                headers: {
-                  "Content-Type": "application/json",
-                  Token: "123-abc",
-                },
-              })
-              .then(() => {
-                console.log(`Order ${orderToCheck.orderId} deleted successfully.`);
-                toast.success(`Order ${orderToCheck.orderId} deleted because it has no items left.`);
-              })
-              .catch((err) => {
-                console.error("Failed to delete BookOrder:", err);
-                toast.error("Failed to delete the order.");
-              });
-              
-              // Remove the orderId from the state (UI) as well
-              return updatedOrders.filter(order => order.orderId !== orderToCheck.orderId);
-            }
-          }
-  
-          return updatedOrders; // Return the updated orders if we didn't delete the parent order
-        });
-  
-        toast.success("Order detail removed from cart");
-      } catch (error) {
-        console.error("Error deleting order detail from API:", error.response || error.message);
-        toast.error("Failed to remove order detail.");
-      }
+      Swal.fire({
+        icon: 'success',
+        title: 'Đã xóa thành công!',
+        text: 'Sản phẩm đã được xóa khỏi giỏ hàng.',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    } catch (error) {
+      console.error("Error deleting order detail from API:", error.response || error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: 'Không thể xóa sản phẩm khỏi giỏ hàng.',
+        showConfirmButton: false,
+        timer: 1500
+      });
     }
-  
-    setShowModal(false); // Close the modal after deletion
   };
   
   
@@ -315,8 +340,7 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
 
   // If trying to decrease below 1, show delete confirmation
   if (newQuantity < 1) {
-    setOrderToDelete(orderDetailId);
-    setShowDeleteModal(true);
+    handleDeleteClick(orderDetailId);
     return;
   }
 
@@ -339,7 +363,7 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
   );
 
   // Update server and handle 0 quantity
-  if (updatedQuantity === 0) handleShowModal(orderDetailId);
+  if (updatedQuantity === 0) handleDeleteClick(orderDetailId);
   else {
     axios.put(`https://rmrbdapi.somee.com/odata/BookOrderDetail/${orderDetailId}`, {
       ...orderToUpdate,
@@ -374,15 +398,6 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
     }
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false); // Close the modal by setting showModal to false
-  };
-
-  const handleDeleteClick = (orderDetailId) => {
-    setOrderToDelete(orderDetailId);
-    setShowDeleteModal(true);
-  };
-
   // Group orders by seller (createById)
   const groupedOrders = orders.reduce((acc, order) => {
     const book = books[order.bookId];
@@ -401,6 +416,9 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
     acc[sellerId].orders.push(order);
     return acc;
   }, {});
+
+  // After updating orders
+  updateCartItems(orders);
 
   return (
     <motion.div
@@ -442,7 +460,7 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
         {Object.values(groupedOrders).map(({ seller, orders }) => (
           <div key={seller.id} className="bg-white rounded-lg shadow-sm mb-4 p-4">
             {/* Seller Header */}
-            <div className="border-b pb-4 flex items-center gap-2">
+            <div className="border-b pb-4 flex items-center gap-4">
               <input
                 type="checkbox"
                 className="w-4 h-4 accent-orange-500"
@@ -464,8 +482,8 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
                   }
                 }}
               />
-              <span className="text-orange-600 font-medium">Yêu thích</span>
-              <span className="font-medium">{seller.name}</span>
+              <FaStore className="text-black" />
+              <span className="font-medium ml-2">{seller.name}</span>
             </div>
 
             {/* Products */}
@@ -517,7 +535,7 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
                         type="number"
                         value={order.quantity}
                         onChange={(e) => updateOrderQuantity(order.orderDetailId, parseInt(e.target.value, 10))}
-                        className="w-14 text-center border-x"
+                        className="w-14 text-center border-x [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         min="1"
                       />
                       <button
@@ -539,9 +557,9 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
                   <div className="col-span-1 text-center">
                     <button
                       onClick={() => handleDeleteClick(order.orderDetailId)}
-                      className="text-gray-500 hover:text-red-500"
+                      className="text-gray-500 transition hover:text-red-500"
                     >
-                      <FaTrash />
+                      <FaTrash className="text-xl" />
                     </button>
                   </div>
                 </div>
@@ -566,12 +584,12 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
                   }
                 }}
               />
-              <span>Select All</span>
+              <span>Chọn tất cả</span>
             </div>
             <div className="flex items-center gap-8">
               <div>
                 <span>Tổng ({selectedOrders.size} sách): </span>
-                <span className="text-xl text-orange-600 font-medium">
+                <span className="text-xl text-red-500 font-medium">
                   {new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
@@ -594,11 +612,6 @@ const updateOrderQuantity = (orderDetailId, newQuantity) => {
         </div>
       </div>
 
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleConfirmDelete}
-      />
       {isProcessing && <LoadingOverlay />}
     </motion.div>
   );

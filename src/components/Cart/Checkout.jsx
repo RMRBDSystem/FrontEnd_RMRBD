@@ -90,6 +90,26 @@ const Checkout = () => {
   });
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Add new state for grouped orders
+  const [groupedOrders, setGroupedOrders] = useState({});
+
+  // Group orders by sender address when component mounts or selected orders change
+  useEffect(() => {
+    const groupBySenderAddress = () => {
+      const grouped = selectedOrders.reduce((acc, order) => {
+        const senderAddressId = order.bookDetails?.senderAddressId;
+        if (!acc[senderAddressId]) {
+          acc[senderAddressId] = [];
+        }
+        acc[senderAddressId].push(order);
+        return acc;
+      }, {});
+      setGroupedOrders(grouped);
+    };
+
+    groupBySenderAddress();
+  }, [selectedOrders]);
+
   // Fetch user coins
   useEffect(() => {
     const fetchUserCoins = async () => {
@@ -935,229 +955,204 @@ const Checkout = () => {
     'COINS': 1   // Pay with Coins is type 1
   };
 
+  // Modify handlePlaceOrder to handle grouped orders
   const handlePlaceOrder = async () => {
     try {
-        setIsProcessing(true);
-        
-        if (!selectedAddress) {
-            toast.error('Vui lòng chọn địa chỉ giao hàng');
-            return;
-        }
-        if (!paymentMethod) {
-            toast.error('Vui lòng chọn phương thức thanh toán');
-            return;
-        }
+      setIsProcessing(true);
 
-        // If paying with coins, check balance and update account
-        if (paymentMethod === 'COINS') {
-            const totalAmount = calculateCombinedTotalPrice();
-            if (userCoins < totalAmount) {
-                toast.error('Số dư xu không đủ để thực hiện giao dịch');
-                return;
-            }
+      if (!selectedAddress) {
+        toast.error('Vui lòng chọn địa chỉ giao hàng');
+        return;
+      }
+      if (!paymentMethod) {
+        toast.error('Vui lòng chọn phương thức thanh toán');
+        return;
+      }
 
-            // Update user's coin balance
-            try {
-                // First get the current account data
-                const accountResponse = await axios.get(
-                    `https://rmrbdapi.somee.com/odata/Account/${userId}`,
-                    {
-                        headers: {
-                            'Token': '123-abc'
-                        }
-                    }
-                );
-
-                const currentAccount = accountResponse.data;
-                
-                // Then update with all required fields
-                const response = await axios.put(
-                    `https://rmrbdapi.somee.com/odata/Account/info/${userId}`,
-                    {
-                        ...currentAccount,
-                        coin: userCoins - totalAmount
-                    },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Token': '123-abc'
-                        }
-                    }
-                );
-                console.log('Coin balance updated:', response.data);
-            } catch (error) {
-                console.error('Error updating coin balance:', error);
-                throw new Error('Failed to update coin balance');
-            }
+      // Handle coin payment first if applicable
+      if (paymentMethod === 'COINS') {
+        const totalAmount = calculateCombinedTotalPrice();
+        if (userCoins < totalAmount) {
+          toast.error('Số dư xu không đủ để thực hiện giao dịch');
+          return;
         }
 
-        const codAmount = paymentMethod === 'COD' ? calculateCombinedTotalPrice() : 0;
-        
-        // Create shipping order
-        const shippingOrder = await createShippingOrder(
-            selectedOrders.map(order => order.bookDetails),
-            selectedAddress,
-            senderAddress,
-            codAmount
-        );
-
-        // Update stock quantities for all books in the order
-        const stockUpdatePromises = selectedOrders.map(order => 
-            updateBookStock(order.bookDetails.bookId, order.quantity)
-        );
-
+        // Update user's coin balance
         try {
-            await Promise.all(stockUpdatePromises);
+          // First get the current account data
+          const accountResponse = await axios.get(
+            `https://rmrbdapi.somee.com/odata/Account/${userId}`,
+            {
+              headers: {
+                'Token': '123-abc'
+              }
+            }
+          );
+
+          const currentAccount = accountResponse.data;
+          
+          // Then update with all required fields
+          const response = await axios.put(
+            `https://rmrbdapi.somee.com/odata/Account/info/${userId}`,
+            {
+              ...currentAccount,
+              coin: userCoins - totalAmount
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'Token': '123-abc'
+              }
+            }
+          );
+          console.log('Coin balance updated:', response.data);
         } catch (error) {
-            console.error('Error updating book stocks:', error);
-            throw new Error('Failed to update book stocks');
+          console.error('Error updating coin balance:', error);
+          throw new Error('Failed to update coin balance');
         }
+      }
 
-        // Define clientAddressId based on address mode
-        const clientAddressId = addressMode === 'select' ? 
-            parseInt(selectedAddress.addressId) : 
-            null;
+      // Create shipping orders for each group
+      const shippingOrderPromises = Object.entries(groupedOrders).map(async ([senderAddressId, orders]) => {
+        const senderAddressResponse = await axios.get(
+          `https://rmrbdapi.somee.com/odata/CustomerAddress/${senderAddressId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Token': '123-abc',
+            }
+          }
+        );
 
-        // Create order payload
+        const codAmount = paymentMethod === 'COD' ? 
+          orders.reduce((total, order) => total + order.totalPrice, 0) + (shippingFee / Object.keys(groupedOrders).length) : 
+          0;
+
+        return createShippingOrder(
+          orders.map(order => order.bookDetails),
+          selectedAddress,
+          senderAddressResponse.data,
+          codAmount
+        );
+      });
+
+      const shippingOrders = await Promise.all(shippingOrderPromises);
+
+      // Create book orders for each group
+      const orderPromises = Object.entries(groupedOrders).map(async ([senderAddressId, orders], index) => {
         const orderPayload = {
-            orderId: 0,
-            customerId: parseInt(userId),
-            totalPrice: calculateCombinedTotalPrice(),
-            shipFee: shippingFee,
-            price: calculateTotalPrice(),
-            purchaseDate: new Date().toISOString(),
-            paymentType: paymentTypeMap[paymentMethod],
-            orderCode: shippingOrder.data?.order_code || null,
-            status: 1,
-            clientAddressId: clientAddressId,
-            shippingAddress: addressMode === 'new' ? {
-                recipientName: selectedAddress.userName,
-                phoneNumber: selectedAddress.phoneNumber,
-                addressDetail: selectedAddress.addressDetail,
-                wardCode: selectedAddress.wardCode,
-                districtCode: selectedAddress.districtCode,
-                provinceCode: selectedAddress.provinceCode
-            } : null,
-            bookOrderDetails: selectedOrders.map(order => ({
-                bookId: order.bookDetails.bookId,
-                quantity: order.quantity,
-                price: order.price
-            }))
+          orderId: 0,
+          customerId: parseInt(userId),
+          totalPrice: orders.reduce((total, order) => total + order.totalPrice, 0) + (shippingFee / Object.keys(groupedOrders).length),
+          shipFee: shippingFee / Object.keys(groupedOrders).length,
+          price: orders.reduce((total, order) => total + order.totalPrice, 0),
+          purchaseDate: new Date().toISOString(),
+          paymentType: paymentTypeMap[paymentMethod],
+          orderCode: shippingOrders[index].data?.order_code || null,
+          status: 1,
+          clientAddressId: addressMode === 'select' ? parseInt(selectedAddress.addressId) : null,
+          shippingAddress: addressMode === 'new' ? {
+            recipientName: selectedAddress.userName,
+            phoneNumber: selectedAddress.phoneNumber,
+            addressDetail: selectedAddress.addressDetail,
+            wardCode: selectedAddress.wardCode,
+            districtCode: selectedAddress.districtCode,
+            provinceCode: selectedAddress.provinceCode
+          } : null,
+          bookOrderDetails: orders.map(order => ({
+            bookId: order.bookDetails.bookId,
+            quantity: order.quantity,
+            price: order.price
+          }))
         };
 
-        console.log('Sending order payload:', orderPayload);
-
-        // Create the order
-        const bookOrderResponse = await axios.post(
-            'https://rmrbdapi.somee.com/odata/BookOrder',
-            orderPayload,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token': '123-abc'
-                }
+        return axios.post(
+          'https://rmrbdapi.somee.com/odata/BookOrder',
+          orderPayload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Token': '123-abc'
             }
+          }
         );
+      });
 
-        console.log('Book order created:', bookOrderResponse);
+      const bookOrders = await Promise.all(orderPromises);
 
-        // Create transaction record
-        try {
-            await createBookTransaction(
-                userId,
-                bookOrderResponse.data.orderId,
-                calculateCombinedTotalPrice(),
-                paymentTypeMap[paymentMethod]
-            );
-        } catch (transactionError) {
-            console.error('Error creating transaction record:', transactionError);
-            // Continue with the order process even if transaction record fails
-        }
-
-        // Delete old orders after successful creation of new order
-        try {
-            for (const order of selectedOrders) {
-                if (order.orderDetailId) {
-                    await axios.delete(
-                        `https://rmrbdapi.somee.com/odata/BookOrderdetail/${order.orderDetailId}`,
-                        {
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Token': '123-abc'
-                            }
-                        }
-                    );
-                    console.log(`Old order ${order.orderDetailId} deleted successfully.`);
-                }
-            }
-        } catch (error) {
-            console.error('Error deleting old orders:', error);
-            // Continue with success flow even if deletion fails
-        }
-
+      // Create order statuses and transactions
+      await Promise.all(bookOrders.map(async (order) => {
         await createOrderStatus(
-          bookOrderResponse.data.orderId,
+          order.data.orderId,
           1,
           'ready_to_pick'
         );
 
-        await Swal.fire({
-            position: "center",
-            icon: "success",
-            title: "Đặt đơn hàng thành công!",
-            text: "Cảm ơn bạn đã mua hàng",
-            showConfirmButton: false,
-            timer: 1500
-        });
+        await createBookTransaction(
+          userId,
+          order.data.orderId,
+          order.data.totalPrice,
+          paymentTypeMap[paymentMethod]
+        );
+      }));
 
-        // Navigate after success
-        navigate('/orders', { 
-            replace: true,
-            state: { selectedOrders: [] }
-        });
+      await Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Đặt đơn hàng thành công!",
+        text: "Cảm ơn bạn đã mua hàng",
+        showConfirmButton: false,
+        timer: 1500
+      });
+
+      // Navigate after success
+      navigate('/orders', { 
+        replace: true,
+        state: { selectedOrders: [] }
+      });
 
     } catch (error) {
-        console.error('Error placing order:', error);
-        
-        // If there was an error and we were using coins, we should try to refund them
-        if (paymentMethod === 'COINS') {
-            try {
-                const accountResponse = await axios.get(
-                    `https://rmrbdapi.somee.com/odata/Account/${userId}`,
-                    {
-                        headers: {
-                            'Token': '123-abc'
-                        }
-                    }
-                );
-
-                const currentAccount = accountResponse.data;
-
-                await axios.put(
-                    `https://rmrbdapi.somee.com/odata/Account/info/${userId}`,
-                    {
-                        ...currentAccount,
-                        coin: userCoins // Restore original coin amount
-                    },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Token': '123-abc'
-                        }
-                    }
-                );
-            } catch (refundError) {
-                console.error('Error refunding coins:', refundError);
+      console.error('Error placing order:', error);
+      
+      // If there was an error and we were using coins, we should try to refund them
+      if (paymentMethod === 'COINS') {
+        try {
+          const accountResponse = await axios.get(
+            `https://rmrbdapi.somee.com/odata/Account/${userId}`,
+            {
+              headers: {
+                'Token': '123-abc'
+              }
             }
-        }
+          );
 
-        Swal.fire({
-            icon: 'error',
-            title: 'Đặt hàng thất bại',
-            text: error.message || 'Vui lòng thử lại sau',
-        });
+          const currentAccount = accountResponse.data;
+
+          await axios.put(
+            `https://rmrbdapi.somee.com/odata/Account/info/${userId}`,
+            {
+              ...currentAccount,
+              coin: userCoins // Restore original coin amount
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'Token': '123-abc'
+              }
+            }
+          );
+        } catch (refundError) {
+          console.error('Error refunding coins:', refundError);
+        }
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Đặt hàng thất bại',
+        text: error.message || 'Vui lòng thử lại sau',
+      });
     } finally {
-        setIsProcessing(false);
+      setIsProcessing(false);
     }
   };
 

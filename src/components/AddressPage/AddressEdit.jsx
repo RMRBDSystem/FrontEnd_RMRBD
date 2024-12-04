@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Button, Form, Table, Modal } from 'react-bootstrap';
+import { Container, Button, Form, Modal } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import Navbar from "../Navbar/Navbar";
-import Footer from '../Footer/Footer';
+import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
+import { motion } from 'framer-motion';
+import { FaEdit, FaMapMarkerAlt, FaPhone } from 'react-icons/fa';
 
 const AddressEdit = () => {
   const [addresses, setAddresses] = useState([]);
@@ -50,7 +49,7 @@ const AddressEdit = () => {
         setAddresses(addressesWithDetails);
       } catch (error) {
         console.error('Error fetching addresses:', error);
-        toast.error('Failed to load addresses.');
+        showErrorAlert('Failed to load addresses.');
       }
     };
 
@@ -66,7 +65,7 @@ const AddressEdit = () => {
         setProvinces(response.data.data || []);
       } catch (error) {
         console.error('Error fetching provinces:', error);
-        toast.error('Failed to load provinces.');
+        showErrorAlert('Failed to load provinces.');
       }
     };
 
@@ -122,7 +121,6 @@ const AddressEdit = () => {
         { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
       );
       const ward = response.data.data.find((w) => w.WardCode === wardCode);
-      console.log('Fetched Ward:', ward);  // Check if ward is fetched correctly
       return ward ? ward.WardName : null;
     } catch (error) {
       console.error('Error fetching ward name:', error);
@@ -140,7 +138,7 @@ const AddressEdit = () => {
       setDistricts(response.data.data || []);
     } catch (error) {
       console.error('Error fetching districts:', error);
-      toast.error('Failed to load districts.');
+      showErrorAlert('Failed to load districts.');
     }
   };
 
@@ -161,7 +159,7 @@ const AddressEdit = () => {
       setWards(response.data.data || []);
     } catch (error) {
       console.error('Error fetching wards:', error);
-      toast.error('Failed to load wards.');
+      showErrorAlert('Failed to load wards.');
     }
   };
 
@@ -183,6 +181,36 @@ const AddressEdit = () => {
     }));
   };
 
+  const showSuccessAlert = (message) => {
+    Swal.fire({
+      title: 'Success!',
+      text: message,
+      icon: 'success',
+      confirmButtonColor: '#f97316', // orange-500
+      timer: 2000,
+      timerProgressBar: true
+    });
+  };
+
+  const showErrorAlert = (message) => {
+    Swal.fire({
+      title: 'Error!',
+      text: message,
+      icon: 'error',
+      confirmButtonColor: '#f97316', // orange-500
+    });
+  };
+
+  const showLoadingAlert = () => {
+    Swal.fire({
+      title: 'Processing...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  };
+
   const checkPhoneNumberExists = async () => {
     try {
       const response = await axios.get(
@@ -201,30 +229,39 @@ const AddressEdit = () => {
       }
     } catch (error) {
       console.error('Error checking phone number:', error);
-      toast.error('Failed to check phone number availability.');
+      showErrorAlert('Failed to check phone number availability.');
     }
   };
 
   const handleSendOtp = async () => {
-    // Assuming you have an API to send OTP here
-    setOtpSent(true);
-    toast.success('OTP sent successfully!');
+    showLoadingAlert();
+    try {
+      // Your OTP sending logic here
+      setOtpSent(true);
+      Swal.close(); // Close loading alert
+      showSuccessAlert('OTP sent successfully!');
+    } catch (error) {
+      Swal.close();
+      showErrorAlert('Failed to send OTP.');
+    }
   };
 
   const handleVerifyOtp = () => {
     if (otpCode === '123456') {  // Replace with actual verification logic
       setOtpVerified(true);
-      toast.success('OTP verified successfully!');
+      showSuccessAlert('OTP verified successfully!');
     } else {
-      toast.error('Invalid OTP. Please try again.');
+      showErrorAlert('Invalid OTP. Please try again.');
     }
   };
 
   const saveAddress = async (e) => {
     e.preventDefault();
   
-    if (!selectedAddress.wardCode || !selectedAddress.districtCode || !selectedAddress.provinceCode || !selectedAddress.addressDetail || !selectedAddress.phoneNumber) {
-      toast.error('Please fill in all required fields.');
+    if (!selectedAddress.wardCode || !selectedAddress.districtCode || 
+        !selectedAddress.provinceCode || !selectedAddress.addressDetail || 
+        !selectedAddress.phoneNumber) {
+      showErrorAlert('Please fill in all required fields.');
       return;
     }
   
@@ -239,154 +276,263 @@ const AddressEdit = () => {
       addressDetail: selectedAddress.addressDetail,
     };
   
+    showLoadingAlert();
+  
     try {
-      const response = await axios.put(`https://rmrbdapi.somee.com/odata/CustomerAddress/${selectedAddress.addressId}`, addressData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Token': '123-abc',
-        },
-      });
+      const response = await axios.put(
+        `https://rmrbdapi.somee.com/odata/CustomerAddress/${selectedAddress.addressId}`, 
+        addressData, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Token': '123-abc',
+          },
+        }
+      );
   
-      if (response.status === 200) {
-        toast.success('Address updated successfully!');  // Change to success message
-        setShowModal(false);
-  
-        // Trigger a page reload after successful update
-        window.location.reload();
-      } else {
-        toast.success('Address updated successfully!');  // Change to success message in case of any other response code
-        setShowModal(false);
-        window.location.reload();  // Reload the page after saving the address
+      Swal.close(); // Close loading alert
+      
+      if (response.status === 200 || response.status === 201) {
+        showSuccessAlert('Address updated successfully!').then(() => {
+          setShowModal(false);
+          window.location.reload();
+        });
       }
     } catch (error) {
+      Swal.close();
+      showErrorAlert('Error updating address. Please try again.');
       console.error('Error saving address:', error);
-      toast.success('Address updated successfully!');  // Change to success message
-      setShowModal(false);
-      window.location.reload();  // Reload the page after saving the address
     }
   };
 
   return (
-    <>
-      <ToastContainer />
-      <Navbar />
-      <Container>
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Address</th>
-              <th>Phone</th>
-              <th>Province</th>
-              <th>District</th>
-              <th>Ward</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {addresses.map((address) => (
-              <tr key={address.addressId}>
-                <td>{address.addressDetail}</td>
-                <td>{address.phoneNumber}</td>
-                <td>{address.provinceName}</td>
-                <td>{address.districtName}</td>
-                <td>{address.WardName}</td>
-                <td>
-                  <Button variant="warning" onClick={() => handleEditAddress(address)}>Edit</Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+    <div className="min-h-screen py-4 bg-gray-50">
+      <Container className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <FaMapMarkerAlt className="mr-2 text-orange-500" />
+            My Addresses
+          </h2>
 
-        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Edit Address</Modal.Title>
+          <div className="grid gap-4">
+            {addresses.map((address) => (
+              <motion.div
+                key={address.addressId}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-gray-700">
+                      <FaMapMarkerAlt className="mr-2 text-orange-500" />
+                      <span className="font-medium">{address.addressDetail}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <FaPhone className="mr-2 text-green-500" />
+                      <span>{address.phoneNumber}</span>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {address.provinceName} • {address.districtName} • {address.WardName}
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline-primary"
+                    onClick={() => handleEditAddress(address)}
+                    className="flex items-center px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
+                  >
+                    <FaEdit className="mr-2" />
+                    Edit
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Enhanced Modal Design */}
+        <Modal 
+          show={showModal} 
+          onHide={() => setShowModal(false)}
+          className="fade"
+          centered
+        >
+          <Modal.Header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+            <Modal.Title className="flex items-center">
+              <FaMapMarkerAlt className="mr-2" />
+              Edit Address
+            </Modal.Title>
+            <button
+              className="text-white opacity-70 hover:opacity-100 text-xl font-semibold"
+              onClick={() => setShowModal(false)}
+            >
+              ×
+            </button>
           </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={saveAddress}>
-              <Form.Group controlId="formAddressDetail">
-                <Form.Label>Address Detail</Form.Label>
+          <Modal.Body className="p-6">
+            <Form onSubmit={saveAddress} className="space-y-4">
+              {/* Address Detail */}
+              <div className="relative">
                 <Form.Control
                   type="text"
                   name="addressDetail"
                   value={selectedAddress?.addressDetail || ''}
                   onChange={handleInputChange}
+                  className="peer w-full px-4 py-2 rounded-lg border-2 border-gray-200 
+                            focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
+                            transition-all duration-200 outline-none"
                   placeholder="Enter address detail"
                 />
-              </Form.Group>
+                <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
+                  Address Detail
+                </Form.Label>
+              </div>
 
-              <Form.Group controlId="formPhoneNumber">
-                <Form.Label>Phone Number</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="phoneNumber"
-                  value={selectedAddress?.phoneNumber || ''}
-                  onChange={handleInputChange}
-                  placeholder="Enter phone number"
-                  onBlur={checkPhoneNumberExists}
-                />
+              {/* Phone Number Section */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Form.Control
+                    type="text"
+                    name="phoneNumber"
+                    value={selectedAddress?.phoneNumber || ''}
+                    onChange={handleInputChange}
+                    onBlur={checkPhoneNumberExists}
+                    className="peer w-full px-4 py-2 rounded-lg border-2 border-gray-200 
+                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                    placeholder="Enter phone number"
+                  />
+                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
+                    Phone Number
+                  </Form.Label>
+                </div>
+
                 {isPhoneAvailable === false && (
-                  <Button variant="primary" onClick={handleSendOtp}>
+                  <Button
+                    variant="primary"
+                    onClick={handleSendOtp}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition-colors"
+                  >
                     Send OTP
                   </Button>
                 )}
+
                 {otpSent && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="space-y-2"
+                  >
                     <Form.Control
                       type="text"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border-2 border-gray-200"
                       placeholder="Enter OTP"
                     />
-                    <Button variant="success" onClick={handleVerifyOtp}>Verify OTP</Button>
-                  </div>
+                    <Button
+                      variant="success"
+                      onClick={handleVerifyOtp}
+                      className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg"
+                    >
+                      Verify OTP
+                    </Button>
+                  </motion.div>
                 )}
-                {otpVerified && <div>OTP Verified!</div>}
-              </Form.Group>
 
-              <Form.Group controlId="formProvince">
-                <Form.Label>Province</Form.Label>
-                <Form.Control as="select" name="provinceCode" value={selectedAddress?.provinceCode || ''} onChange={handleInputChange}>
-                  <option value="">Select Province</option>
-                  {provinces.map((province) => (
-                    <option key={province.ProvinceID} value={province.ProvinceID}>
-                      {province.ProvinceName}
-                    </option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
+                {otpVerified && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-green-500 text-center font-medium"
+                  >
+                    ✓ OTP Verified Successfully
+                  </motion.div>
+                )}
+              </div>
 
-              <Form.Group controlId="formDistrict">
-                <Form.Label>District</Form.Label>
-                <Form.Control as="select" name="districtCode" value={selectedAddress?.districtCode || ''} onChange={handleInputChange}>
-                  <option value="">Select District</option>
-                  {districts.map((district) => (
-                    <option key={district.DistrictID} value={district.DistrictID}>
-                      {district.DistrictName}
-                    </option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
+              {/* Location Selects */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="relative">
+                  <Form.Select
+                    name="provinceCode"
+                    value={selectedAddress?.provinceCode || ''}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 
+                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                  >
+                    <option value="">Select Province</option>
+                    {provinces.map((province) => (
+                      <option key={province.ProvinceID} value={province.ProvinceID}>
+                        {province.ProvinceName}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
+                    Province
+                  </Form.Label>
+                </div>
 
-              <Form.Group controlId="formWard">
-                <Form.Label>Ward</Form.Label>
-                <Form.Control as="select" name="wardCode" value={selectedAddress?.wardCode || ''} onChange={handleInputChange}>
-                  <option value="">Select Ward</option>
-                  {wards.map((ward) => (
-                    <option key={ward.WardCode} value={ward.WardCode}>
-                      {ward.WardName}
-                    </option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
+                <div className="relative">
+                  <Form.Select
+                    name="districtCode"
+                    value={selectedAddress?.districtCode || ''}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 
+                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                  >
+                    <option value="">Select District</option>
+                    {districts.map((district) => (
+                      <option key={district.DistrictID} value={district.DistrictID}>
+                        {district.DistrictName}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
+                    District
+                  </Form.Label>
+                </div>
 
-              <Button variant="primary" type="submit">Save Address</Button>
+                <div className="relative">
+                  <Form.Select
+                    name="wardCode"
+                    value={selectedAddress?.wardCode || ''}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 
+                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                  >
+                    <option value="">Select Ward</option>
+                    {wards.map((ward) => (
+                      <option key={ward.WardCode} value={ward.WardCode}>
+                        {ward.WardName}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
+                    Ward
+                  </Form.Label>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
+                >
+                  Save Changes
+                </Button>
+              </div>
             </Form>
           </Modal.Body>
         </Modal>
       </Container>
-      <Footer />
-    </>
+    </div>
   );
 };
 

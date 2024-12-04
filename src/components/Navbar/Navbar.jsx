@@ -14,6 +14,7 @@ import Notification from "/images/notification.svg";
 import "./navbar.css"
 import { useSocket } from "../../App"
 import { getNotificationbyAccountId } from "../services/NotificationService"
+import CartDropdown from './CartDropDown'
 const categoriesContent = {
   "Công Thức Nấu Ăn": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
@@ -366,6 +367,7 @@ const Navbar = () => {
         </Link>
         <ul className="nav-links-container">
           <SearchWrapper />
+          <CartDropdown />
           <NavLinks links={rightLinks} setIsMenuOpen={setIsMenuOpen} />
           {isLoggedIn ? (
             <div

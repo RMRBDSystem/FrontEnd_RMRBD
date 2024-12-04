@@ -1,80 +1,76 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import { Container, Row, Col, Button, Form, Modal } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
-import Cookies from "js-cookie";
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
+import Cookies from 'js-cookie';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useDropzone } from 'react-dropzone';
+
 const AddBook = () => {
   const [book, setBook] = useState({
-    createById: "",
-    categoryId: "",
-    senderAddressId: "",
-    bookName: "",
-    author: "",
-    description: "",
-    price: "", // Converted to integer
-    unitInStock: 0, // Converted to integer
-    createDate: "",
-    isbn: "",
-    weight: 0, // Converted to integer
-    length: 0, // Converted to integer
-    width: 0, // Converted to integer
-    height: 0, // Converted to integer
+    createById: '',
+    categoryId: '',
+    senderAddressId: '',
+    bookName: '',
+    author: '',
+    description: '',
+    price: '',
+    unitInStock: '1',
+    createDate: '',
+    isbn: '',
+    weight: '',
+    length: '',
+    width: '',
+    height: '',
     image: null,
+    requiredNote: "KHONGCHOXEMHANG"
   });
-
+  
   const [categories, setCategories] = useState([]);
   const [addresses, setAddresses] = useState([]);
-  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
-  const [createdBookId, setCreatedBookId] = useState(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const userId = Cookies.get("UserId");
+  const userId = Cookies.get('UserId');
+  const [isBookFormVisible, setIsBookFormVisible] = useState(true);
+  const [previewImages, setPreviewImages] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          "https://rmrbdapi.somee.com/odata/BookCategory",
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
+        const response = await axios.get('https://rmrbdapi.somee.com/odata/BookCategory', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Token': '123-abc',
+          },
+        });
         setCategories(response.data || []);
       } catch (error) {
-        console.error("Lỗi khi tải danh mục", error);
+        console.error('Lỗi khi tải danh mục:', error);
         Swal.fire({
-          icon: "error",
-          title: "Không thể tải danh mục.",
-          text: error.message,
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Không thể tải danh mục.'
         });
       }
     };
 
     const fetchAddresses = async () => {
       try {
-        const response = await axios.get(
-          "https://rmrbdapi.somee.com/odata/CustomerAddress",
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
-        const filteredAddresses = response.data.filter(
-          (address) => address.accountId === parseInt(userId)
-        );
+        const response = await axios.get('https://rmrbdapi.somee.com/odata/CustomerAddress', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Token': '123-abc',
+          },
+        });
+        const filteredAddresses = response.data.filter(address => address.accountId === parseInt(userId));
         setAddresses(filteredAddresses);
       } catch (error) {
-        console.error("Lỗi khi tải địa chỉ:", error);
+        console.error('Lỗi khi tải địa chỉ:', error);
         Swal.fire({
-          icon: "error",
-          title: "Không thể tải địa chỉ.",
-          text: error.message,
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Không thể tải địa chỉ.'
         });
       }
     };
@@ -83,168 +79,196 @@ const AddBook = () => {
     fetchAddresses();
   }, [userId]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  const handleImageDrop = useCallback((acceptedFiles) => {
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxFiles = 10; // Số lượng tệp tối đa cho phép
 
-    // Define max limits
-    const maxValues = {
-      weight: 50000,
-      length: 200,
-      width: 200,
-      height: 200,
-    };
-
-    if (["weight", "length", "width", "height"].includes(name)) {
-      const numericValue = parseInt(value) || 0;
-      if (numericValue > maxValues[name]) {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: `${
-            name.charAt(0).toUpperCase() + name.slice(1)
-          } cannot exceed ${maxValues[name]}`,
-          confirmButtonText: "OK",
-        });
-        return; // Prevent setting value if it exceeds max
-      }
-      setBook((prev) => ({
-        ...prev,
-        [name]: numericValue,
-      }));
-    } else if (name === "price") {
-      const rawValue = value.replace(/[^0-9.]/g, "");
-      const formattedValue = rawValue
-        ? new Intl.NumberFormat().format(rawValue)
-        : "";
-      setBook((prev) => ({
-        ...prev,
-        price: formattedValue,
-      }));
-    } else {
-      setBook((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+    // Kiểm tra tổng số tệp (đã có + mới)
+    const totalFiles = (book.image?.length || 0) + acceptedFiles.length;
+    if (totalFiles > maxFiles) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: `Tối đa ${maxFiles} hình ảnh được phép`
+      });
+      return;
     }
-  };
 
-  const handleImageChange = (e) => {
-    const files = e.target.files;
-    const fileArray = Array.from(files); // Convert FileList to array
-    setBook((prev) => ({
-      ...prev,
-      image: fileArray, // Store the array of image
-    }));
-  };
-
-  const saveBook = async (e) => {
-    e.preventDefault();
-
-    // Hiển thị hộp thoại xác nhận trước khi lưu sách
-    const result = await Swal.fire({
-      title: "Bạn có chắc chắn muốn lưu sách này không?",
-      text: "Hành động này không thể hoàn tác!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Có, lưu sách!",
-      cancelButtonText: "Không, hủy bỏ",
+    const validFiles = acceptedFiles.filter(file => {
+      if (!validImageTypes.includes(file.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Loại tệp không hợp lệ',
+          text: `${file.name} không phải là loại hình ảnh hợp lệ (chỉ JPG, PNG hoặc GIF)`
+        });
+        return false;
+      }
+      if (file.size > maxSize) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Tệp quá lớn',
+          text: `${file.name} quá lớn (tối đa 5MB)`
+        });
+        return false;
+      }
+      return true;
     });
 
-    // Nếu người dùng chọn "Có, lưu sách!", tiếp tục lưu sách
-    if (result.isConfirmed) {
-      // Remove commas from the price before sending it to the backend
-      const rawPrice = parseInt(book.price.replace(/[^0-9]/g, "")); // Remove commas
+    if (validFiles.length > 0) {
+      // Cập nhật trạng thái sách với các tệp mới
+      setBook(prev => ({
+        ...prev,
+        image: prev.image ? [...prev.image, ...validFiles] : validFiles
+      }));
 
-      // Check if the price is zero, and if so, set it to 'Free'
-      if (rawPrice === 0) {
-        setBook((prev) => ({
-          ...prev,
-          price: "Free",
-        }));
-      }
-
-      // Check if the price is less than 1000 but not 'Free'
-      if (rawPrice < 1000 && rawPrice !== 0) {
-        Swal.fire({
-          icon: "error",
-          title: "Giá phải ít nhất 1000 đồng!",
-        });
-        return; // Prevent form submission
-      }
-
-      const bookData = {
-        ...book,
-        price: rawPrice === 0 ? "Free" : rawPrice, // Send price as raw number or 'Free'
-        createById: Cookies.get("UserId") || "",
-        status: "-1",
-        createDate: new Date().toISOString(),
-        bookOrders: [],
-        bookRates: [],
-        comments: [],
-        createBy: null,
-      };
-
-      try {
-        const response = await axios.post(
-          "https://rmrbdapi.somee.com/odata/book",
-          bookData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
-
-        if (response.status === 200 || response.status === 201) {
-          Swal.fire({
-            icon: "success",
-            title: "Thêm sách thành công!",
-          });
-          setCreatedBookId(response.data.bookId); // Save the newly created book ID
-          setShowImageUploadModal(true); // Open the image upload modal
-          resetForm();
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Lỗi khi thêm sách. Vui lòng thử lại.",
-          });
-        }
-      } catch (error) {
-        console.error(
-          "Lỗi khi lưu sách:",
-          error.response ? error.response.data : error.message
-        );
-        Swal.fire({
-          icon: "error",
-          title: "Lỗi khi lưu sách. Vui lòng thử lại.",
-          text: error.message,
-        });
-      }
-    } else {
-      // Nếu người dùng chọn "Không, hủy bỏ", không làm gì cả
-      console.log("Hành động lưu sách bị hủy bỏ.");
+      // Tạo và lưu trữ URL xem trước cho các hình ảnh mới
+      const newPreviews = validFiles.map(file => ({
+        url: URL.createObjectURL(file),
+        name: file.name
+      }));
+      
+      setPreviewImages(prev => [...prev, ...newPreviews]);
+      
+      console.log(`Đã thêm ${validFiles.length} hình ảnh mới. Tổng cộng: ${totalFiles}`);
     }
+  }, [book.image]);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: handleImageDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
+    },
+    multiple: true, // Cho phép chọn nhiều tệp
+    maxSize: 5 * 1024 * 1024 // 5MB
+  });
+
+  const removeImage = useCallback((index) => {
+    setBook(prev => {
+      const newImages = [...(prev.image || [])];
+      newImages.splice(index, 1);
+      return {
+        ...prev,
+        image: newImages
+      };
+    });
+
+    setPreviewImages(prev => {
+      const newPreviews = [...prev];
+      if (newPreviews[index]?.url) {
+        URL.revokeObjectURL(newPreviews[index].url);
+      }
+      newPreviews.splice(index, 1);
+      return newPreviews;
+    });
+  }, []);
+
+  // Thêm hiệu ứng dọn dẹp
+  useEffect(() => {
+    return () => {
+      // Dọn dẹp URL khi thành phần bị hủy
+      previewImages.forEach(image => {
+        if (image?.url) {
+          URL.revokeObjectURL(image.url);
+        }
+      });
+    };
+  }, [previewImages]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Xác thực các trường biểu mẫu
+    const safeTrim = (value) => value?.trim() || '';
+    const safeNumber = (value) => Number(value) || 0;
+
+    const bookData = {
+      bookName: safeTrim(book.bookName),
+      description: safeTrim(book.description),
+      author: safeTrim(book.author),
+      price: safeNumber(book.price?.replace(/[,\.]/g, '')),
+      unitInStock: safeNumber(book.unitInStock),
+      categoryId: safeNumber(book.categoryId),
+      isbn: safeTrim(book.isbn),
+      weight: safeNumber(book.weight),
+      length: safeNumber(book.length),
+      width: safeNumber(book.width),
+      height: safeNumber(book.height),
+      senderAddressId: safeNumber(book.senderAddressId)
+    };
+
+    // Xác thực các trường bắt buộc
+    const requiredFields = {
+      bookName: 'Tên sách',
+      author: 'Tên tác giả',
+      description: 'Mô tả',
+      price: 'Giá',
+      categoryId: 'Danh mục',
+      senderAddressId: 'Địa chỉ gửi',
+      isbn: 'ISBN'
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key, label]) => !bookData[key])
+      .map(([_, label]) => label);
+
+    if (missingFields.length > 0) {
+      const errorMessage = `Vui lòng điền vào các trường bắt buộc sau: ${missingFields.join(', ')}`;
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: errorMessage
+      });
+      return;
+    }
+
+    // Thêm xác thực cụ thể cho senderAddressId
+    if (!selectedAddress || !book.senderAddressId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Vui lòng chọn địa chỉ gửi'
+      });
+      return;
+    }
+
+    // Nếu xác thực thành công, hiển thị phần tải lên hình ảnh
+    setIsBookFormVisible(false);
   };
 
   const resetForm = () => {
-    setBook({
-      createById: "",
-      categoryId: "",
-      senderAddressId: "",
-      bookName: "",
-      description: "",
-      price: "",
-      unitInStock: 0,
-      createDate: "",
-      isbn: "",
-      weight: 0,
-      length: 0,
-      width: 0,
-      height: 0,
-      image: null,
+    // Xóa URL xem trước
+    previewImages.forEach(image => {
+      if (image.url) {
+        URL.revokeObjectURL(image.url);
+      }
     });
+    setPreviewImages([]);
+
+    // Đặt lại trạng thái địa chỉ đã chọn
     setSelectedAddress(null);
+
+    // Đặt lại tất cả dữ liệu sách bao gồm hình ảnh
+    setBook({
+      createById: '',
+      categoryId: '',
+      senderAddressId: '',
+      bookName: '',
+      author: '',
+      description: '',
+      price: '',
+      unitInStock: '1',
+      createDate: '',
+      isbn: '',
+      weight: '',
+      length: '',
+      width: '',
+      height: '',
+      image: null
+    });
+
+    // Hiển thị biểu mẫu sách
+    setIsBookFormVisible(true);
   };
 
   const handleAddressSelect = (address) => {
@@ -256,366 +280,722 @@ const AddBook = () => {
     setShowAddressModal(false);
   };
 
+  const numberInputClass = `peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                           focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                           transition-all duration-200 outline-none
+                           placeholder-transparent
+                           [appearance:textfield]
+                           [&::-webkit-outer-spin-button]:appearance-none
+                           [&::-webkit-inner-spin-button]:appearance-none`;
+
+  // Định nghĩa handleImageUpload trước khi sử dụng trong JSX
+  const handleImageUpload = useCallback(async () => {
+    if (!book.image || book.image.length === 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Không có hình ảnh',
+        text: 'Vui lòng chọn ít nhất một hình ảnh'
+      });
+      return;
+    }
+
+    try {
+      // Hiển thị trạng thái tải lên
+      Swal.fire({
+        title: 'Đang tải lên...',
+        text: 'Đang tải lên sách và hình ảnh...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const safeTrim = (value) => value?.trim() || '';
+      const safeNumber = (value) => Number(value) || 0;
+
+      // Format book data with proper types and required fields
+      const bookData = {
+        bookName: book.bookName?.trim(),
+        description: book.description?.trim(),
+        author: book.author?.trim(),
+        price: parseFloat(book.price?.replace(/[,\.]/g, '')),
+        unitInStock: parseInt(book.unitInStock, 10),
+        status: -1,
+        createById: parseInt(userId, 10),
+        categoryId: parseInt(book.categoryId, 10),
+        isbn: book.isbn?.trim(),
+        weight: parseFloat(book.weight) || 0,
+        length: parseFloat(book.length) || 0,
+        width: parseFloat(book.width) || 0,
+        height: parseFloat(book.height) || 0,
+        senderAddressId: parseInt(book.senderAddressId, 10),
+        createDate: new Date().toISOString(),
+        requiredNote: "KHONGCHOXEMHANG" // Add this required field
+      };
+
+      // Validate that all required numeric fields are actual numbers
+      const numericFields = ['price', 'unitInStock', 'createById', 'categoryId', 'senderAddressId'];
+      for (const field of numericFields) {
+        if (isNaN(bookData[field])) {
+          throw new Error(`${field} must be a valid number`);
+        }
+      }
+
+      // Chuẩn bị FormData hình ảnh trước để đảm bảo chúng ta có hình ảnh hợp lệ
+      const formData = new FormData();
+      book.image.forEach((image) => formData.append('image', image));
+
+      // Đầu tiên, thử tải lên hình ảnh đến một vị trí tạm thời hoặc xác thực chúng
+      // Đây là một chỗ giữ chỗ - bạn có thể cần điều chỉnh dựa trên khả năng API của bạn
+      try {
+        // Xác thực hình ảnh (kích thước, định dạng, v.v.)
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const invalidImages = book.image.filter(img => !validImageTypes.includes(img.type));
+        
+        if (invalidImages.length > 0) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Loại tệp không hợp lệ',
+            text: 'Vui lòng chỉ tải lên hình ảnh JPG, PNG hoặc GIF'
+          });
+          return;
+        }
+
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const oversizedImages = book.image.filter(img => img.size > maxSize);
+        
+        if (oversizedImages.length > 0) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Tệp quá lớn',
+            text: 'Một số hình ảnh quá lớn. Kích thước tối đa là 5MB mỗi hình ảnh'
+          });
+          return;
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Lỗi xác thực hình ảnh'
+        });
+        return;
+      }
+
+      // Bây giờ tiến hành tạo sách và tải lên hình ảnh
+      try {
+        // Tải lên dữ liệu sách
+        const bookResponse = await axios.post(
+          'https://rmrbdapi.somee.com/odata/Book',
+          bookData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Token': '123-abc'
+            }
+          }
+        );
+
+        if (bookResponse?.status === 201 || bookResponse?.status === 200) {
+          const newBookId = bookResponse.data.bookId;
+          const totalImages = book.image.length;
+          let successfulUploads = 0;
+
+          // Tải lên hình ảnh từng cái một
+          try {
+            // Hiển thị thông báo tải lên
+            const loadingToast = Swal.fire({
+              title: 'Đang tải lên...',
+              text: `Đang tải lên hình ảnh (0/${totalImages})...`,
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
+            // Tải lên từng hình ảnh tuần tự
+            for (let i = 0; i < book.image.length; i++) {
+              const formData = new FormData();
+              formData.append('image', book.image[i]);
+
+              console.log(`Đang tải lên hình ảnh ${i + 1}/${totalImages}: ${book.image[i].name}`);
+
+              const imageResponse = await axios.post(
+                `https://rmrbdapi.somee.com/odata/UploadImage/Book/${newBookId}`,
+                formData,
+                { 
+                  headers: { 
+                    'Content-Type': 'multipart/form-data',
+                    'Token': '123-abc'
+                  }
+                }
+              );
+
+              if (imageResponse?.status === 200 || imageResponse?.status === 201) {
+                successfulUploads++;
+                // Cập nhật thông báo tải lên
+                Swal.update(loadingToast, {
+                  title: `Đang tải lên hình ảnh (${successfulUploads}/${totalImages})...`
+                });
+              } else {
+                console.error(`Không thể tải lên hình ảnh ${i + 1}`);
+              }
+            }
+
+            // Đóng thông báo tải lên
+            Swal.close(loadingToast);
+
+            if (successfulUploads === totalImages) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: `Đã tải lên thành công sách với ${successfulUploads} hình ảnh!`
+              });
+              resetForm();
+              setIsBookFormVisible(true);
+            } else if (successfulUploads > 0) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Thành công một phần',
+                text: `Đã tải lên ${successfulUploads} trong số ${totalImages} hình ảnh`
+              });
+              resetForm();
+              setIsBookFormVisible(true);
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Tải lên thất bại',
+                text: 'Không thể tải lên bất kỳ hình ảnh nào'
+              });
+              // Tùy chọn xử lý trường hợp không có hình ảnh nào được tải lên
+            }
+
+          } catch (uploadError) {
+            console.error('Lỗi tải lên hình ảnh:', uploadError);
+            console.error('Phản hồi lỗi:', uploadError.response?.data);
+            
+            if (successfulUploads > 0) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Thành công một phần',
+                text: `Thành công một phần: đã tải lên ${successfulUploads} trong số ${totalImages} hình ảnh`
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Tải lên thất bại',
+                text: 'Không thể tải lên hình ảnh. Sách đã được tạo nhưng hình ảnh không thể tải lên.'
+              });
+            }
+            
+            // Đặt lại biểu mẫu và quay lại biểu mẫu sách
+            resetForm();
+            setIsBookFormVisible(true);
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Lỗi',
+            text: 'Không thể tạo sách. Vui lòng thử lại.'
+          });
+        }
+      } catch (error) {
+        console.error('Error details:', error.response?.data);
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: error.response?.data?.message || 'Lỗi tải lên sách và hình ảnh.'
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: error.response?.data?.message || 'Lỗi tải lên sách và hình ảnh.'
+      });
+    }
+  }, [book, userId]);
+
+  // Cập nhật trình xử lý nút Quay lại
+  const handleBack = () => {
+    // Xóa hình ảnh xem trước và thu hồi URL đối tượng
+    previewImages.forEach(image => {
+      if (image.url) {
+        URL.revokeObjectURL(image.url);
+      }
+    });
+    setPreviewImages([]);
+    
+    // Đặt lại trạng thái hình ảnh
+    setBook(prev => ({
+      ...prev,
+      image: null
+    }));
+    
+    // Hiển thị biểu mẫu sách
+    setIsBookFormVisible(true);
+  };
+
   return (
-    <>
-      <Container
-        className="my-5"
-        style={{
-          backgroundColor: "#f0f0f0",
-          padding: "30px",
-          borderRadius: "8px",
-        }}
-      >
-        <Form onSubmit={saveBook}>
-          {/* Book Name Section */}
-          {/* Submit Button */}
-          <Row className="mb-6">
-            <Col className="flex justify-end">
-              <Button
-                type="submit"
-                className="py-2 px-8 text-lg w-auto btn-sm bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-md shadow-lg hover:from-orange-500 hover:to-orange-700 transition duration-300"
-              >
-                <span className="mr-2">
-                  <i className="fas fa-save"></i>
-                </span>
-                Lưu sách
-              </Button>
-            </Col>
-            <h1 className="text-4xl font-bold mb-6 flex items-center">
-              <span className="text-orange-500 mr-2 text-5xl">+</span> Thêm sách
-            </h1>
-            <p className="text-gray-600 mb-8">
-              Tải lên sách thật dễ dàng! Thêm mục yêu thích của bạn, chia sẻ với
-              bạn bè, gia đình hoặc cộng đồng RMRBD.
-            </p>
-          </Row>
-          <hr className="my-6 border-t-2 border-gray-300" />
-          <Row className="mb-6">
-            <Col md={6}>
-              <Form.Group controlId="bookName">
-                <Form.Label className="text-lg font-medium">
-                  Tên sách
-                </Form.Label>
-                <Form.Control
-                  type="text"
-                  id="bookName"
-                  name="bookName"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.bookName}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Tên sách của bạn là gì"
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group controlId="author">
-                <Form.Label className="text-lg font-medium">
-                  Tên tác giả
-                </Form.Label>
-                <Form.Control
-                  type="text"
-                  id="author"
-                  name="author"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.author}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Tác giả của cuốn sách là ai"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <hr className="my-6 border-t-2 border-gray-300" />
-          {/* Category Section */}
-          <Row className="mb-6">
-            <Col md={6}>
-              <Form.Group controlId="categoryId">
-                <Form.Label className="text-lg font-medium">
-                  Thể loại
-                </Form.Label>
-                <Form.Control
-                  as="select"
-                  id="categoryId"
-                  name="categoryId"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.categoryId}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Hãy chọn thể loại cho cuốn sách này</option>
-                  {categories.length > 0 ? (
-                    categories.map((category) => (
-                      <option
-                        key={category.categoryId}
-                        value={category.categoryId}
-                      >
+    <div 
+    >
+      <Container className="my-8 px-4 max-w-4xl mx-auto relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {isBookFormVisible ? (
+            <motion.div
+              key="bookForm"
+              initial={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "-100%" }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6"
+            >
+              <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+                Thêm Sách Mới
+              </h2>
+
+              <Form onSubmit={handleSubmit} className="space-y-4">
+                {/* Phần Tên Sách & Tác Giả */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="relative">
+                    <Form.Control
+                      type="text"
+                      id="bookName"
+                      name="bookName"
+                      value={book.bookName || ''}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        bookName: e.target.value
+                      }))}
+                      required
+                      className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                                transition-all duration-200 outline-none
+                                placeholder-transparent"
+                      placeholder="Tên Sách"
+                    />
+                    <Form.Label
+                      htmlFor="bookName"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                transition-all duration-200 
+                                peer-placeholder-shown:text-base 
+                                peer-placeholder-shown:text-gray-400
+                                peer-placeholder-shown:top-3.5
+                                peer-focus:-top-2.5 
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600
+                                bg-white px-2
+                                pointer-events-none"
+                    >
+                      Tên Sách
+                    </Form.Label>
+                  </div>
+
+                  <div className="relative">
+                    <Form.Control
+                      type="text"
+                      id="author"
+                      name="author"
+                      value={book.author || ''}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        author: e.target.value
+                      }))}
+                      required
+                      className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                                transition-all duration-200 outline-none
+                                placeholder-transparent"
+                      placeholder="Tên Tác Giả"
+                    />
+                    <Form.Label
+                      htmlFor="author"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                transition-all duration-200 
+                                peer-placeholder-shown:text-base 
+                                peer-placeholder-shown:text-gray-400
+                                peer-placeholder-shown:top-3.5
+                                peer-focus:-top-2.5 
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600
+                                bg-white px-2
+                                pointer-events-none"
+                    >
+                      Tên Tác Giả
+                    </Form.Label>
+                  </div>
+                </div>
+
+                {/* Lựa Chọn Danh Mục */}
+                <div className="relative">
+                  <Form.Select
+                    id="categoryId"
+                    name="categoryId"
+                    value={book.categoryId || ''}
+                    onChange={(e) => setBook(prev => ({
+                      ...prev,
+                      categoryId: e.target.value
+                    }))}
+                    required
+                    className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                              transition-all duration-200 outline-none
+                              appearance-none"
+                  >
+                    <option value="">Chọn Danh Mục</option>
+                    {categories.map((category) => (
+                      <option key={category.categoryId} value={category.categoryId}>
                         {category.name}
                       </option>
-                    ))
-                  ) : (
-                    <option>Hiện tại không có phân loại để chọn</option>
-                  )}
-                </Form.Control>
-              </Form.Group>
-            </Col>
+                    ))}
+                  </Form.Select>
+                  <Form.Label
+                    className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                              bg-white px-2"
+                  >
+                    Danh Mục
+                  </Form.Label>
+                </div>
 
-            <Col md={6}>
-              <Form.Group controlId="isbn">
-                <Form.Label className="text-lg font-medium">Mã ISBN</Form.Label>
-                <Form.Control
-                  type="text"
-                  id="isbn"
-                  name="isbn"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.isbn}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Nhập mã ISBN"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <hr className="my-6 border-t-2 border-gray-300" />
-          {/* Description Section */}
-          <Row className="mb-6">
-            <Col md={12}>
-              <Form.Group controlId="description">
-                <Form.Label className="text-lg font-medium">Mô tả</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  id="description"
-                  name="description"
-                  rows={3}
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.description}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Chia sẻ suy nghĩ của bạn về cuốn sách này, điều gì đã làm cho bạn muốn chia sẻ cuốn sách này đến với mọi người"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <hr className="my-6 border-t-2 border-gray-300" />
-          {/* Price & Units in Stock Section */}
-          <Row className="mb-6">
-            <Col md={6}>
-              <Form.Group controlId="price">
-                <Form.Label className="text-lg font-medium">Giá cả</Form.Label>
-                <Form.Control
-                  type="text"
-                  id="price"
-                  name="price"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.price}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Nhập giá sách"
-                />
-              </Form.Group>
-            </Col>
+                {/* Mô Tả */}
+                <div className="relative">
+                  <Form.Control
+                    as="textarea"
+                    id="description"
+                    name="description"
+                    value={book.description || ''}
+                    onChange={(e) => setBook(prev => ({
+                      ...prev,
+                      description: e.target.value
+                    }))}
+                    required
+                    className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                              transition-all duration-200 outline-none
+                              placeholder-transparent"
+                    placeholder="Mô Tả"
+                  />
+                  <Form.Label
+                    htmlFor="description"
+                    className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                              transition-all duration-200 
+                              peer-placeholder-shown:text-base 
+                              peer-placeholder-shown:text-gray-400
+                              peer-placeholder-shown:top-3.5
+                              peer-focus:-top-2.5 
+                              peer-focus:text-sm
+                              peer-focus:text-gray-600
+                              bg-white px-2
+                              pointer-events-none"
+                  >
+                    Mô Tả
+                  </Form.Label>
+                </div>
 
-            <Col md={6}>
-              <Form.Group controlId="unitInStock">
-                <Form.Label className="text-lg font-medium">
-                  Số lượng
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  id="unitInStock"
-                  name="unitInStock"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.unitInStock}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Nhập số lượng sách"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <hr className="my-6 border-t-2 border-gray-300" />
-          {/* Dimensions Section */}
-          <Row className="mb-6">
-            <Col md={3}>
-              <Form.Group controlId="weight">
-                <Form.Label className="text-lg font-medium">
-                  Cân Nặng
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  id="weight"
-                  name="weight"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.weight}
-                  onChange={handleInputChange}
-                  max="50000"
-                  required
-                  placeholder="Nhập cân nặng (g)"
-                />
-              </Form.Group>
-            </Col>
+                {/* Phần Giá & Kho */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="relative">
+                    <Form.Control
+                      type="text"
+                      id="price"
+                      name="price"
+                      value={book.price || ''}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        price: e.target.value
+                      }))}
+                      required
+                      className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                                transition-all duration-200 outline-none
+                                placeholder-transparent"
+                      placeholder="Giá"
+                    />
+                    <Form.Label
+                      htmlFor="price"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                transition-all duration-200 
+                                peer-placeholder-shown:text-base 
+                                peer-placeholder-shown:text-gray-400
+                                peer-placeholder-shown:top-3.5
+                                peer-focus:-top-2.5 
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600
+                                bg-white px-2
+                                pointer-events-none"
+                    >
+                      Giá (VND)
+                    </Form.Label>
+                  </div>
 
-            <Col md={3}>
-              <Form.Group controlId="length">
-                <Form.Label className="text-lg font-medium">
-                  Chiều dài
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  id="length"
-                  name="length"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.length}
-                  onChange={handleInputChange}
-                  max="200"
-                  required
-                  placeholder="Nhập chiều dài (cm)"
-                />
-              </Form.Group>
-            </Col>
+                  <div className="relative">
+                    <Form.Control
+                      type="number"
+                      id="unitInStock"
+                      name="unitInStock"
+                      value={book.unitInStock || '1'}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        unitInStock: e.target.value
+                      }))}
+                      required
+                      min="1"
+                      className={`${numberInputClass} peer`}
+                      placeholder="Số Lượng Trong Kho"
+                    />
+                    <Form.Label
+                      htmlFor="unitInStock"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                transition-all duration-200 
+                                peer-placeholder-shown:text-base 
+                                peer-placeholder-shown:text-gray-400
+                                peer-placeholder-shown:top-3.5
+                                peer-focus:-top-2.5 
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600
+                                bg-white px-2
+                                pointer-events-none"
+                    >
+                      Số Lượng Trong Kho
+                    </Form.Label>
+                  </div>
+                </div>
 
-            <Col md={3}>
-              <Form.Group controlId="width">
-                <Form.Label className="text-lg font-medium">Bề Rộng</Form.Label>
-                <Form.Control
-                  type="number"
-                  id="width"
-                  name="width"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.width}
-                  onChange={handleInputChange}
-                  max="200"
-                  required
-                  placeholder="Nhập bề rộng (cm)"
-                />
-              </Form.Group>
-            </Col>
+                {/* Phần Kích Thước */}
+                <div className="grid md:grid-cols-4 gap-4">
+                  {['weight', 'length', 'width', 'height'].map((dimension) => (
+                    <div key={dimension} className="relative">
+                      <Form.Control
+                        type="number"
+                        id={dimension}
+                        name={dimension}
+                        value={book[dimension] || ''}
+                        onChange={(e) => setBook(prev => ({
+                          ...prev,
+                          [dimension]: e.target.value
+                        }))}
+                        required
+                        className={`${numberInputClass} peer`}
+                        placeholder={dimension}
+                      />
+                      <Form.Label
+                        htmlFor={dimension}
+                        className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                  transition-all duration-200 
+                                  peer-placeholder-shown:text-base 
+                                  peer-placeholder-shown:text-gray-400
+                                  peer-placeholder-shown:top-3.5
+                                  peer-focus:-top-2.5 
+                                  peer-focus:text-sm
+                                  peer-focus:text-gray-600
+                                  bg-white px-2
+                                  pointer-events-none"
+                      >
+                        {dimension.charAt(0).toUpperCase() + dimension.slice(1)} (cm)
+                      </Form.Label>
+                    </div>
+                  ))}
+                </div>
 
-            <Col md={3}>
-              <Form.Group controlId="height">
-                <Form.Label className="text-lg font-medium">Độ cao</Form.Label>
-                <Form.Control
-                  type="number"
-                  id="height"
-                  name="height"
-                  className="form-control-sm border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-300 p-2 rounded-md"
-                  value={book.height}
-                  onChange={handleInputChange}
-                  max="200"
-                  required
-                  placeholder="Nhập độ cao (cm)"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <hr className="my-6 border-t-2 border-gray-300" />
-          {/* Select Address Button */}
-          <Form.Label className="text-lg font-medium">Địa chỉ</Form.Label>
-          <Row className="mb-6">
-            <Col>
-              <Button
-                variant="outline"
-                onClick={() => setShowAddressModal(true)}
-                className="py-2 px-4 text-sm bg-white border border-black text-black hover:bg-gray-100 w-auto"
-              >
-                {selectedAddress
-                  ? `${selectedAddress.addressDetail} - ${selectedAddress.phoneNumber}`
-                  : "Chọn địa chỉ"}
-              </Button>
-            </Col>
-          </Row>
-        </Form>
+                {/* Trường ISBN */}
+                <div className="relative">
+                  <Form.Control
+                    type="text"
+                    id="isbn"
+                    name="isbn"
+                    value={book.isbn || ''}
+                    onChange={(e) => setBook(prev => ({
+                      ...prev,
+                      isbn: e.target.value
+                    }))}
+                    required
+                    className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                              transition-all duration-200 outline-none
+                              placeholder-transparent"
+                    placeholder="ISBN"
+                  />
+                  <Form.Label
+                    htmlFor="isbn"
+                    className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                              transition-all duration-200 
+                              peer-placeholder-shown:text-base 
+                              peer-placeholder-shown:text-gray-400
+                              peer-placeholder-shown:top-3.5
+                              peer-focus:-top-2.5 
+                              peer-focus:text-sm
+                              peer-focus:text-gray-600
+                              bg-white px-2
+                              pointer-events-none"
+                  >
+                    ISBN
+                  </Form.Label>
+                </div>
+
+                {/* Lựa Chọn Địa Chỉ - cập nhật kiểu dáng */}
+                <Button
+                  onClick={() => setShowAddressModal(true)}
+                  className="bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 font-medium 
+                            px-6 py-2 rounded-lg transition-all duration-200 
+                            border-2 border-gray-200 hover:border-gray-300
+                            shadow-sm hover:shadow
+                            transform hover:-translate-y-0.5"
+                >
+                  {selectedAddress 
+                    ? `${selectedAddress.addressDetail} - ${selectedAddress.phoneNumber}`
+                    : 'Chọn Địa Chỉ'}
+                </Button>
+
+                {/* Nút Gửi */}
+                <div className="flex justify-end mt-6">
+                  <Button
+                    type="submit"
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold 
+                              px-6 py-2 rounded-lg transition-all duration-200 
+                              transform hover:-translate-y-0.5"
+                  >
+                    Lưu Sách
+                  </Button>
+                </div>
+              </Form>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="imageUpload"
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6"
+            >
+              <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+                Tải Lên Hình Ảnh Sách
+              </h2>
+              
+              <div className="space-y-6">
+                <div className="w-full p-12 border-2 border-dashed border-gray-300 rounded-lg 
+                              hover:border-blue-500 transition-colors duration-200
+                              min-h-[300px] flex items-center justify-center">
+                  <div {...getRootProps()} className="text-center w-full">
+                    <input {...getInputProps()} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4"
+                    >
+                      <div className="flex justify-center">
+                        <svg 
+                          className="w-16 h-16 text-gray-400" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth="2" 
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-gray-600 text-lg">
+                        Kéo và thả hình ảnh vào đây
+                      </p>
+                      <p className="text-gray-400">
+                        hoặc nhấp để chọn tệp
+                      </p>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {previewImages.length > 0 && (
+                  <motion.div 
+                    className="grid grid-cols-3 gap-4 mt-6"
+                    layout
+                  >
+                    {previewImages.map((image, index) => (
+                      <motion.div
+                        key={image.url}
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="relative group aspect-square bg-gray-100 rounded-lg"
+                      >
+                        <img
+                          src={image.url}
+                          alt={image.name || `Hình ảnh ${index + 1}`}
+                          className="w-full h-full object-cover rounded-lg"
+                          loading="lazy"
+                        />
+                        <motion.button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-3 -right-3 w-7 h-7 
+                                   bg-red-500 hover:bg-red-600
+                                   text-white text-lg font-bold
+                                   rounded-full flex items-center justify-center
+                                   shadow-lg transform hover:scale-110
+                                   transition-all duration-200
+                                   cursor-pointer
+                                   z-50"
+                          aria-label={`Xóa ${image.name || `hình ảnh ${index + 1}`}`}
+                        >
+                          ×
+                        </motion.button>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 
+                                      transition-opacity duration-200 rounded-lg">
+                          <div className="absolute bottom-2 left-2 right-2 text-white text-sm truncate px-2">
+                            {image.name || `Hình ảnh ${index + 1}`}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end space-x-4">
+                <Button
+                  variant="secondary"
+                  onClick={handleBack}
+                  className="px-6 py-2"
+                >
+                  Quay Lại
+                </Button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleImageUpload}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg"
+                >
+                  Tải Lên Hình Ảnh
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Container>
-      {/* Address Modal */}
-      <Modal show={showAddressModal} onHide={() => setShowAddressModal(false)}>
+
+      {/* Modal Địa Chỉ */}
+      <Modal show={showAddressModal} onHide={() => setShowAddressModal(false)} className="custom-modal">
         <Modal.Header closeButton>
-          <Modal.Title>Hãy chọn địa chỉ đã có của bạn</Modal.Title>
+          <Modal.Title>Chọn Địa Chỉ</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ul className="list-unstyled">
-            {addresses.map((address) => (
+          <ul className="address-list">
+            {addresses.map(address => (
               <li
                 key={address.addressId}
-                className="cursor-pointer border-b border-gray-300 py-2"
+                className="address-item"
                 onClick={() => handleAddressSelect(address)}
               >
-                <div>{address.addressDetail}</div>
-                <div>{address.phoneNumber}</div>
+                <div className="address-detail">{address.addressDetail}</div>
+                <div className="address-phone">{address.phoneNumber}</div>
               </li>
             ))}
           </ul>
         </Modal.Body>
       </Modal>
-      {/* Address Modal */}
-      <Modal
-        show={showImageUploadModal}
-        onHide={() => setShowImageUploadModal(false)}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Upload Book Image(s)</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Group controlId="image">
-            <Form.Label>Upload Image(s)</Form.Label>
-            <Form.Control
-              type="file"
-              id="image"
-              name="image"
-              accept="image/*"
-              multiple // Allow multiple file selection
-              onChange={handleImageChange}
-            />
-          </Form.Group>
-          <Button
-            variant="primary"
-            className="mt-3"
-            onClick={async () => {
-              const formData = new FormData();
-              book.image.forEach((image) => formData.append("image", image));
-
-              try {
-                const response = await axios.post(
-                  `https://rmrbdapi.somee.com/odata/UploadImage/Book/${createdBookId}`,
-                  formData,
-                  {
-                    headers: {
-                      "Content-Type": "multipart/form-data",
-                      Token: "123-abc",
-                    },
-                  }
-                );
-                if (response.status === 200 || response.status === 201) {
-                  Swal.fire({
-                    icon: "success",
-                    title: "Thành công",
-                    text: "Cập nhật ảnh thành công",
-                    confirmButtonText: "OK",
-                  });
-                  setShowImageUploadModal(false); // Close modal
-                } else {
-                  Swal.fire({
-                    icon: "error",
-                    title: "Thất bại",
-                    text: "Thất bại khi tải ảnh.",
-                    confirmButtonText: "OK",
-                  });
-                }
-              } catch (error) {
-                console.error("Error uploading image:", error);
-                Swal.fire({
-                  icon: "error",
-                  title: "Thất bại",
-                  text: "Thất bại khi tải ảnh.",
-                  confirmButtonText: "OK",
-                });
-              }
-            }}
-          >
-            Upload
-          </Button>
-        </Modal.Body>
-      </Modal>
-    </>
+    </div>
   );
 };
 

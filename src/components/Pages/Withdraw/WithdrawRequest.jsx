@@ -120,7 +120,7 @@ const WithDrawRequest = () => {
                                     </span>Danh sách yêu cầu</button>
                                 </div>
                                 <form onSubmit={handleSubmit}>
-                                    <p className="card-text font-semibold text-xl mb-2">Tài khoản khả dụng: <span className='text-2xl text-green-500'>{account.coin - amount} XU</span></p>
+                                    <p className="card-text font-semibold text-xl mb-2">Tài khoản khả dụng: <span className='text-2xl text-green-500'>{account.coin - amount} <img src="/images/icon/dollar.png" alt=" " className='h-8 w-8 inline-block' /></span></p>
                                     <div className="form-group font-medium text-red-500">
                                         <label htmlFor="amount">Số xu muốn rút:</label>
                                         <input type="number" className="form-control" id="amount" value={amount} min="0" onChange={(event) => setAmount(event.target.value)} />
