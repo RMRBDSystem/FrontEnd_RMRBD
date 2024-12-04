@@ -14,8 +14,8 @@ import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../AccountProfile/Sidebar";
 
-const BookList = () => {
-  const [Books, setBooks] = useState([]);
+const EbookList = () => {
+  const [Ebooks, setEbooks] = useState([]);
   const [accountId, setAccountID] = useState("");
   const [loading, setLoading] = useState(true);
   const [showFilter, setShowFilter] = useState(false);
@@ -28,40 +28,40 @@ const BookList = () => {
   }, []);
   useEffect(() => {
     if (accountId) {
-      fetchBooks(); // Fetch data only when accountId is available
+      fetchEbooks(); // Fetch data only when accountId is available
     }
   }, [accountId]);
-  const fetchBooks = async () => {
-    //https://rmrbdapi.somee.com/odata/Book?$filter=createbyid eq ${accountId}
+  const fetchEbooks = async () => {
+    //https://rmrbdapi.somee.com/odata/Ebook?$filter=createbyid eq ${accountId}
     try {
       const response = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Book?$filter=createbyid eq ${accountId}`,
+        `https://rmrbdapi.somee.com/odata/Ebook?$filter=createbyid eq ${accountId}`,
         {
           headers: { "Content-Type": "application/json", token: "123-abc" },
         }
       );
-      setBooks(response.data);
+      setEbooks(response.data);
     } catch (error) {
-      console.error("Error fetching Books:", error);
+      console.error("Error fetching Ebooks:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBooks();
+    fetchEbooks();
   }, []);
 
-  const handleDetails = (bookId) => {
-    navigate(`/book-list-customer/${bookId}`);
+  const handleDetails = (EbookId) => {
+    navigate(`/Ebook-list-customer/${EbookId}`);
   };
 
-  const handleEdit = (bookId) => {
-    navigate(`/edit-book/${bookId}`);
+  const handleEdit = (EbookId) => {
+    navigate(`/edit-Ebook/${EbookId}`);
   };
 
-  const handleAddBook = () => {
-    navigate("/add-book-customer"); // Navigate to the add book page
+  const handleAddEbook = () => {
+    navigate("/add-ebook-customer"); // Navigate to the add Ebook page
   };
 
   // Columns for DataTable
@@ -72,8 +72,8 @@ const BookList = () => {
       sortable: true,
     },
     {
-      name: "Tên sách",
-      selector: (row) => row.bookName || "Unknown",
+      name: "Tên sách điện tử",
+      selector: (row) => row.ebookName || "Unknown",
       sortable: true,
       filterable: true,
     },
@@ -81,8 +81,8 @@ const BookList = () => {
       name: "Ảnh",
       selector: (row) => (
         <img
-          src={row.images?.[0]?.imageUrl || ""}
-          alt="Book preview"
+          src={row.imageUrl || ""}
+          alt="Ebook preview"
           className="w-16 h-16 object-cover rounded-md"
         />
       ),
@@ -123,7 +123,7 @@ const BookList = () => {
           {/* Edit Icon */}
           <button
             className="btn btn-link"
-            onClick={() => handleEdit(row.bookId)}
+            onClick={() => handleEdit(row.EbookId)}
           >
             <FaRegEdit
               style={{ color: "#28a745", fontSize: "24px" }}
@@ -134,7 +134,7 @@ const BookList = () => {
           {/* Info Icon */}
           <button
             className="btn btn-link"
-            onClick={() => handleDetails(row.bookId)}
+            onClick={() => handleDetails(row.EbookId)}
           >
             <FaInfoCircle
               style={{ color: "#007bff", fontSize: "24px" }}
@@ -147,11 +147,11 @@ const BookList = () => {
     },
   ];
 
-  // Filter books based on the filters applied (name and status)
-  const filteredBooks = Books.filter((book) => {
+  // Filter Ebooks based on the filters applied (name and status)
+  const filteredEbooks = Ebooks.filter((ebook) => {
     return (
-      book.bookName.toLowerCase().includes(nameFilter.toLowerCase()) &&
-      (statusFilter === "" || book.status.toString() === statusFilter)
+      ebook.ebookName.toLowerCase().includes(nameFilter.toLowerCase()) &&
+      (statusFilter === "" || ebook.status.toString() === statusFilter)
     );
   });
 
@@ -164,15 +164,15 @@ const BookList = () => {
           className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl"
           style={{ minWidth: "1000px" }}
         >
-          {/* Add Book Button */}
+          {/* Add Ebook Button */}
 
           <div className="mb-4 flex justify-end">
             <button
-              onClick={handleAddBook}
+              onClick={handleAddEbook}
               className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 flex items-center"
             >
               <FaPlusCircle className="mr-2" />
-              Thêm sách
+              Thêm sách điện tử
             </button>
           </div>
           <div className="mb-4 flex items-center">
@@ -186,7 +186,7 @@ const BookList = () => {
           </div>
           {showFilter && (
             <div className="mb-4 flex flex-wrap items-center gap-4 bg-gray-100 p-4 rounded-md">
-              {/* Filter by Book Name */}
+              {/* Filter by Ebook Name */}
               <input
                 type="text"
                 placeholder="Tìm kiếm theo tên sách"
@@ -220,7 +220,7 @@ const BookList = () => {
           <DataTable
             title="Danh sách sách"
             columns={columns}
-            data={filteredBooks}
+            data={filteredEbooks}
             progressPending={loading}
             pagination
             responsive
@@ -233,4 +233,4 @@ const BookList = () => {
   );
 };
 
-export default BookList;
+export default EbookList;

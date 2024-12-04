@@ -429,10 +429,10 @@ const Navbar = () => {
                         {/* Icon for Customer Recipe */}
                         <img
                           src="/images/icon/recipe.svg"
-                          alt="Công thức của tôi"
+                          alt="Công thức đã lưu"
                           className="h-5 w-5 mr-2"
                         />
-                        Công thức của tôi
+                        Công thức đã lưu
                       </NavLink>
 
                       <NavLink
@@ -453,23 +453,23 @@ const Navbar = () => {
                     <>
                       <NavLink
                         to="/update-role"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Moderator */}
                         <img
-                          src="/images/icon/MODERATE.svg"
+                          src="/images/icon/SELLERRECIPE.svg"
                           alt="Account moderate"
                           className="h-5 w-5 mr-2"
                         />
-                        Account moderate
+                        Tổng quan quản lý
                       </NavLink>
                       <NavLink
                         to="/reportmod"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Report Moderation */}
                         <img
-                          src="/images/icon/REPORTMOD.svg"
+                          src="/images/icon/review.svg"
                           alt="Duyệt đơn khiếu nại"
                           className="h-5 w-5 mr-2"
                         />
@@ -477,11 +477,11 @@ const Navbar = () => {
                       </NavLink>
                       <NavLink
                         to="/withdrawmod"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Withdraw */}
                         <img
-                          src="/images/icon/WITHDRAWMOD.svg"
+                          src="/images/icon/withdraw.svg"
                           alt="Duyệt rút xu"
                           className="h-5 w-5 mr-2"
                         />
@@ -493,7 +493,7 @@ const Navbar = () => {
                     <>
                       <NavLink
                         to="/recipe-customer-list"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Seller Recipe */}
                         <img
@@ -501,39 +501,27 @@ const Navbar = () => {
                           alt="Seller Recipe"
                           className="h-5 w-5 mr-2"
                         />
-                        Seller Recipe
-                      </NavLink>
-                      <NavLink
-                        to="/add-recipe"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
-                      >
-                        {/* Icon for Add Recipe */}
-                        <img
-                          src="/images/icon/ADDRECIPE.svg"
-                          alt="Add a Recipe"
-                          className="h-5 w-5 mr-2"
-                        />
-                        Add a Recipe
+                        Tổng quan người bán
                       </NavLink>
                       <NavLink
                         to="/list-saved-recipe"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Seller Saved Recipe */}
                         <img
-                          src="/images/icon/SAVERECIPE.svg"
-                          alt="Công thức của tôi"
+                          src="/images/icon/recipe.svg"
+                          alt="Công thức đã lưu"
                           className="h-5 w-5 mr-2"
                         />
-                        Công thức của tôi
+                        Công thức đã lưu
                       </NavLink>
                       <NavLink
                         to="/withdrawrequest"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Withdraw Request */}
                         <img
-                          src="/images/icon/WITHDRAWREQUEST.svg"
+                          src="/images/icon/withdraw.svg"
                           alt="Yêu cầu rút tiền"
                           className="h-5 w-5 mr-2"
                         />
@@ -541,7 +529,7 @@ const Navbar = () => {
                       </NavLink>
                       <NavLink
                         to="/report"
-                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Complaint */}
                         <img
@@ -679,7 +667,7 @@ const Navbar = () => {
                       <>
                         <div className="w-full">
                           <NavLink to="/list-saved-recipe" className="block px-4 py-2">
-                            Công thức của tôi
+                            Công thức đã lưu
                           </NavLink>
                           <NavLink to="/update-account" className="block px-4 py-2">
                             Đăng kí bán hàng

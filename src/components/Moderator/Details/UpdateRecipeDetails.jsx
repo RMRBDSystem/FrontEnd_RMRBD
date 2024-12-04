@@ -7,6 +7,8 @@ import CheckMarkIcon from "/images/icon/iconscheckmark24.png";
 import Cookies from "js-cookie";
 import Swal from "sweetalert2"; // Import SweetAlert2
 import { FaSave, FaArrowLeft } from "react-icons/fa";
+import { useSocket } from "../../../App"
+import { createNotification } from "../../services/NotificationService"
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
@@ -16,7 +18,7 @@ const RecipeDetail = () => {
   const [tagMap, setTagMap] = useState({});
   const [status, setStatus] = useState();
   const [censorNote, setCensorNote] = useState();
-
+  const { socket, accountOnline } = useSocket();
   // Hàm lấy chi tiết công thức
   const fetchRecipeDetail = async (id) => {
     const response = await axios.get(
@@ -84,7 +86,7 @@ const RecipeDetail = () => {
 
   // Hàm lưu cập nhật
   const handleSave = async () => {
-    await Swal.fire({
+    const result = await Swal.fire({
       title: "Bạn có chắc chắn muốn thay đổi trạng thái?",
       text: "Điều này sẽ cập nhật trạng thái tài khoản!",
       icon: "warning",
@@ -92,38 +94,41 @@ const RecipeDetail = () => {
       confirmButtonText: "Đồng ý",
       cancelButtonText: "Hủy",
     });
-    const censorId = Cookies.get("UserId");
-    try {
-      const updatedRecipe = {
-        ...recipe,
-        status,
-        censorNote,
-        censorId,
-      };
-      console.log(updatedRecipe);
-      await axios.put(
-        `https://rmrbdapi.somee.com/odata/Recipe/${recipeId}`,
-        //`https://localhost:7220/odata/Recipe/${recipeId}`,
-        updatedRecipe,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
-      Swal.fire({
-        icon: "success",
-        title: "Thành công!",
-        text: "Công thức đã được cập nhật thành công.",
-        confirmButtonText: "OK",
-      });
-    } catch (error) {
-      console.error("Error updating recipe:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Thất bại!",
-        text: "Công thức đã cập nhật thất bại.",
-        confirmButtonText: "OK",
-      });
+    if (result.isConfirmed) {
+      const censorId = Cookies.get("UserId");
+      try {
+        const updatedRecipe = {
+          ...recipe,
+          status,
+          censorNote,
+          censorId,
+        };
+        console.log(updatedRecipe);
+        await axios.put(
+          `https://rmrbdapi.somee.com/odata/Recipe/${recipeId}`,
+          //`https://localhost:7220/odata/Recipe/${recipeId}`,
+          updatedRecipe,
+          {
+            headers: { "Content-Type": "application/json", Token: "123-abc" },
+          }
+        );
+        Swal.fire({
+          icon: "success",
+          title: "Thành công!",
+          text: "Công thức đã được cập nhật thành công.",
+          confirmButtonText: "OK",
+        });
+      } catch (error) {
+        console.error("Error updating recipe:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Thất bại!",
+          text: "Công thức đã cập nhật thất bại.",
+          confirmButtonText: "OK",
+        });
+      }
     }
+
   };
 
   useEffect(() => {
@@ -133,6 +138,24 @@ const RecipeDetail = () => {
   if (!recipe || !accountID || images.length === 0) {
     return <div className="text-center text-xl">Loading...</div>;
   }
+
+  const handleNotification = (text) => {
+    socket.emit("sendNotification", {
+      senderName: accountOnline,
+      receiverName: accountID?.userName,
+      content: text,
+    });
+    const addNotification = () => {
+      const newNotificationData = {
+        accountId: accountID?.accountId,
+        content: text,
+        date: new Date().toISOString(),
+        status: 1,
+      };
+      createNotification(newNotificationData); // Không cần await
+    };
+    addNotification();
+  };
 
   return (
     <>
@@ -303,7 +326,11 @@ const RecipeDetail = () => {
           </div>
           <div className="flex space-x-4">
             <button
-              onClick={handleSave}
+              onClick={() => {
+                const statusText = status === 1 ? "Xác nhận" : "Khóa";
+                handleNotification(`Mod ${accountOnline} đã ${statusText} công thức ${recipe.recipeName} của bạn`);
+                handleSave();
+              }}
               className="flex items-center justify-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform duration-300 hover:scale-105"
             >
               <FaSave className="text-lg" />

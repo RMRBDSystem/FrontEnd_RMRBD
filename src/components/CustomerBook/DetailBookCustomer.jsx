@@ -3,19 +3,13 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import ClockIcon from "/images/icon/iconclock.png";
 import SpoonIcon from "/images/icon/iconsspoon.png";
-import Cookies from "js-cookie";
-import Swal from "sweetalert2"; // Import SweetAlert2
-import { FaSave, FaArrowLeft } from "react-icons/fa";
-import { useSocket } from "../../../App"
-import {createNotification} from "../../services/NotificationService"
+import {  FaArrowLeft } from "react-icons/fa";
 const BookDetail = () => {
   const { bookId } = useParams(); // Lấy ID từ URL
   const [book, setBook] = useState(null);
   const [accountID, setAccountID] = useState(null);
   const [mainImage, setMainImage] = useState(null);
-  const [status, setStatus] = useState();
-  const [censorNote, setCensorNote] = useState();
-  const { socket, accountOnline } = useSocket();
+
   // Hàm lấy chi tiết công thức
   const fetchBookDetail = async (id) => {
     const response = await axios.get(
@@ -27,9 +21,7 @@ const BookDetail = () => {
     const bookData = response.data;
     console.log("Book Data",bookData);
     setBook(bookData);
-    setStatus(bookData.status);
     setMainImage(bookData.images[0]?.imageUrl);
-    setCensorNote(bookData.censorNote || "");
     return bookData;
   };
 
@@ -58,49 +50,7 @@ const BookDetail = () => {
     }
   };
 
-  // Hàm lưu cập nhật
-  const handleSave = async () => {
-    await Swal.fire({
-      title: "Bạn có chắc chắn muốn thay đổi trạng thái?",
-      text: "Điều này sẽ cập nhật trạng thái tài khoản!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Đồng ý",
-      cancelButtonText: "Hủy",
-    });
-    const censorId = Cookies.get("UserId");
-    try {
-      const updatedBook = {
-        ...book,
-        status,
-        censorNote,
-        censorId,
-      };
-      console.log(updatedBook);
-      await axios.put(
-        `https://rmrbdapi.somee.com/odata/Book/${bookId}`,
-        updatedBook,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
-      Swal.fire({
-        icon: "success",
-        title: "Thành công!",
-        text: "Công thức đã được cập nhật thành công.",
-        confirmButtonText: "OK",
-      });
-    } catch (error) {
-      console.error("Error updating Book:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Thất bại!",
-        text: "Công thức đã cập nhật thất bại.",
-        confirmButtonText: "OK",
-      });
-    }
-  };
-
+ 
   useEffect(() => {
     fetchData();
   }, [bookId]);
@@ -108,24 +58,6 @@ const BookDetail = () => {
   if (!book || !accountID || !book.images?.length === 0) {
     return <div className="text-center text-xl">Loading...</div>;
   }
-
-  const handleNotification = (text) => {
-    socket.emit("sendNotification", {
-      senderName: accountOnline,
-      receiverName: accountID?.userName,
-      content: text,
-    });
-    const addNotification = () => {
-      const newNotificationData = {
-        accountId: accountID?.accountId,
-        content: text,
-        date: new Date().toISOString(),
-        status: 1,
-      };
-      createNotification(newNotificationData); // Không cần await
-    };
-    addNotification();
-  };
 
   return (
     <>
@@ -193,40 +125,7 @@ const BookDetail = () => {
             <img src={SpoonIcon} alt="Icon" className="mx-2 w-6 h-6" />
           </div>
 
-          <div>
-            <label className="block text-lg font-semibold">Status:</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(parseInt(e.target.value))}
-              className="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value={1}>Xác nhận</option>
-              <option value={-1}>Chờ xác nhận</option>
-              <option value={0}>Khóa</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-lg font-semibold">Censor Note:</label>
-            <textarea
-              value={censorNote}
-              onChange={(e) => setCensorNote(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
-              rows="4"
-            />
-          </div>
           <div className="flex space-x-4">
-            <button
-              onClick={()=>{
-                const statusText = status === 1 ? "Xác nhận" : "Khóa";
-                handleNotification(`Mod ${accountOnline} đã ${statusText} sách ${book.bookName} của bạn`);
-                handleSave();
-              }}
-              className="flex items-center justify-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform duration-300 hover:scale-105"
-            >
-              <FaSave className="text-lg" />
-              <span className="text-lg">Lưu</span>
-            </button>
-
             <button
               className="flex items-center justify-center space-x-2 px-6 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition transform duration-300 hover:scale-105"
               onClick={() => window.history.back()}

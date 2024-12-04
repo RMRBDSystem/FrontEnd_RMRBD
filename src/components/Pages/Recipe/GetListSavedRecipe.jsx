@@ -10,7 +10,8 @@ import {
   CardMedia,
   Button,
   Box,
-  CircularProgress, // Import CircularProgress for loading indicator
+  CircularProgress,
+  Link,
 } from "@mui/material";
 
 const GetListSaveRecipe = () => {
@@ -53,14 +54,20 @@ const GetListSaveRecipe = () => {
     // Navigate to the edit page
     navigate(`/editrecipecustomer-recipe/${recipeId}`);
   };
-
+  const handleDetails = (recipeId) => {
+    // Navigate to the edit page
+    navigate(`/recipecustomer-detail/${recipeId}`);
+  };
   return (
-    <Container className="section-center pb-12 bg-gray-300 rounded-full" maxWidth={"xl"}>
-      <div className="flex justify-center items-center">
-        <Typography className="flex items-center" variant="h4" gutterBottom>
-          Công thức nấu ăn đã lưu<img src="/images/icon/recipe.svg" alt="Công thức nấu ăn" className="h-20 w-20 ml-2" />
-        </Typography>
-      </div>
+    <Container
+      className="section-center py-8"
+      style={{ minHeight: "500px" }}
+      maxWidth={"xl"}
+    >
+      <Typography className="text-black-500" variant="h4" gutterBottom>
+        Công thức nấu ăn đã lưu
+      </Typography>
+
       {/* Show loading indicator when data is being fetched */}
       {loading ? (
         <Box
@@ -68,7 +75,7 @@ const GetListSaveRecipe = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "50vh", // Center the loading spinner in the middle of the screen
+            height: "100vh", // Center the loading spinner in the middle of the screen
           }}
         >
           <CircularProgress />
@@ -129,7 +136,7 @@ const GetListSaveRecipe = () => {
                   display: "flex",
                   flexDirection: "column", // Ensures the content is stacked vertically
                   justifyContent: "space-between", // Ensures spacing between elements
-                  minHeight: 250, // Ensures enough space for content and button
+                  minHeight: 200, // Ensures enough space for content and button
                   flexGrow: 1, // Ensures the content area grows to fill available space
                 }}
               >
@@ -139,23 +146,82 @@ const GetListSaveRecipe = () => {
                 <Typography variant="body2" color="text.secondary">
                   {recipe.description || "No description"}
                 </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEdit(recipe.recipeId)}
-                  fullWidth
-                  sx={{ marginTop: "auto" }} // Ensures the button stays at the bottom
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    marginTop: "auto",
+                    flexDirection: "row",
+                    width: "100%",
+                  }}
                 >
-                  Edit Recipe
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleEdit(recipe.recipeId)}
+                    sx={{
+                      background: "linear-gradient(45deg, #FF6F00, #FF8F00)", // Gradient from dark to light orange
+                      color: "white", // White text color for contrast
+                      "&:hover": {
+                        background: "linear-gradient(45deg, #FF8F00, #FF6F00)", // Reverse the gradient on hover for effect
+                      },
+                      boxShadow: 2, // Optional shadow for the button to give it a floating effect
+                      flex: 1, // Makes the button flexible within the container
+                    }}
+                  >
+                    Chỉnh sửa
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    onClick={() => handleDetails(recipe.recipeId)}
+                    sx={{
+                      background: "linear-gradient(45deg, #FF6F00, #FF8F00)", // Gradient from dark to light orange
+                      color: "white", // White text color for contrast
+                      "&:hover": {
+                        background: "linear-gradient(45deg, #FF8F00, #FF6F00)", // Reverse the gradient on hover for effect
+                      },
+                      boxShadow: 2, // Optional shadow for the button to give it a floating effect
+                      flex: 1, // Makes the button flexible within the container
+                    }}
+                  >
+                    Chi tiết
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           ))}
         </Box>
       ) : (
-        <Typography variant="body1" color="text.secondary" sx={{ marginTop: 2 }}>
-          No recipes found.
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: 20,
+          }}
+        >
+          <Typography
+            variant="h6"
+            color="text.primary"
+            sx={{ fontWeight: "bold", textAlign: "center" }}
+          >
+            Bạn chưa có công thức nào đã lưu.
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ marginTop: 2, textAlign: "center", lineHeight: 1.5 }}
+          >
+            Hãy tới trang này để làm đầy bộ sưu tập của bạn nhé!{" "}
+            <Link
+              href="/recipe"
+              color="primary"
+              sx={{ fontWeight: "bold", textDecoration: "underline" }}
+            >
+              Mua công thức ngay!
+            </Link>
+          </Typography>
+        </Box>
       )}
     </Container>
   );

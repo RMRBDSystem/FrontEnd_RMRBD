@@ -12,6 +12,7 @@ import WithDrawMod from "../Pages/Withdraw/WithdrawMod";
 import WithdrawResponse from "../Pages/Withdraw/WithdrawResponse";
 import WithDrawRequest from "../Pages/Withdraw/WithdrawRequest";
 import WithdrawList from "../Pages/Withdraw/WithdrawList";
+import Product from "../HomePage/Products";
 //Customer
 import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import AddEbookPageForCustomer from "../AddItems/EbookCustomer";
@@ -21,6 +22,12 @@ import Cart from '../Cart/ShoppingCart';
 import Checkout from "../Cart/Checkout";
 import Orders from "../Cart/Orders/Orders";
 import OrderFullDetails from '../Cart/Orders/OrderFullDetails';
+import DetailsBookCustomer from '../CustomerBook/DetailBookCustomer';
+import ListEbookCustomer from '../CustomerEbook/ListEbookCustomer';
+import AddBookCustomer from '../CustomerBook/AddBookCustomer';
+import AddEBookCustomer from '../CustomerEbook/AddEbookCustomer';
+import DetailSavedRecipe from '../Pages/Recipe/DetailSavedRecipe';
+import EditRoleUpdate from '../AccountProfile/EditRoleUpdate';
 //import Addbook from '../Pages/Add Items/AddBook';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
@@ -109,14 +116,23 @@ export default function RouterPage() {
             }
           />
           <Route element={<Layout />}>
+
+            <Route path="/edit-profile/:accountID" element={<EditRoleUpdate />} />
+            <Route path="/recipecustomer-detail/:recipeId" element={<DetailSavedRecipe />} />
+            <Route path="/add-ebook-customer" element={<AddEBookCustomer />} />
+            <Route path="/add-book-customer" element={<AddBookCustomer />} />
+            <Route path="/list-ebook-customer" element={<ListEbookCustomer />} />
+            <Route path="/book-list-customer/:bookId" element={<DetailsBookCustomer />} />
             <Route path="/recipe-detail/:recipeId" element={<RecipeDetails />} />
             <Route path="/recipe-customer-detail/:recipeId" element={<RecipeCustomerDetail />} />
             <Route path="/update-account" element={<UpdateProfile />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/faq" element={<FAQPage />} />
-            <Route path="/recipe" element={<Recipe />} />
+            <Route path="/recipe/:searchString?" element={<Recipe />} />
+            <Route path="/recipes/:searchString" element={<Recipe />} />
             <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
-            <Route path="/book" element={<Book />} />
+            <Route path="/book:searchString?" element={<Book />} />
+            <Route path="/books/:searchString" element={<Book />} />
             <Route path="/book/:bookId" element={<BookDetail />} />
             <Route path="/coinTransaction" element={<CoinTransaction />} />
             <Route path="/termsofpurchase" element={<TermsOfPurchase />} />
@@ -136,6 +152,7 @@ export default function RouterPage() {
             <Route path="/withdrawresponse/:coinTransactionId" element={<WithdrawResponse />} />
             <Route path="/update-information" element={<UpdateAccount />} />
             <Route path="/form-updated-role" element={<ViewRoleUpdateSubmit />} />
+            <Route path="/product/:searchString?" element={<Product />} />
             <Route
               path="/recipecustomer-list"
               element={

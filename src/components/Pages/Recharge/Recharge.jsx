@@ -8,11 +8,11 @@ const RechargePage = () => {
   const conversionRate = 0.85;
   const coinOptions = [
     { coins: 5000, price: 5000 },
-    { coins: 10000, price: 10000 * conversionRate },
-    { coins: 15000, price: 15000 * conversionRate },
-    { coins: 20000, price: 20000 * conversionRate },
-    { coins: 25000, price: 25000 * conversionRate },
-    { coins: 35000, price: 35000 * conversionRate },
+    { coins: 10000, price: 10000  },
+    { coins: 25000, price: 25000  },
+    { coins: 50000, price: 50000  },
+    { coins: 75000, price: 75000  },
+    { coins: 100000, price: 100000 * conversionRate },
     { coins: 450000, price: 450000 * conversionRate },
   ];
 
@@ -25,6 +25,7 @@ const RechargePage = () => {
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customCoins, setCustomCoins] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('PayOS'); // Lưu phương thức thanh toán
+  const [eror, setError] = useState('');
 
 
 
@@ -104,7 +105,10 @@ const RechargePage = () => {
     const value = e.target.value;
     if (/^\d*$/.test(value)) { // Kiểm tra chỉ cho phép nhập số
       setCustomCoins(value);
-      if (value < 10000) {
+      if(value < 5000){
+       setTotal(0)
+      }
+      else if (value < 100000 && value >= 5000) {
         setTotal(value);
       } else
         setTotal(value * conversionRate); // Cập nhật tổng giá trị theo số xu nhập
@@ -138,7 +142,7 @@ const RechargePage = () => {
 
         {/* Thông báo khuyến mãi */}
         <div className="max-w-[450px] bg-yellow-100 p-2 rounded-md mb-4">
-          <p className="font-bold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-red-500">Tiết kiệm 15% khi nạp trên 10000 xu.</span></span>
+          <p className="font-bold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-red-500">Tiết kiệm 15% khi nạp từ 100000 xu.</span></span>
         </div>
         {/* Lựa chọn số xu */}
         <div className="grid grid-cols-4 gap-4 mb-6">
@@ -162,7 +166,7 @@ const RechargePage = () => {
             onClick={handleOpenCustomModal}
           >
             <div className="font-semibold text-2xl mb-1 text-center">&#11088; Tùy chỉnh</div>
-            <div className="text-gray-600 font-bold text-sm">Khuyến mãi nạp trên 10000 xu</div>
+            <div className="text-gray-600 font-bold text-sm">Khuyến mãi nạp từ 100000 xu</div>
           </div>
         </div>
 

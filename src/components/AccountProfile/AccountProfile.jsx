@@ -188,6 +188,7 @@ const AccountProfile = () => {
         if (idMatch) {
           setIdCardNumber(idMatch[0]);
         } else {
+          setIdCardNumber(null);
           setErrors((prevErrors) => ({
             ...prevErrors,
             frontIDCard: "Không tìm thấy số căn cước trong ảnh.",
@@ -201,6 +202,7 @@ const AccountProfile = () => {
           const date = new Date(`${year}-${month}-${day}`);
           setDateOfBirth(date);
         } else {
+          setDateOfBirth(null);
           setErrors((prevErrors) => ({
             ...prevErrors,
             frontIDCard: "Không tìm thấy ngày sinh trong ảnh.",
@@ -209,6 +211,8 @@ const AccountProfile = () => {
 
         // Kiểm tra nếu thiếu số căn cước hoặc ngày sinh
         if (!idMatch && !dateMatch) {
+          setIdCardNumber(null); 
+          setDateOfBirth(null); 
           setErrors((prevErrors) => ({
             ...prevErrors,
             frontIDCard:
@@ -261,7 +265,6 @@ const AccountProfile = () => {
         <h1 className="text-4xl font-bold mb-6 flex items-center">
           <span className="text-orange-500 mr-2 text-5xl">+</span> Trở thành
           người bán hàng
-          <img src="/images/icon/ECOMMERCE.svg" alt="Trở thành người bán hàng" className="h-20 w-20 ml-4"/>
         </h1>
         <p className="text-gray-600 mb-8">
           Chúng tôi giúp bạn kết nối với hàng nghìn độc giả và tạo ra cơ hội

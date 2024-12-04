@@ -15,6 +15,8 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import BuildIcon from "@mui/icons-material/Build";
+import Swal from "sweetalert2"; // Import SweetAlert2
 
 const EditRecipe = () => {
   const { recipeId } = useParams();
@@ -54,7 +56,7 @@ const EditRecipe = () => {
         purchasePrice: data.purchasePrice || 0,
       });
     } catch (error) {
-      console.error("Error fetching recipe data:", error);
+      console.error("Lỗi khi lấy dữ liệu công thức:", error);
     } finally {
       setLoading(false);
     }
@@ -100,11 +102,21 @@ const EditRecipe = () => {
           }
         );
 
-        alert("Changes saved successfully!");
+        Swal.fire({
+          title: "Thành công!",
+          text: "Đã lưu thay đổi thành công.",
+          icon: "success",
+          confirmButtonText: "Đồng ý",
+        });
         setIsEditing(false);
       } catch (error) {
-        console.error("Error saving changes:", error);
-        alert("Failed to save changes.");
+        console.error("Lỗi khi lưu thay đổi:", error);
+        Swal.fire({
+          title: "Thất bại!",
+          text: "Không thể lưu thay đổi.",
+          icon: "error",
+          confirmButtonText: "Thử lại",
+        });
       }
     } else if (confirmDialog.action === "restore" && recipeData) {
       setEditFields({
@@ -119,23 +131,40 @@ const EditRecipe = () => {
   };
 
   if (loading) return <CircularProgress />;
-  if (!recipeData) return <Typography>Loading...</Typography>;
+  if (!recipeData) return <Typography>Đang tải...</Typography>;
 
-  const recipeName = recipeData.recipe?.recipeName || "Recipe Name";
+  const recipeName = recipeData.recipe?.recipeName || "Tên công thức";
 
   return (
     <Container
       maxWidth="md"
-      sx={{ mt: 5, backgroundColor: "white", p: 3, borderRadius: 2 }}
+      sx={{
+        mt: 5,
+        backgroundColor: "white",
+        p: 3,
+        borderRadius: 2,
+        marginBottom: 4,
+        minHeight: "500px",
+      }}
     >
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Edit Recipe
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          <BuildIcon sx={{ color: "#FF6F00", marginRight: 1 }} /> Chỉnh sửa công
+          thức
+        </Typography>
+        <Typography variant="body1" sx={{ color: "text.secondary", mb: 1 }}>
+          Hãy chỉnh sửa công thức đã lưu theo ý của bạn. Bạn có thể thay đổi
+          nguyên liệu, hướng dẫn, và các thông tin khác của công thức.
         </Typography>
         <Button variant="outlined" onClick={() => navigate(-1)}>
-          Back
+          Quay lại
         </Button>
       </Box>
+      <hr className="my-6 border-t-2 border-gray-500" />
 
       <Typography variant="h5" sx={{ mt: 3, mb: 2 }}>
         {recipeName}
@@ -143,7 +172,7 @@ const EditRecipe = () => {
 
       <Box display="flex" flexDirection="column" gap={2}>
         <TextField
-          label="Ingredients"
+          label="Nguyên liệu"
           multiline
           fullWidth
           rows={4}
@@ -151,9 +180,11 @@ const EditRecipe = () => {
           onChange={(e) => handleFieldChange("ingredient", e.target.value)}
           disabled={!isEditing}
         />
+        <hr className="my-6 border-t-2 border-gray-500" />
+
         <Box display="flex" gap={2}>
           <TextField
-            label="Number of Services"
+            label="Số người phục vụ"
             type="number"
             fullWidth
             value={editFields.numberOfService}
@@ -163,7 +194,7 @@ const EditRecipe = () => {
             disabled={!isEditing}
           />
           <TextField
-            label="Purchase Price"
+            label="Giá đã thanh toán"
             type="number"
             fullWidth
             value={editFields.purchasePrice}
@@ -171,8 +202,10 @@ const EditRecipe = () => {
             disabled={!isEditing}
           />
         </Box>
+        <hr className="my-6 border-t-2 border-gray-500" />
+
         <TextField
-          label="Nutrition"
+          label="Dinh dưỡng"
           multiline
           fullWidth
           rows={4}
@@ -180,8 +213,16 @@ const EditRecipe = () => {
           onChange={(e) => handleFieldChange("nutrition", e.target.value)}
           disabled={!isEditing}
         />
+        <hr className="my-6 border-t-2 border-gray-500" />
+        <p className="text-gray-500 text-sm mb-2">
+          Nếu bạn muốn thêm bước khi chỉnh sửa thì vui lòng thêm chữ{" "}
+          <strong>Bước</strong> ngay ở phía trước nhé{" "}
+          <span role="img" aria-label="smile">
+            😊
+          </span>
+        </p>
         <TextField
-          label="Tutorial"
+          label="Hướng dẫn"
           multiline
           fullWidth
           rows={4}
@@ -190,20 +231,26 @@ const EditRecipe = () => {
           disabled={!isEditing}
         />
       </Box>
+      <hr className="my-6 border-t-2 border-gray-500" />
 
       <Box sx={{ mt: 3 }}>
         {!isEditing ? (
           <Button
             variant="contained"
-            color="primary"
+            sx={{
+              backgroundColor: "#FF6F00", // Màu cam
+              "&:hover": {
+                backgroundColor: "#FF8F1F", // Màu cam nhạt khi hover
+              },
+            }}
             onClick={() => setIsEditing(true)}
           >
-            Edit
+            Chỉnh sửa
           </Button>
         ) : (
           <>
             <Button variant="contained" color="success" onClick={saveChanges}>
-              Save
+              Lưu
             </Button>
             <Button
               variant="outlined"
@@ -211,7 +258,7 @@ const EditRecipe = () => {
               onClick={restoreFields}
               sx={{ ml: 2 }}
             >
-              Restore
+              Khôi phục
             </Button>
             <Button
               variant="outlined"
@@ -219,7 +266,7 @@ const EditRecipe = () => {
               onClick={() => setIsEditing(false)}
               sx={{ ml: 2 }}
             >
-              Cancel
+              Hủy
             </Button>
           </>
         )}
@@ -230,22 +277,22 @@ const EditRecipe = () => {
         open={confirmDialog.open}
         onClose={() => setConfirmDialog({ open: false, action: null })}
       >
-        <DialogTitle>Confirmation</DialogTitle>
+        <DialogTitle>Xác nhận</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {confirmDialog.action === "save"
-              ? "Are you sure you want to save the changes?"
-              : "Are you sure you want to restore the original values?"}
+              ? "Bạn chắc chắn muốn lưu thay đổi?"
+              : "Bạn chắc chắn muốn khôi phục lại giá trị ban đầu?"}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
             onClick={() => setConfirmDialog({ open: false, action: null })}
           >
-            Cancel
+            Hủy
           </Button>
           <Button onClick={executeAction} color="primary">
-            Confirm
+            Xác nhận
           </Button>
         </DialogActions>
       </Dialog>

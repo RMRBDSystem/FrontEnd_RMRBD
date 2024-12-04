@@ -7,6 +7,9 @@ import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
 import "./addrecipecus.css"
 import { FiPlus, FiX } from "react-icons/fi";
+import { useSocket } from "../../App"
+import { getAccountByRoleId } from '../services/AccountService'
+import { createNotification } from "../services/NotificationService"
 const RecipeCustomer = () => {
   const [recipeName, setRecipeName] = useState("");
   const [numberOfService, setNumberOfService] = useState("");
@@ -28,7 +31,9 @@ const RecipeCustomer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [energy,setEnergy] =useState("");
+  const [energy, setEnergy] = useState("");
+  const { socket, accountOnline } = useSocket();
+  const [listModer, setListModer] = useState([]);
   useEffect(() => {
     const storedUserId = Cookies.get("UserId");
     console.log("Stored UserId:", storedUserId);
@@ -55,6 +60,12 @@ const RecipeCustomer = () => {
       });
       console.log("API Response:", response.data); // Thêm dòng log này
       setTags(response.data);
+      const stored = await getAccountByRoleId();
+      const extractedModeratornames = stored.map(account => ({
+        Id: account.accountId,
+        userName: account.userName
+      }));
+      setListModer(extractedModeratornames);
     } catch (error) {
       console.error("Error fetching active tags:", error);
     }
@@ -329,6 +340,29 @@ const RecipeCustomer = () => {
       : [...selectedTagIds, tagId];
 
     setSelectedTagIds(updatedSelection);
+  };
+
+  const handleNotification = (text) => {
+    for (let i = 0; i < listModer.length; i++) {
+      // Gửi thông báo qua socket
+      socket.emit("sendNotification", {
+        senderName: accountOnline,
+        receiverName: listModer[i].userName,
+        content: text,
+      });
+
+      //Tạo thông báo mới
+      const newNotificationData = {
+        accountId: listModer[i].Id,
+        content: text,
+        date: new Date().toISOString(),
+        status: 1,
+      };
+
+      // Gọi hàm tạo thông báo (không cần await nếu bạn không cần phải chờ)
+      createNotification(newNotificationData);
+    }
+
   };
 
   return (
@@ -688,38 +722,14 @@ const RecipeCustomer = () => {
               </Form.Control>
             </Form.Group>
           </Col>
-          {/* <hr className="nm-8" />
-          <div className="notes-section">
-            <h2 className="text-2xl font-bold mb-4">Ghi chú (Tùy chọn)</h2>
-            <p>Thêm bất kỳ lời khuyên hữu ích nào về thay thế thành phần, phục vụ hoặc lưu trữ tại đây.</p>
-
-            {!showNoteForm ? (
-              // UI for Button (Image 1)
-              <Button className="custom-button d-flex align-items-center mt-4" onClick={handleAddNoteClick}>
-                + Thêm ghi chú
-              </Button>
-            ) : (
-              // UI for Form (Image 2)
-              <Form>
-                <Form.Group controlId="censorNote">
-                  <Form.Control
-                    as="textarea"
-                    value={censorNote}
-                    rows={3}
-                    onChange={handleInputChange(setCensorNote, "censorNote")}
-                    placeholder="e.g. Cố gắng không trộn quá nhiều bột. Gấp nhẹ nhàng." />
-                </Form.Group>
-                <div className="d-flex justify-content-start" style={{ marginTop: "10px" }}>
-                  <Button className="custom-button d-flex align-items-center mt-4" onClick={handleCancelNote}>
-                    Cancel
-                  </Button>
-                </div>
-              </Form>
-            )}
-          </div> */}
-
           <div className="d-flex justify-content-between align-items-center mt-4">
-            <Button variant="danger" onClick={handleSave} className="px-4 py-2 fw-bold">
+            <Button 
+            variant="danger" 
+            onClick={()=>{
+              handleNotification(`${accountOnline} đã tạo công thức ${recipeName} mới. Vui lòng mod phê duyệt!!`);
+              handleSave();
+            }} 
+            className="px-4 py-2 fw-bold">
               Gửi công thức
             </Button>
           </div>

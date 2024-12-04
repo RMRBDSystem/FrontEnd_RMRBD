@@ -26,6 +26,10 @@ const SearchWrapper = () => {
     }
   };
 
+  const handleSearch = async (searchString) => {
+    window.location.href = `/product/${searchString}`;
+  }
+
   const handleSearchInputChange = (event) => {
     const value = event.target.value;
     setSearchString(value);
@@ -85,8 +89,8 @@ const SearchWrapper = () => {
 
   return (
     <div>
-      <div className="search-btn cursor-pointer text-gray-50 text-xl py-2 px-4 hover:text-custom-orange" 
-      onClick={toggleSearch}>
+      <div className="search-btn cursor-pointer text-gray-50 text-xl py-2 px-4 hover:text-custom-orange"
+        onClick={toggleSearch}>
         <FaSearch />
       </div>
 
@@ -106,7 +110,9 @@ const SearchWrapper = () => {
                 value={searchString}
                 onChange={handleSearchInputChange}
               />
-              <button
+              <button onClick={() => {
+                handleSearch(searchString);
+              }}
                 type="submit"
                 className="absolute right-5 top-1/2 transform -translate-y-1/2 w-[60px] h-[60px] flex items-center justify-center bg-transparent border-none cursor-pointer text-black"
               >

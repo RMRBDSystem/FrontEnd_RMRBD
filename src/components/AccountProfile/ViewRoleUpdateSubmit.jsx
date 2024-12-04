@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaClock, FaBan } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Swal from "sweetalert2";
@@ -22,7 +22,6 @@ const ViewRoleUpdateSubmit = () => {
   const fetchAccountProfileData = async (userId) => {
     try {
       const response = await axios.get(
-        // `https://localhost:7220/odata/AccountProfile/${userId}`,
         `https://rmrbdapi.somee.com/odata/AccountProfile/${userId}`,
         {
           headers: { "Content-Type": "application/json", Token: "123-abc" },
@@ -45,7 +44,9 @@ const ViewRoleUpdateSubmit = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN");
   };
-
+  const handleEdit = () => {
+    navigate(`/edit-profile/${accountID}`);
+  };
   const handleBackButton = () => {
     Swal.fire({
       title: "Quay lại trang chủ?",
@@ -112,15 +113,40 @@ const ViewRoleUpdateSubmit = () => {
                     <FaCheckCircle size={20} />
                     <span>Đã được kiểm duyệt</span>
                   </span>
+                ) : accountProfile.status === -1 ? (
+                  <span className="text-yellow-500 flex items-center space-x-2">
+                    <FaClock size={20} />
+                    <span>Trong quá trình kiểm duyệt</span>
+                  </span>
+                ) : accountProfile.status === -2 ? (
+                  <>
+                    <span className="text-orange-500 flex items-center space-x-2">
+                      <FaBan size={20} />
+                      <span>Từ chối</span>
+                    </span>
+                    <button
+                      onClick={handleEdit}
+                      className="ml-4 px-4 py-2 bg-indigo-500 text-white text-sm rounded-md hover:bg-indigo-600 transition"
+                    >
+                      Chỉnh sửa
+                    </button>
+                  </>
                 ) : (
                   <span className="text-red-500 flex items-center space-x-2">
                     <FaTimesCircle size={20} />
-                    <span>Chưa được kiểm duyệt</span>
+                    <span>Đã bị khóa</span>
                   </span>
                 )}
               </div>
             </div>
-
+            <div className="flex justify-start items-center space-x-4 border-b border-gray-300 pb-4">
+              <label className="block text-base font-medium text-gray-700 mb-1 w-1/4">
+                Lưu ý
+              </label>
+              <div className="flex items-center w-3/4">
+                {accountProfile.censorNote}
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-4">
               {/* Front ID Card */}
               <div className="flex flex-col items-center">

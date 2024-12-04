@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar.jsx";
 import BookCard from "./BookCard.jsx";
+import { useParams } from 'react-router-dom';
 import { getBooks, getBooksByCategory } from "../../services/BookService.js";
+import { searchBook } from "../../services/SearchService.js";
 
 function Book() {
+  const { searchString } = useParams();
+  const [search, setSearch] = useState(searchString ?? "");
   const [books, setBooks] = useState([]); // Danh sách sách
   const [loading, setLoading] = useState(false); // Trạng thái đang tải dữ liệu
   const [error, setError] = useState(null); // Trạng thái lỗi
@@ -19,11 +23,10 @@ function Book() {
 
       try {
         let booksData;
-
         if (selectedFilters.categories) {
           booksData = await getBooksByCategory(selectedFilters.categories);
         } else {
-          booksData = await getBooks();
+          booksData = await searchBook(search);
         }
 
         // Kiểm tra xem booksData có phải là mảng
@@ -63,7 +66,7 @@ function Book() {
     };
 
     fetchBooks();
-  }, [selectedFilters]);
+  }, [selectedFilters, search]);
 
 
 
@@ -88,6 +91,26 @@ function Book() {
 
   return (
     <section className="section-center min-h-screen">
+      <form className="flex items-center mb-4" onSubmit={(e) => e.preventDefault()}>
+        <input
+          type="text"
+          id="text"
+          placeholder="Tìm kiếm..."
+          className="px-4 py-2 border border-gray-300 rounded-l-lg"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            fetchBooks();
+          }}
+          type="button"
+          className="px-4 py-2 bg-blue-500 text-white rounded-r-lg"
+        >
+          <i className="fas fa-search">Tìm kiếm</i>
+        </button>
+      </form>
       <div className="container px-4 mx-auto">
         <div className="flex flex-col lg:flex-row items-start justify-between -mx-4">
           {/* Sidebar */}

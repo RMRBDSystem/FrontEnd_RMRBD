@@ -8,6 +8,7 @@ import {
   FiHeart,
   FiBookOpen,
   FiBook,
+  FiFileText,
 } from "react-icons/fi"; // Import icons
 
 const Sidebar = () => {
@@ -59,7 +60,16 @@ const Sidebar = () => {
       label: "Công thức đã đăng",
       icon: <FiBookOpen />,
     },
-    { path: "/book-list-customer", label: "Sách đã đăng", icon: <FiBook /> },
+    {
+      path: "/book-list-customer",
+      label: "Sách đã đăng",
+      icon: <FiBook />,
+    },
+    {
+      path: "/list-ebook-customer",
+      label: "Sách điện tử đã đăng",
+      icon: <FiFileText />,
+    },
   ];
 
   return (

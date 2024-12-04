@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
 import Swal from "sweetalert2";
 const AddBook = () => {
@@ -99,11 +97,14 @@ const AddBook = () => {
     if (["weight", "length", "width", "height"].includes(name)) {
       const numericValue = parseInt(value) || 0;
       if (numericValue > maxValues[name]) {
-        toast.error(
-          `${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed ${
-            maxValues[name]
-          }`
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: `${
+            name.charAt(0).toUpperCase() + name.slice(1)
+          } cannot exceed ${maxValues[name]}`,
+          confirmButtonText: "OK",
+        });
         return; // Prevent setting value if it exceeds max
       }
       setBook((prev) => ({
@@ -257,7 +258,6 @@ const AddBook = () => {
 
   return (
     <>
-      <ToastContainer />
       <Container
         className="my-5"
         style={{
@@ -278,7 +278,7 @@ const AddBook = () => {
                 <span className="mr-2">
                   <i className="fas fa-save"></i>
                 </span>
-                Save Book
+                Lưu sách
               </Button>
             </Col>
             <h1 className="text-4xl font-bold mb-6 flex items-center">
@@ -585,14 +585,29 @@ const AddBook = () => {
                   }
                 );
                 if (response.status === 200 || response.status === 201) {
-                  toast.success("Image(s) uploaded successfully!");
+                  Swal.fire({
+                    icon: "success",
+                    title: "Thành công",
+                    text: "Cập nhật ảnh thành công",
+                    confirmButtonText: "OK",
+                  });
                   setShowImageUploadModal(false); // Close modal
                 } else {
-                  toast.error("Error uploading image(s).");
+                  Swal.fire({
+                    icon: "error",
+                    title: "Thất bại",
+                    text: "Thất bại khi tải ảnh.",
+                    confirmButtonText: "OK",
+                  });
                 }
               } catch (error) {
                 console.error("Error uploading image:", error);
-                toast.error("Error uploading image(s).");
+                Swal.fire({
+                  icon: "error",
+                  title: "Thất bại",
+                  text: "Thất bại khi tải ảnh.",
+                  confirmButtonText: "OK",
+                });
               }
             }}
           >

@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../Recipe/Sidebar.jsx';
 import RecipeCard from './RecipeCard.jsx';
+import { useParams } from 'react-router-dom';
 import { getRecipes, getRecipesByTags } from '../../services/RecipeService.js';
+import { searchRecipe } from '../../services/SearchService.js'
 
 function Recipe() {
+    const { searchString } = useParams();
+    const [search, setSearch] = useState(searchString ?? "");
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(false); // Trạng thái đang tải dữ liệu
     const [error, setError] = useState(null); // Trạng thái lỗi
@@ -19,11 +23,10 @@ function Recipe() {
             try {
                 let recipesData;
                 if (selectedFilters.tags) {
-                    // Nếu có bộ lọc danh mục, lấy sách theo danh mục
+
                     recipesData = await getRecipesByTags(selectedFilters.tags);
                 } else {
-                    // Nếu không có bộ lọc, lấy tất cả sách
-                    recipesData = await getRecipes();
+                    recipesData = await searchRecipe(search);
                 }
 
                 if (Array.isArray(recipesData)) {
@@ -48,7 +51,7 @@ function Recipe() {
                         return matchesPrice && matchesRating;
                     });
 
-                    await setRecipes(filteredRecipes); // Đảm bảo booksData là mảng
+                    setRecipes(filteredRecipes); // Đảm bảo booksData là mảng
                 } else {
                     console.error("Dữ liệu không hợp lệ:", booksData);
                     setError("Dữ liệu không hợp lệ.");
@@ -61,7 +64,7 @@ function Recipe() {
             }
         };
         fetchRecipes();
-    }, [selectedFilters]);
+    }, [selectedFilters, search]);
 
     const totalPages = Math.ceil(recipes.length / recipesPerPage);
     const displayedrecipes = recipes.slice(
@@ -78,9 +81,28 @@ function Recipe() {
         await setCurrentPage(1); // Reset về trang đầu khi áp dụng bộ lọc
     };
 
-
     return (
         <section className="section-center">
+            <form className="flex items-center mb-4" onSubmit={(e) => e.preventDefault()}>
+                <input
+                    type="text"
+                    id="text"
+                    placeholder="Tìm kiếm..."
+                    className="px-4 py-2 border border-gray-300 rounded-l-lg"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+                <button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        fetchRecipes();
+                    }}
+                    type="button"
+                    className="px-4 py-2 bg-blue-500 text-white rounded-r-lg"
+                >
+                    <i className="fas fa-search">Tìm kiếm</i>
+                </button>
+            </form>
             <div className="container px-4 mx-auto">
                 {/* Giới hạn độ rộng tối đa và căn giữa nội dung */}
                 <div className="flex flex-col lg:flex-row items-start justify-between -mx-4">
