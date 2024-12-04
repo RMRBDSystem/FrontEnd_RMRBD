@@ -184,7 +184,7 @@ function BookCard({ book }) {
   };
 
   const handleCardClick = () => {
-    navigate(`/book/${book.bookId}`);
+    navigate(`/book-detail/${book.bookId}`);
   };
 
   return (

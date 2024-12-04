@@ -274,7 +274,7 @@ function RecipeCard({ recipe }) {
 
   return (
     <div
-      className="block p-px bg-gradient-to-br from-blueGray-800 via-blueGray-800 to-blueGray-800 hover:from-yellow-500 hover:via-green-400 hover:to-blue-500 cursor-pointer rounded-lg"
+      className="block p-px bg-white cursor-pointer rounded-lg"
       onClick={handleCardClick}
     >
       <div className="p-5 rounded-lg shadow-md">

@@ -136,7 +136,7 @@ export default function RouterPage() {
             <Route path="/recipe/:searchString?" element={<Recipe />} />
             <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
             <Route path="/book/:searchString?" element={<Book />} />
-            <Route path="/book/:bookId" element={<BookDetail />} />
+            <Route path="/book-detail/:bookId" element={<BookDetail />} />
             <Route path="/ebook" element={<Ebook />} />
             <Route path="/ebook/:ebookId" element={<EbookDetail />} />
             <Route path="/ebook/:ebookId/read" element={<EbookReader />} />

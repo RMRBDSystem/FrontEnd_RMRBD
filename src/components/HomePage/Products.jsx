@@ -53,7 +53,7 @@ const Product = () => {
                                     <div className='card-body'>
                                         <h5 className='card-title'>{book.bookName}</h5>
                                         <p className='card-text'>{book.price} xu</p>
-                                        <a href={`/book/${book.bookId}`} className='btn btn-primary btn-block'>Xem chi tiết</a>
+                                        <a href={`/book-detail/${book.bookId}`} className='btn btn-primary btn-block'>Xem chi tiết</a>
                                     </div>
                                 </div>
                             </div>
