@@ -55,11 +55,12 @@ const GetListSaveRecipe = () => {
   };
 
   return (
-    <Container className="section-center py-8" maxWidth={"xl"}>
-      <Typography className="text-black-500" variant="h4" gutterBottom>
-        Công thức nấu ăn đã lưu
-      </Typography>
-
+    <Container className="section-center pb-12 bg-gray-300 rounded-full" maxWidth={"xl"}>
+      <div className="flex justify-center items-center">
+        <Typography className="flex items-center" variant="h4" gutterBottom>
+          Công thức nấu ăn đã lưu<img src="/images/icon/recipe.svg" alt="Công thức nấu ăn" className="h-20 w-20 ml-2" />
+        </Typography>
+      </div>
       {/* Show loading indicator when data is being fetched */}
       {loading ? (
         <Box
@@ -67,7 +68,7 @@ const GetListSaveRecipe = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "100vh", // Center the loading spinner in the middle of the screen
+            height: "50vh", // Center the loading spinner in the middle of the screen
           }}
         >
           <CircularProgress />
@@ -128,7 +129,7 @@ const GetListSaveRecipe = () => {
                   display: "flex",
                   flexDirection: "column", // Ensures the content is stacked vertically
                   justifyContent: "space-between", // Ensures spacing between elements
-                  minHeight: 200, // Ensures enough space for content and button
+                  minHeight: 250, // Ensures enough space for content and button
                   flexGrow: 1, // Ensures the content area grows to fill available space
                 }}
               >

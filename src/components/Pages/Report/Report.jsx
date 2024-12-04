@@ -140,10 +140,10 @@ const ReportPage = () => {
     return (
         <section className="section-center">
             <div className="report-page max-w-4xl container text-center bg-white shadow-lg rounded p-3 my-3 mx-auto">
-                <span className="material-icons text-blue-600 text-6xl">
+                <span className="material-icons text-6xl">
                     email
                 </span>
-                <Typography variant="h5" color="primary" gutterBottom><strong>Đơn Khiếu Nại</strong></Typography>
+                <Typography variant="h5" color="" gutterBottom><strong>Đơn Khiếu Nại</strong></Typography>
 
                 <form onSubmit={handleSubmit} noValidate>
                     {/* Title Input */}

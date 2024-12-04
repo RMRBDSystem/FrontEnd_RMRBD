@@ -141,7 +141,7 @@ const FAQPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-gray-250 flex flex-col justify-center relative overflow-hidden">
       <img
         src="https://play.tailwindcss.com/img/beams.jpg"
         alt=""

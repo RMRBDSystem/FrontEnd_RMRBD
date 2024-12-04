@@ -1,3 +1,10 @@
+import websiteIcon from "/images/icon/Web.svg";
+import apiIcon from "/images/icon/API.svg";
+import databaseIcon from "/images/icon/DATA.svg";
+import customSolutionsIcon from "/images/icon/SOLUTION.svg";
+import ecommerceIcon from "/images/icon/ECOMMERCE.svg";
+import supportIcon from "/images/icon/SUPPORT.svg";
+
 export const leftLinks = [
   { href: "/", title: "Home" },
   { href: "/recharge", title: "Recharge" },
@@ -61,5 +68,55 @@ export const filterableData = [
     src: "https://templatelab.com/wp-content/uploads/2023/06/Recipe-Book-Template-3-scaled.jpg",
     title: "Saxophonist",
     text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  },
+];
+export const services = [
+  {
+    id: 1,
+    service: "Phát triển Website",
+    description:
+      "Phát triển website quản lý công thức và phân phối sách sử dụng .NET, ReactJS và RESTful API, giúp tối ưu hóa hiệu suất và trải nghiệm người dùng.",
+    icon: websiteIcon,
+    border: "border-b md:border-r",
+  },
+  {
+    id: 2,
+    service: "Tích hợp API",
+    description:
+      "Tích hợp RESTful API để đồng bộ dữ liệu giữa các hệ thống và đảm bảo kết nối hiệu quả cho quản lý công thức và sách.",
+    icon: apiIcon,
+    border: "border-b lg:border-r",
+  },
+  {
+    id: 3,
+    service: "Quản lý Cơ sở Dữ liệu",
+    description:
+      "Sử dụng SQL Server để quản lý dữ liệu sách và công thức, đảm bảo truy xuất nhanh và an toàn.",
+    icon: databaseIcon,
+    border: "border-b md:border-r lg:border-r-0",
+  },
+  {
+    id: 4,
+    service: "Giải pháp Tùy Chỉnh",
+    description:
+      "Cung cấp giải pháp tùy chỉnh phù hợp với nhu cầu cụ thể, từ quản lý sách đến công thức nấu ăn.",
+    icon: customSolutionsIcon,
+    border: "border-b lg:border-r lg:border-b-0",
+  },
+  {
+    id: 5,
+    service: "Tích hợp Thương mại Điện tử",
+    description:
+      "Tích hợp chức năng bán sách trực tuyến, xử lý thanh toán và quản lý đơn hàng dễ dàng và bảo mật.",
+    icon: ecommerceIcon,
+    border: "border-b md:border-r md:border-b-0 lg:border-b-0",
+  },
+  {
+    id: 6,
+    service: "Duy trì & Hỗ trợ",
+    description:
+      "Cung cấp bảo trì và hỗ trợ liên tục, đảm bảo hệ thống hoạt động ổn định và bảo mật.",
+    icon: supportIcon,
+    border: "",
   },
 ];

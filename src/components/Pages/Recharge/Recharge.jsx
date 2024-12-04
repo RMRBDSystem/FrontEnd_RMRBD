@@ -116,7 +116,7 @@ const RechargePage = () => {
 
   return (
     <section className='section'>
-      <div className="max-w-[1140px] mx-auto p-6 bg-white rounded-lg shadow-lg mb-10">
+      <div className="max-w-[1140px] mx-auto p-6 bg-white rounded-lg shadow-lg mb-10 text-2xl">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Nhận Xu</h2>
         {/* Thông tin người dùng */}
         <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg mb-4">
@@ -128,7 +128,7 @@ const RechargePage = () => {
             />
             <div>
               <p className="font-bold text-gray-800">{userName}</p>
-              <p className="text-sm text-gray-500">&#11088;{coin}</p>
+              <p className="text-sm text-gray-500"><img src="images/icon/dollar.png" alt="" className='h-5 w-5 inline-block'/> {coin}</p>
             </div>
           </div>
           <a href="/coinTransaction" className="text-gray-900 font-bold cursor-pointer">
@@ -149,7 +149,7 @@ const RechargePage = () => {
                 } cursor-pointer`}
               onClick={() => handleSelect(option)}
             >
-              <div className="font-bold text-gray-900 text-xl text-center mb-1">&#11088; {option.coins}</div>
+              <div className="font-bold text-gray-900 text-xl text-center mb-1"><img src="images/icon/dollar.png" alt="" className='h-5 w-5 inline-block'/> {option.coins}</div>
               <div className="text-gray-600 text-sm text-center">
                 {typeof option.price === 'number' ? `₫${option.price.toLocaleString()}` : option.price}
               </div>

@@ -9,7 +9,7 @@ function Layout() {
     <>
       <Navbar />
       <Breadcrumb />
-      <main>
+      <main className='min-h-screen'>
         <Outlet/>
       </main>
       <Footer />

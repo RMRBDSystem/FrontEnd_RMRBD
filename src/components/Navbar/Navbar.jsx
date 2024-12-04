@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import LogoA from '/images/LogoA.png';
-import Logo from '/images/Logo.png';
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import NavLinks from './NavLinks';
 import { leftLinks } from '../../data/data';
@@ -273,7 +272,7 @@ const Navbar = () => {
             variant="text"
             title={"Categories"}
             size="sm"
-            className="flex items-center gap-1 text-gray-50 hover:text-green-500"
+            className="flex items-center gap-1 text-gray-50 hover:text-green-500 text-xl"
             onMouseEnter={() => setShowDropdown(true)}
           >
             <Widgets />
@@ -379,20 +378,31 @@ const Navbar = () => {
                   alt="User Avatar"
                   className="w-12 h-12 object-cover rounded-full"
                 />
-                <span
-                  className={`ml-2 text-sm font-medium text-white`}
-                >
-                  {accountData.userName}
-                </span>
+                <div className="flex flex-col items-start ml-1">
+                  {/* Username */}
+                  <span className="text-base font-bold text-white">
+                    {accountData.userName}
+                  </span>
+                  {/* Coin */}
+                  <span className="text-base font-bold text-white">
+                    {accountData.coin} <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 inline-block"/>
+                  </span>
+                </div>
               </div>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-md text-black z-10">
+                <div className="absolute mt-2 w-52 bg-white shadow-lg rounded-md text-black z-10 text-left p-2 text-base">
                   {userRole === "Admin" && (
                     <>
                       <NavLink
                         to="/admin-dashboard" // Change to your admin page
-                        className="block px-4 py-2 hover:bg-gray-200 rounded-md"
+                        className="block px-4 py-2 hover:bg-gray-200 rounded-md flex items-center"
                       >
+                        {/* Icon for Admin */}
+                        <img
+                          src="/images/icon/ADMIN.svg"
+                          alt="Quản trị viên"
+                          className="h-5 w-5 mr-2"
+                        />
                         Quản trị viên
                       </NavLink>
                     </>
@@ -401,21 +411,41 @@ const Navbar = () => {
                     <>
                       <NavLink
                         to="/update-account"
-                        className="block px-4 py-2 hover:bg-gray-200 rounded-md"
+                        className="block px-2 py-2 hover:bg-gray-200 rounded-md flex items-center"
                       >
+                        {/* Icon for Customer */}
+                        <img
+                          src="/images/icon/ECOMMERCE.svg"
+                          alt="Đăng kí bán hàng"
+                          className="h-5 w-5 mr-2"
+                        />
                         Đăng kí bán hàng
                       </NavLink>
+
                       <NavLink
                         to="/list-saved-recipe"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Customer Recipe */}
+                        <img
+                          src="/images/icon/recipe.svg"
+                          alt="Công thức của tôi"
+                          className="h-5 w-5 mr-2"
+                        />
                         Công thức của tôi
                       </NavLink>
+
                       <NavLink
                         to="/report"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
-                        Khiếu Nại
+                        {/* Icon for Complaint */}
+                        <img
+                          src="/images/icon/SUPPORT.svg"
+                          alt="Khiếu nại"
+                          className="h-5 w-5 mr-2"
+                        />
+                        Khiếu nại
                       </NavLink>
                     </>
                   )}
@@ -423,20 +453,38 @@ const Navbar = () => {
                     <>
                       <NavLink
                         to="/update-role"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Moderator */}
+                        <img
+                          src="/images/icon/MODERATE.svg"
+                          alt="Account moderate"
+                          className="h-5 w-5 mr-2"
+                        />
                         Account moderate
                       </NavLink>
                       <NavLink
                         to="/reportmod"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Report Moderation */}
+                        <img
+                          src="/images/icon/REPORTMOD.svg"
+                          alt="Duyệt đơn khiếu nại"
+                          className="h-5 w-5 mr-2"
+                        />
                         Duyệt đơn khiếu nại
                       </NavLink>
                       <NavLink
                         to="/withdrawmod"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Withdraw */}
+                        <img
+                          src="/images/icon/WITHDRAWMOD.svg"
+                          alt="Duyệt rút xu"
+                          className="h-5 w-5 mr-2"
+                        />
                         Duyệt rút xu
                       </NavLink>
                     </>
@@ -445,40 +493,75 @@ const Navbar = () => {
                     <>
                       <NavLink
                         to="/recipe-customer-list"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Seller Recipe */}
+                        <img
+                          src="/images/icon/SELLERRECIPE.svg"
+                          alt="Seller Recipe"
+                          className="h-5 w-5 mr-2"
+                        />
                         Seller Recipe
                       </NavLink>
                       <NavLink
                         to="/add-recipe"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Add Recipe */}
+                        <img
+                          src="/images/icon/ADDRECIPE.svg"
+                          alt="Add a Recipe"
+                          className="h-5 w-5 mr-2"
+                        />
                         Add a Recipe
                       </NavLink>
                       <NavLink
                         to="/list-saved-recipe"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Seller Saved Recipe */}
+                        <img
+                          src="/images/icon/SAVERECIPE.svg"
+                          alt="Công thức của tôi"
+                          className="h-5 w-5 mr-2"
+                        />
                         Công thức của tôi
                       </NavLink>
                       <NavLink
                         to="/withdrawrequest"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
+                        {/* Icon for Withdraw Request */}
+                        <img
+                          src="/images/icon/WITHDRAWREQUEST.svg"
+                          alt="Yêu cầu rút tiền"
+                          className="h-5 w-5 mr-2"
+                        />
                         Yêu cầu rút tiền
                       </NavLink>
                       <NavLink
                         to="/report"
-                        className="block px-4 py-2 hover:bg-gray-200"
+                        className="block px-4 py-2 hover:bg-gray-200 flex items-center"
                       >
-                        Khiếu Nại
+                        {/* Icon for Complaint */}
+                        <img
+                          src="/images/icon/SUPPORT.svg"
+                          alt="Khiếu nại"
+                          className="h-5 w-5 mr-2"
+                        />
+                        Khiếu nại
                       </NavLink>
                     </>
                   )}
                   <div
-                    className="block px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                    className="block px-2 py-2 hover:bg-gray-200 cursor-pointer flex"
                     onClick={handleLogout}
                   >
+                    <img
+                      src="/images/icon/logout.svg"
+                      alt="Đăng xuất"
+                      className="h-5 w-5 mr-2"
+                    />
                     Đăng xuất
                   </div>
                 </div>
@@ -607,6 +690,11 @@ const Navbar = () => {
                             size="sm"
                             onClick={handleLogout}
                           >
+                            <img
+                              src="/images/icon/logout.svg"
+                              alt="Đăng xuất"
+                              className="h-5 w-5 mr-2"
+                            />
                             Đăng xuất
                           </Button>
                         </div>
