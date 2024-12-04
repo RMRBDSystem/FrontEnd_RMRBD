@@ -1,15 +1,16 @@
-import { React, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+
 import Swal from "sweetalert2";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import Navbar from "../Navbar/Navbar";
-import Footer from "../Footer/Footer";
 import Cookies from "js-cookie";
 import Tesseract from "tesseract.js";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaTrashAlt, FaCloudUploadAlt } from "react-icons/fa";
+import { useSocket } from "../../App"
+import { getAccountByRoleId } from '../services/AccountService'
+import {createNotification} from "../services/NotificationService"
 const AccountProfile = () => {
   const [accountID, setAccountID] = useState();
   const [portrait, setPortrait] = useState(null);
@@ -32,12 +33,28 @@ const AccountProfile = () => {
     idCardNumber: "",
     dateOfBirth: "",
   });
+  const { socket, accountOnline } = useSocket();
+  const [listModer, setListModer] = useState([]);
 
   useEffect(() => {
-    const storedUserId = Cookies.get("UserId");
-    if (storedUserId) {
-      setAccountID(storedUserId);
-    }
+    const fetchReport = async () => {
+      try {
+        const storedUserId = Cookies.get("UserId");
+        if (storedUserId) {
+          setAccountID(storedUserId);
+        }
+        const stored = await getAccountByRoleId();
+          const extractedModeratornames = stored.map(account => ({
+            Id: account.accountId,
+            userName: account.userName
+          }));
+          setListModer(extractedModeratornames);
+      } catch (err) {
+          console.error(err);
+      }
+  };
+  fetchReport();
+    
   }, []);
 
   const handleSaveAccountProfile = async () => {
@@ -213,6 +230,30 @@ const AccountProfile = () => {
     setFile(null);
     setPreview(null);
     setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+  };
+
+  
+  const handleNotification = (text) => {
+    for (let i = 0; i < listModer.length; i++) {
+      // Gửi thông báo qua socket
+      socket.emit("sendNotification", {
+        senderName: accountOnline,
+        receiverName: listModer[i].userName,
+        content: text,
+      });
+
+      // Tạo thông báo mới
+      const newNotificationData = {
+        accountId: listModer[i].Id,
+        content: text,
+        date: new Date().toISOString(),
+        status: 1,
+      };
+
+      // Gọi hàm tạo thông báo (không cần await nếu bạn không cần phải chờ)
+      createNotification(newNotificationData);
+    }
+
   };
 
   return (
@@ -528,7 +569,10 @@ const AccountProfile = () => {
           <div className="d-flex justify-content-end mt-4">
             <Button
               variant="primary"
-              onClick={handleSaveAccountProfile}
+              onClick={()=>{
+                handleNotification(`${accountOnline} đã gửi thông tin đăng kí bán hàng về hệ thống`);
+                handleSaveAccountProfile();
+              }}
               disabled={isLoading}
               className="px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-4 focus:ring-orange-300 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50"
             >
