@@ -4,7 +4,7 @@ import axios from "axios";
 import ClockIcon from "/images/icon/iconclock.png"
 import SpoonIcon from "/images/icon/iconsspoon.png"
 import CheckMarkIcon from "/images/icon/iconscheckmark24.png"
-
+import CommentRecipes from '../CommentItem/CommentRecipes'
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
@@ -151,8 +151,8 @@ const RecipeDetail = () => {
               </p>
               <p className="text-lg mb-2">
                 <strong className="text-gray-800">Ngày tạo:</strong>{" "}
-                {recipe?.createDate 
-                  ? new Date(recipe.createDate ).toLocaleDateString("vi-VN") // Định dạng ngày theo chuẩn Việt Nam
+                {recipe?.createDate
+                  ? new Date(recipe.createDate).toLocaleDateString("vi-VN") // Định dạng ngày theo chuẩn Việt Nam
                   : "N/A"}
               </p>
             </div>
@@ -238,6 +238,15 @@ const RecipeDetail = () => {
                   ? "Blocked"
                   : "N/A"}
           </p>
+          <div className="relative flex items-center mb-8">
+            <hr className="flex-grow border-t border-black-300" />
+            <img src={SpoonIcon} alt="Icon" className="mx-2 w-6 h-6" />
+          </div>
+          <CommentRecipes recipeId={recipeId} createById={accountID} />
+          <div className="relative flex items-center mb-8">
+            <hr className="flex-grow border-t border-black-300" />
+            <img src={SpoonIcon} alt="Icon" className="mx-2 w-6 h-6" />
+          </div>
           <button
             className="mt-6 px-6 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition"
             onClick={() => window.history.back()}
