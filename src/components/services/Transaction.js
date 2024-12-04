@@ -91,3 +91,29 @@ export const updateCoinTransaction = async (coinTransaction) => {
         throw error;
     }
 }
+// Create book transaction record
+export const createBookTransaction = async (customerId, orderId, amount, paymentType) => {
+    try {
+        const transactionPayload = {
+            customerId: parseInt(customerId),
+            orderId: parseInt(orderId),
+            moneyFluctuations: paymentType === 2 ? amount : null, // Fixed field name to match API
+            coinFluctuations: paymentType === 1 ? amount : null, // If COINS (type 1), use amount
+            date: new Date().toISOString(),
+            details: paymentType === 1 ? 'Thanh toán bằng xu' : 'Thanh toán khi nhận hàng',
+            status: 1
+        };
+
+        const response = await axios.post('/BookTransaction', transactionPayload, {
+            baseURL: API_URL,
+            headers: {
+                'Content-Type': 'application/json',
+                'Token': TOKEN,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error creating book transaction:', error);
+        throw error;
+    }
+};

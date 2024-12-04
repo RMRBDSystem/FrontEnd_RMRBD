@@ -25,13 +25,10 @@ const WithdrawResponse = () => {
 
     const handelApprove = async () => {
         try {
-            const account = await getAccountById(withdraw.customer.accountId);
-            console.log('account:', account);
-            account.coin = account.coin + withdraw.coinFluctuations;
-            const response = await updateAccount(account);
+
             withdraw.status = 1;
             const response2 = await updateCoinTransaction(withdraw);
-            if (response.status && response2.status) {
+            if (response2.status) {
                 alert('Duyệt thành công');
                 window.location.href = '/withdrawmod';
             }
@@ -44,9 +41,13 @@ const WithdrawResponse = () => {
     }
 
     const handelCancel = async () => {
+        const account = await getAccountById(withdraw.customer.accountId);
+        console.log('account:', account);
+        account.coin = account.coin - withdraw.coinFluctuations;
+        const response = await updateAccount(account);
         withdraw.status = 0;
-        const response = await updateCoinTransaction(withdraw);
-        if (response.status) {
+        const response2 = await updateCoinTransaction(withdraw);
+        if (response.status && response2.status) {
             alert('Hủy thành công');
             window.location.href = '/withdrawmod';
         } else {

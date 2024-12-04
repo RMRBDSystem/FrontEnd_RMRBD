@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { saveReportImage, saveReport } from '../../services/ReportService';
 import { TextField, Button, Box, Typography } from '@mui/material';
 import Swal from 'sweetalert2';  // Import SweetAlert2
 import { useNavigate } from 'react-router-dom';  // Import useNavigate hook
-
+import { useSocket } from '../../../App'
+import { getAccountByRoleId} from '../../services/AccountService'
+import { createNotification } from '../../services/NotificationService'
 const ReportPage = () => {
     const imageInput = useRef(null);
     const [title, setTitle] = useState('');
@@ -14,6 +16,8 @@ const ReportPage = () => {
     const [loading, setLoading] = useState(false);  // Loading state
     const navigate = useNavigate();  // Initialize useNavigate hook
 
+    const [listModer,setListModer]=useState([]);
+
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -22,11 +26,24 @@ const ReportPage = () => {
     };
 
     useEffect(() => {
-        const storedUserId = Cookies.get('UserId');
-        if (storedUserId) {
-            setUserId(storedUserId);
-        }
-    }, []);
+        const fetchReport = async () => {
+            try {
+                const storedUserId = Cookies.get('UserId');
+                if (storedUserId) {
+                    setUserId(storedUserId);
+                }
+                const stored = await getAccountByRoleId();
+                const extractedModeratornames = stored.map(account => ({
+                    Id: account.accountId,
+                    userName: account.userName
+                }));
+                setListModer(extractedModeratornames);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchReport();
+    }, [listModer]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -93,6 +110,31 @@ const ReportPage = () => {
             });
             setLoading(false);
         }
+    };
+
+    const { socket, accountOnline } = useSocket();
+    
+    const handleNotification = (text) => {
+        for (let i = 0; i < listModer.length; i++) {
+            // Gửi thông báo qua socket
+            socket.emit("sendNotification", {
+                senderName: accountOnline,
+                receiverName: listModer[i].userName,
+                content: text,
+            });
+        
+            // Tạo thông báo mới
+            const newNotificationData = {
+                accountId: listModer[i].Id,
+                content: text,
+                date: new Date().toISOString(),
+                status: 1,
+            };
+        
+            // Gọi hàm tạo thông báo (không cần await nếu bạn không cần phải chờ)
+            createNotification(newNotificationData);
+        }
+        
     };
 
     return (
@@ -179,7 +221,15 @@ const ReportPage = () => {
 
                     {/* Submit and History buttons */}
                     <Box mt={2}>
-                        <Button variant="contained" color="success" size="large" type="submit" sx={{ mr: 2 }} disabled={loading}>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            size="large"
+                            type="submit"
+                            sx={{ mr: 2 }}
+                            disabled={loading}
+                            onClick={() => handleNotification(`${accountOnline} đã gửi khiếu nại về hệ thống`)} // Correctly placed here
+                        >
                             {loading ? 'Đang gửi...' : 'Gửi báo cáo'}
                         </Button>
                         <Button variant="outlined" color="error" size="large" href="/listreport">

@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { getReportById, updateReport } from '../../services/ReportService';
 import { Box, Typography, Button, TextareaAutosize, Card, CardContent } from '@mui/material';
 import Swal from 'sweetalert2'; // Import SweetAlert2
-
+import {useSocket} from '../../../App'
+import {createNotification} from '../../services/NotificationService'
+import {getAccountById} from '../../services/AccountService'
 const ReportResponse = () => {
     const { reportId } = useParams();
     const [report, setReport] = useState({});
     const [response, setResponse] = useState('');
     const [UserId, setUserId] = useState('');
+    const [idusersendrp,setIdsersendrp]=useState('');
+    const [usernamerp,setUsernamerp]=useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -20,11 +24,15 @@ const ReportResponse = () => {
                 if (storedUserId) {
                     setUserId(storedUserId);
                 }
+                setIdsersendrp(report.customerId);
+                const usernamesendrp = await getAccountById(idusersendrp);
+                setUsernamerp(usernamesendrp.userName);
+
             }
         }
 
         fetchData();
-    }, [reportId]);
+    }, [reportId,report,idusersendrp]);
 
     const handleCancel = async (id) => {
         if (response) {
@@ -81,6 +89,24 @@ const ReportResponse = () => {
             });
         }
     }
+    const { socket, accountOnline } = useSocket();
+    const handleNotification = (text) => {
+        socket.emit("sendNotification", {
+            senderName: accountOnline,
+            receiverName: usernamerp,
+            content: text,
+        });
+        const addNotification = () => {
+            const newNotificationData = {
+                accountId: idusersendrp,
+                content: text,
+                date: new Date().toISOString(),
+                status: 1,
+            };
+            createNotification(newNotificationData); // Không cần await
+        };
+        addNotification();
+    };
 
     return (
         <Box className="container" sx={{ maxWidth: '1200px', margin: 'auto', padding: 2 }}>
@@ -151,7 +177,10 @@ const ReportResponse = () => {
                             variant="contained" 
                             color="error" 
                             fullWidth 
-                            onClick={() => handleCancel(report.feedBackId)}
+                            onClick={() => {
+                                handleCancel(report.feedBackId);
+                                handleNotification(`${accountOnline} đã từ chối khiếu nại ${report.title} của bạn`);
+                              }}
                         >
                             Từ chối
                         </Button>
@@ -164,7 +193,10 @@ const ReportResponse = () => {
                             variant="contained" 
                             color="success" 
                             fullWidth 
-                            onClick={() => handleComplete(report.feedBackId)}
+                            onClick={() => {
+                                handleComplete(report.feedBackId);
+                                handleNotification(`${accountOnline} đã phản hồi khiếu nại ${report.title} của bạn`);
+                            }}
                         >
                             Hoàn thành
                         </Button>

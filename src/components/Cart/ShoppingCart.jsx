@@ -9,6 +9,9 @@ import { getProvinceName, fetchDistrictName, fetchWardName } from '../services/A
 import { Link } from 'react-router-dom';
 import { FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import DeleteConfirmationModal from '../../components/Cart/components/DeleteConfirmationModal';
+import { motion } from 'framer-motion';
+import LoadingOverlay from '../shared/LoadingOverlay';
 
 const ShoppingCart = () => {
   const [orders, setOrders] = useState([]);
@@ -21,6 +24,7 @@ const ShoppingCart = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -32,11 +36,12 @@ const ShoppingCart = () => {
           headers: { 'Content-Type': 'application/json', 'Token': '123-abc' },
         });
     
-        // Filter orders by customerId
-        const userBookOrders = bookOrdersResponse.data.filter(order => order.customerId === parseInt(userId));
+        // Filter orders by customerId AND null orderCode (cart items)
+        const userBookOrders = bookOrdersResponse.data.filter(order => 
+          order.customerId === parseInt(userId) && order.orderCode === null
+        );
     
         // Fetch order details
-        const bookOrderIds = userBookOrders.map(order => order.orderId);
         const orderDetailsResponse = await axios.get('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
           headers: { 'Content-Type': 'application/json', 'Token': '123-abc' },
         });
@@ -50,10 +55,11 @@ const ShoppingCart = () => {
             quantity: detail.quantity,
             price: detail.price,
             totalPrice: detail.quantity * detail.price,
-            purchaseDate: order?.purchaseDate,  // Safe access with optional chaining
-            clientAddressId: order?.clientAddressId,  // Safe access with optional chaining
+            purchaseDate: order?.purchaseDate,
+            clientAddressId: order?.clientAddressId,
+            orderId: order?.orderId // Add orderId to track parent order
           };
-        });
+        }).filter(order => order.orderId != null); // Only include orders that match with parent orders
     
         // Log flattened orders for debugging
         console.log("Flattened Orders:", flatOrders);
@@ -66,7 +72,7 @@ const ShoppingCart = () => {
         setOrders(flatOrders);
       } catch (error) {
         console.error('Error fetching orders or details:', error);
-        toast.error('Failed to load orders.');
+        toast.error('Failed to load cart items.');
       }
     };
     
@@ -139,16 +145,26 @@ const ShoppingCart = () => {
   axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
   // Confirm Deletion
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (orderToDelete) {
-      // Step 1: Delete the specific BookOrderDetail from the API
-      axios.delete(`https://rmrbdapi.somee.com/odata/BookOrderDetail/${orderToDelete}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Token: "123-abc",
-        },
-      })
-      .then(() => {
+      try {
+        // Find the order detail in our current state to get its orderId
+        const orderToRemove = orders.find(order => order.orderDetailId === orderToDelete);
+        if (!orderToRemove) {
+          throw new Error('Order detail not found');
+        }
+
+        // Step 1: Delete the specific BookOrderDetail
+        await axios.delete(
+          `https://rmrbdapi.somee.com/odata/BookOrderdetail/${orderToDelete}`,  // Note: changed to 'BookOrderdetail'
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Token: "123-abc",
+            },
+          }
+        );
+
         // Step 2: Remove the deleted BookOrderDetail from the state (UI)
         setOrders(prevOrders => {
           const updatedOrders = prevOrders.filter(order => order.orderDetailId !== orderToDelete);
@@ -188,11 +204,10 @@ const ShoppingCart = () => {
         });
   
         toast.success("Order detail removed from cart");
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Error deleting order detail from API:", error.response || error.message);
         toast.error("Failed to remove order detail.");
-      });
+      }
     }
   
     setShowModal(false); // Close the modal after deletion
@@ -213,7 +228,7 @@ const ShoppingCart = () => {
     return addressLine;
   };
 
-  const handleCheckboxChange = (orderDetailId, totalPrice) => {
+  const handleCheckboxChange = (orderDetailId) => {
     setSelectedOrders((prevSelectedOrders) => {
       const newSelectedOrders = new Set(prevSelectedOrders);
       if (newSelectedOrders.has(orderDetailId)) {
@@ -294,191 +309,66 @@ useEffect(() => {
   });
 }, [orders, addressDetails]); 
 
-const handleQuantityInputChange = (orderDetailId, newQuantity) => {
-  const parsedQuantity = Math.max(parseInt(newQuantity) || 1, 1);  // Ensure minimum of 1
+const updateOrderQuantity = (orderDetailId, newQuantity) => {
   const orderToUpdate = orders.find(order => order.orderDetailId === orderDetailId);
   if (!orderToUpdate) return;
 
-  // Get the available stock for the book
-  const book = books[orderToUpdate.bookId];
-  const maxQuantity = book?.unitInStock || 0;
+  // If trying to decrease below 1, show delete confirmation
+  if (newQuantity < 1) {
+    setOrderToDelete(orderDetailId);
+    setShowDeleteModal(true);
+    return;
+  }
 
-  // If the quantity typed exceeds stock, warn the user
-  if (parsedQuantity > maxQuantity) {
+  const maxQuantity = books[orderToUpdate.bookId]?.unitInStock || 0;
+
+  if (newQuantity > maxQuantity) {
     toast.warn("Quantity exceeds available stock!");
     return;
   }
 
-  // Recalculate the total price based on new quantity
-  const updatedTotalPrice = parsedQuantity * orderToUpdate.price;
-
-  // Update the order with the new quantity
-  setOrders(prevOrders => prevOrders.map(order =>
-    order.orderDetailId === orderDetailId ? { ...order, quantity: parsedQuantity, totalPrice: updatedTotalPrice } : order
-  ));
-
-  // Recalculate the total price of selected orders
-  updateTotalPrice();
-
-  // Update the BookOrderDetail on the server
-  axios.put(
-    `https://rmrbdapi.somee.com/odata/BookOrderDetail/${orderDetailId}`,
-    {
-      ...orderToUpdate,
-      quantity: parsedQuantity,
-      totalPrice: updatedTotalPrice,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Token: "123-abc",
-      },
-    }
-  )
-  .then(response => {
-    console.log("API Response:", response.data);
-  })
-  .catch(error => {
-    console.error("Error updating quantity:", error.response || error.message);
-  });
-
-  // Show delete modal if quantity is zero
-  if (parsedQuantity === 0) {
-    handleShowModal(orderToUpdate.orderId); // Show the delete modal if quantity is zero
-  }
-};
-
-const handleQuantityChange = (orderDetailId, changeType) => {
-  const orderToUpdate = orders.find(order => order.orderDetailId === orderDetailId);
-  if (!orderToUpdate) return;
-
-  const currentQuantity = orderToUpdate.quantity || 0;
-  let updatedQuantity = changeType === 1 ? currentQuantity + 1 : currentQuantity - 1;
-
-  // Ensure the updated quantity does not go below 1
-  if (updatedQuantity < 1) {
-    updatedQuantity = 0; // Set to zero if it's less than 1
-  }
-
-  const book = books[orderToUpdate.bookId];
-  const maxQuantity = book?.unitInStock || 0;
-  if (updatedQuantity > maxQuantity) {
-    toast.warn("Quantity exceeds available stock!");
-    return;
-  }
-
+  const updatedQuantity = Math.max(newQuantity, 1); // Ensure minimum of 1
   const updatedTotalPrice = updatedQuantity * orderToUpdate.price;
 
-  // Update the order in the state
-  setOrders(prevOrders => prevOrders.map(order =>
-    order.orderDetailId === orderDetailId ? { ...order, quantity: updatedQuantity, totalPrice: updatedTotalPrice } : order
-  ));
+  setOrders(prevOrders =>
+    prevOrders.map(order =>
+      order.orderDetailId === orderDetailId
+        ? { ...order, quantity: updatedQuantity, totalPrice: updatedTotalPrice }
+        : order
+    )
+  );
 
-  updateTotalPrice();
-
-  const updatedOrder = {
-    orderDetailId: orderToUpdate.orderDetailId,
-    orderId: orderToUpdate.orderId,
-    bookId: orderToUpdate.bookId,
-    price: orderToUpdate.price,  // Ensure price is included
-    quantity: updatedQuantity,
-    totalPrice: updatedTotalPrice,
-    status: orderToUpdate.status || 1  // Ensure status is sent
-  };
-
-  // Update the BookOrderDetail on the server
-  axios.put(
-    `https://rmrbdapi.somee.com/odata/BookOrderDetail/${orderDetailId}`,
-    {
+  // Update server and handle 0 quantity
+  if (updatedQuantity === 0) handleShowModal(orderDetailId);
+  else {
+    axios.put(`https://rmrbdapi.somee.com/odata/BookOrderDetail/${orderDetailId}`, {
       ...orderToUpdate,
       quantity: updatedQuantity,
       totalPrice: updatedTotalPrice,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Token: "123-abc",
-      },
-    }
-  )
-  .then(response => {
-    console.log("API Response:", response.data);
-  })
-  .catch(error => {
-    console.error("Error updating quantity:", error.response || error.message);
-  });
-
-  // Show delete modal if quantity is zero
-  if (updatedQuantity === 0) {
-    handleShowModal(orderToUpdate.orderId); // Show the delete modal if quantity is zero
+    }, { headers: { "Content-Type": "application/json", Token: "123-abc" } })
+    .catch(error => console.error("Error updating quantity:", error));
   }
 };
-
-  const handleDeleteOrder = (orderDetailId) => {
-    const orderToDelete = orders.find(order => order.orderDetailId === orderDetailId);
-  
-    if (!orderToDelete) return;
-  
-    // Delete the order detail first
-    axios.delete(`https://rmrbdapi.somee.com/odata/BookOrderDetail/${orderDetailId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Token: "123-abc",
-      },
-    })
-    .then(response => {
-      console.log("Order detail deleted:", response.data);
-  
-      // Remove the order detail from the cart
-      setOrders(prevOrders => {
-        const updatedOrders = prevOrders.filter(order => order.orderDetailId !== orderDetailId);
-        
-        // Check if there are any remaining details for this orderId
-        const remainingDetails = updatedOrders.filter(order => order.orderId === orderToDelete.orderId);
-        
-        // If no remaining details, remove the whole order from the cart
-        if (remainingDetails.length === 0) {
-          // Call the API to delete the entire order
-          axios.delete(`https://rmrbdapi.somee.com/odata/BookOrder/${orderToDelete.orderId}`, {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          })
-          .then(() => {
-            console.log(`Order ${orderToDelete.orderId} deleted successfully`);
-            toast.success(`Order ${orderToDelete.orderId} deleted because it has no items left.`);
-          })
-          .catch((err) => {
-            console.error("Failed to delete BookOrder:", err);
-            toast.error("Failed to delete the order.");
-          });
-  
-          // Remove the order from the cart
-          return updatedOrders.filter(order => order.orderId !== orderToDelete.orderId);
-        }
-  
-        return updatedOrders;
-      });
-  
-      toast.success("Order detail removed from cart");
-    })
-    .catch(error => {
-      console.error("Error deleting order detail:", error.response || error.message);
-      toast.error("Failed to delete order detail.");
-    });
-  };  
   
   const handleProceedToCheckout = () => {
     if (selectedOrders.size > 0) {
+      setIsProcessing(true); // This will show LoadingOverlay
       const selectedOrdersList = orders
-        .filter(order => selectedOrders.has(order.orderId))
+        .filter(order => selectedOrders.has(order.orderDetailId))
         .map(order => ({
           ...order,
-          bookDetails: books[order.bookId] // Include book details in the order
+          bookDetails: books[order.bookId],
+          address: addressDetails[order.clientAddressId]
         }));
-  
-      navigate('/checkout', { state: { selectedOrders: selectedOrdersList } });
+
+      navigate('/checkout', { 
+        state: { 
+          selectedOrders: selectedOrdersList,
+          totalAmount: totalPrice 
+        } 
+      });
+      
+      setTimeout(() => setIsProcessing(false), 500);
     } else {
       toast.error('Please select at least one order to proceed!');
     }
@@ -488,122 +378,229 @@ const handleQuantityChange = (orderDetailId, changeType) => {
     setShowModal(false); // Close the modal by setting showModal to false
   };
 
-   
+  const handleDeleteClick = (orderDetailId) => {
+    setOrderToDelete(orderDetailId);
+    setShowDeleteModal(true);
+  };
+
+  // Group orders by seller (createById)
+  const groupedOrders = orders.reduce((acc, order) => {
+    const book = books[order.bookId];
+    const sellerId = book?.createById;
+    const sellerName = book?.createBy?.userName || 'Unknown Seller';
+    
+    if (!acc[sellerId]) {
+      acc[sellerId] = {
+        seller: {
+          id: sellerId,
+          name: sellerName,
+        },
+        orders: []
+      };
+    }
+    acc[sellerId].orders.push(order);
+    return acc;
+  }, {});
+
   return (
-    <>
-      <ToastContainer />
-      <Container className="my-5">
-        <h2 className="text-center mb-4">Your Orders</h2>
-        <Table bordered responsive className="text-center">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Book Image</th>
-              <th>Book Name</th>
-              <th>Price</th>
-              <th>Total Price</th>
-              <th className="w-36">Quantity</th>
-              <th>Action</th> {/* Added Action column for Trash Icon */}
-            </tr>
-          </thead>
-          <tbody>
-          {orders.length > 0 ? (
-            orders.map((order) => (
-              <tr key={order.orderId}>
-                <td>
-                <input
-                  type="checkbox"
-                  checked={selectedOrders.has(order.orderDetailId)} 
-                  onChange={() => handleCheckboxChange(order.orderDetailId, order.totalPrice)}  
-                />
-                </td>
-                <td>
-                  {books[order.bookId] && books[order.bookId].images.length > 0 ? (
-                    <img
-                      src={books[order.bookId].images[0].imageUrl}
-                      alt="Book"
-                      className="w-24 h-24 object-cover cursor-pointer"
-                    />
-                  ) : (
-                    <span>No Image</span>
-                  )}
-                </td>
-                <td>{books[order.bookId]?.bookName || 'No book available'}</td>
-                <td>{formatCurrency(order.price)}</td>
-                <td>{formatCurrency(order.totalPrice)}</td>
-                <td className="text-center">
-                  <div className="d-flex justify-content-center align-items-center">
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => handleQuantityChange(order.orderDetailId, -1)}  // Decrease quantity
-                      className="me-2"
-                      disabled={order.quantity <= 0} 
-                    >
-                      -
-                    </Button>
-
-                    <input
-                      type="number"
-                      value={order.quantity}
-                      onChange={(e) => handleQuantityInputChange(order.orderDetailId, e.target.value)}  // Update quantity via input
-                      className="w-20 text-center"
-                      min="1"
-                      max={books[order.bookId]?.unitInStock || 0}
-                    />
-
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => handleQuantityChange(order.orderDetailId, 1)}  // Increase quantity
-                      className="ms-2"
-                      disabled={order.quantity >= (books[order.bookId]?.unitInStock || 0)}  // Disable the plus button if quantity exceeds stock
-                    >
-                      +
-                    </Button>
-                  </div>
-                </td>
-
-                <td className="flex justify-center items-center h-28">
-                <FaTrash
-                    className="cursor-pointer text-xl"
-                    onClick={() => handleShowModal(order.orderDetailId)} // Pass the specific orderDetailId
-                  />
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="9" className="text-center">No orders available.</td>
-            </tr>
-          )}
-          </tbody>
-        </Table>
-        <Modal show={showModal} onHide={handleCloseModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Confirm Deletion</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Are you sure you want to delete this order?
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              No
-            </Button>
-            <Button variant="danger" onClick={handleConfirmDelete}>
-              Yes, Delete
-            </Button>
-          </Modal.Footer>
-        </Modal>
-        <div className="d-flex justify-content-between align-items-center">
-          <h4>Total: {formatCurrency(totalPrice)}</h4>
-          <Button variant="primary" disabled={selectedOrders.size === 0}
-            onClick={handleProceedToCheckout}>
-            Proceed to Checkout
-          </Button>
+    <motion.div
+      initial={{ x: "100%" }}
+      animate={{ x: 0 }}
+      exit={{ x: "-100%" }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
+      className="bg-gray-100 min-h-screen py-4"
+    >
+      <div className="container mx-auto px-4">
+        <ToastContainer />
+        
+        {/* Header Bar */}
+        <div className="bg-white rounded-t-lg shadow-sm mb-3 p-4">
+          <div className="grid grid-cols-12 text-gray-600 text-sm">
+            <div className="col-span-1 text-center">
+              <input
+                type="checkbox"
+                className="w-4 h-4 accent-orange-500"
+                checked={selectedOrders.size === orders.length}
+                onChange={() => {
+                  if (selectedOrders.size === orders.length) {
+                    setSelectedOrders(new Set());
+                  } else {
+                    setSelectedOrders(new Set(orders.map(o => o.orderDetailId)));
+                  }
+                }}
+              />
+            </div>
+            <div className="col-span-5">Sản Phẩm</div>
+            <div className="col-span-2 text-center">Đơn Giá</div>
+            <div className="col-span-2 text-center">Số Lượng</div>
+            <div className="col-span-1 text-center">Số Tiền</div>
+            <div className="col-span-1 text-center">Thao Tác</div>
+          </div>
         </div>
-      </Container>
-    </>
+
+        {/* Grouped Orders by Seller */}
+        {Object.values(groupedOrders).map(({ seller, orders }) => (
+          <div key={seller.id} className="bg-white rounded-lg shadow-sm mb-4 p-4">
+            {/* Seller Header */}
+            <div className="border-b pb-4 flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="w-4 h-4 accent-orange-500"
+                checked={orders.every(order => selectedOrders.has(order.orderDetailId))}
+                onChange={() => {
+                  const sellerOrderIds = orders.map(o => o.orderDetailId);
+                  if (orders.every(order => selectedOrders.has(order.orderDetailId))) {
+                    setSelectedOrders(prev => {
+                      const next = new Set(prev);
+                      sellerOrderIds.forEach(id => next.delete(id));
+                      return next;
+                    });
+                  } else {
+                    setSelectedOrders(prev => {
+                      const next = new Set(prev);
+                      sellerOrderIds.forEach(id => next.add(id));
+                      return next;
+                    });
+                  }
+                }}
+              />
+              <span className="text-orange-600 font-medium">Yêu thích</span>
+              <span className="font-medium">{seller.name}</span>
+            </div>
+
+            {/* Products */}
+            {orders.map((order) => {
+              const book = books[order.bookId];
+              return (
+                <div key={order.orderDetailId} className="grid grid-cols-12 items-center py-4 border-b">
+                  <div className="col-span-1 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedOrders.has(order.orderDetailId)}
+                      onChange={() => handleCheckboxChange(order.orderDetailId)}
+                      className="w-4 h-4 accent-orange-500"
+                    />
+                  </div>
+                  
+                  <div className="col-span-5 flex items-center gap-4">
+                    <Link to={`/book/${order.bookId}`}>
+                      <img
+                        src={book?.images?.[0]?.imageUrl || 'placeholder.jpg'}
+                        alt={book?.bookName}
+                        className="w-16 h-20 object-cover rounded hover:opacity-80 transition-opacity"
+                      />
+                    </Link>
+                    <Link 
+                      to={`/book/${order.bookId}`}
+                      className="font-medium text-gray-800 hover:text-orange-600 transition-colors"
+                    >
+                      {book?.bookName}
+                    </Link>
+                  </div>
+
+                  <div className="col-span-2 text-center">
+                    {new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND'
+                    }).format(order.price)}
+                  </div>
+
+                  <div className="col-span-2 flex justify-center">
+                    <div className="flex border rounded">
+                      <button
+                        onClick={() => updateOrderQuantity(order.orderDetailId, order.quantity - 1)}
+                        className="px-3 py-1 hover:bg-gray-100"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        value={order.quantity}
+                        onChange={(e) => updateOrderQuantity(order.orderDetailId, parseInt(e.target.value, 10))}
+                        className="w-14 text-center border-x"
+                        min="1"
+                      />
+                      <button
+                        onClick={() => updateOrderQuantity(order.orderDetailId, order.quantity + 1)}
+                        className="px-3 py-1 hover:bg-gray-100"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="col-span-1 text-center">
+                    {new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND'
+                    }).format(order.price * order.quantity)}
+                  </div>
+
+                  <div className="col-span-1 text-center">
+                    <button
+                      onClick={() => handleDeleteClick(order.orderDetailId)}
+                      className="text-gray-500 hover:text-red-500"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+
+        {/* Footer/Checkout Bar */}
+        <div className="bg-white rounded-lg shadow-sm p-4 sticky bottom-0">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <input
+                type="checkbox"
+                className="w-4 h-4 accent-orange-500"
+                checked={selectedOrders.size === orders.length}
+                onChange={() => {
+                  if (selectedOrders.size === orders.length) {
+                    setSelectedOrders(new Set());
+                  } else {
+                    setSelectedOrders(new Set(orders.map(o => o.orderDetailId)));
+                  }
+                }}
+              />
+              <span>Select All</span>
+            </div>
+            <div className="flex items-center gap-8">
+              <div>
+                <span>Tổng ({selectedOrders.size} sách): </span>
+                <span className="text-xl text-orange-600 font-medium">
+                  {new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                  }).format(totalPrice)}
+                </span>
+              </div>
+              <button
+                onClick={handleProceedToCheckout}
+                disabled={selectedOrders.size === 0}
+                className={`px-12 py-2 rounded ${
+                  selectedOrders.size === 0
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : 'bg-orange-500 hover:bg-orange-600'
+                } text-white`}
+              >
+                Thanh Toán
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+      />
+      {isProcessing && <LoadingOverlay />}
+    </motion.div>
   );
 };
 

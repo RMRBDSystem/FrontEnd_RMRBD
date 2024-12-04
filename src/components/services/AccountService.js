@@ -32,3 +32,18 @@ export const updateAccount = async (account) => {
         throw error;
     }
 };
+export const getAccountByRoleId = async () => {
+    try {
+        const response = await axios.get(`https://rmrbdapi.somee.com/odata/Account?$filter=roleId eq 3`, {
+            headers: {
+              token: '123-abc',
+              mode: 'no-cors'
+            }
+          });
+          //console.log(response.data.userName);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching books:", error);
+        throw error;
+    }
+};

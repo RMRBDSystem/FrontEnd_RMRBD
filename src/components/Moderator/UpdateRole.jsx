@@ -1,189 +1,210 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import Table from "react-bootstrap/Table";
-import { FaBan, FaCheckCircle, FaRegClock } from "react-icons/fa";
-import Cookies from "js-cookie";
+import {
+  FaBan,
+  FaCheckCircle,
+  FaRegClock,
+  FaInfoCircle,
+  FaFilter,
+} from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import DataTable from "react-data-table-component";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 const AccountProfile = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [censorID, setCensorID] = useState();
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [showFilter, setShowFilter] = useState(false); // State to control the filter visibility
+  const [statusFilter, setStatusFilter] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUserId  = Cookies.get("UserId");
-    if (storedUserId) {
-      setCensorID(storedUserId);
-    }
     getData();
   }, []);
 
   const getData = async () => {
+    const headers = { "Content-Type": "application/json", token: "123-abc" };
+
     try {
-      const result = await axios.get("https://rmrbdapi.somee.com/odata/AccountProfile", {
-        headers: { "Content-Type": "application/json", token: "123-abc" },
-      });
-
-      const accountProfiles = result.data;
-
-      // Lấy dữ liệu của từng Account từ API Account
-      const accountDataPromises = accountProfiles.map(async (profile) => {
-        try {
-          const accountResult = await axios.get(`https://rmrbdapi.somee.com/odata/Account/${profile.accountId}`, {
-            headers: { "Content-Type": "application/json", token: "123-abc" },
-          });
-
-          return { ...profile, Account: accountResult.data };
-        } catch (error) {
-          console.error("Error fetching account data:", error);
-          return { ...profile, Account: null };
-        }
-      });
-
-      const updatedData = await Promise.all(accountDataPromises);
-
-      setData(updatedData);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching account profiles:", error);
-      setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (accountId, newStatus) => {
-    const confirmed = window.confirm("Bạn có chắc chắn muốn thay đổi trạng thái không?");
-    if (!confirmed) {
-      return;
-    }
-
-    const updatedItem = data.find((item) => item.accountId === accountId);
-
-    // Cập nhật status ở bảng AccountProfile
-    const updateAccountProfileData = { ...updatedItem, status: newStatus , censorId: censorID};
-
-    // Nếu status = 1 thì cập nhật roleId ở bảng Account thành 2
-    if (newStatus === 1) {
-      updatedItem.Account.roleId = 2;
-    }
-
-    const updatePromises = [];
-
-    // 1. Cập nhật status ở bảng AccountProfile
-    const accountProfileUpdatePromise = axios.put(
-      `https://rmrbdapi.somee.com/odata/AccountProfile/${accountId}`,
-      updateAccountProfileData,
-      {
-        headers: { "Content-Type": "application/json", Token: "123-abc" },
-      }
-    );
-    updatePromises.push(accountProfileUpdatePromise);
-
-    // 2. Cập nhật roleId trong bảng Account nếu status = 1
-    if (newStatus === 1) {
-      const accountUpdatePromise = axios.put(
-        `https://rmrbdapi.somee.com/odata/Account/${accountId}`,
-        updatedItem.Account,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
+      const result = await axios.get(
+        "https://rmrbdapi.somee.com/odata/AccountProfile",
+        { headers }
       );
-      updatePromises.push(accountUpdatePromise);
-    }
-
-    // Gửi tất cả các yêu cầu update cùng lúc
-    try {
-      await Promise.all(updatePromises);
-
-      // Làm mới dữ liệu sau khi cập nhật thành công
-      getData();
-
-      toast.success("Trạng thái và role đã được cập nhật!");
+      setData(result.data);
     } catch (error) {
-      console.log(error);
-      toast.error("Có lỗi xảy ra khi cập nhật!");
+      console.error("Error fetching account data:", error);
     }
   };
 
   const handleDetails = (accountId) => {
-    console.log(`Viewing details for account ID: ${accountId}`);
+    navigate(`/update-role/${accountId}`);
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // Filter the data based on the search term
+  const filteredData = data.filter((row) => {
+    const matchesName = row.account?.userName
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      !statusFilter || row.status?.toString() === statusFilter;
+
+    return matchesName && matchesStatus;
+  });
+
+  const columns = [
+    {
+      name: "STT",
+      selector: (row, index) => index + 1,
+      sortable: true,
+      width: "80px", // Reduced width for smaller display
+    },
+    {
+      name: "Tên người dùng",
+      selector: (row) => row.account?.userName || "Không có tên",
+      sortable: true,
+      width: "250px", // Adjusted width
+      style: { fontSize: "14px" }, // Reduced font size for smaller text
+    },
+    {
+      name: "Ngày sinh",
+      selector: (row) => row.dateOfBirth.split("T")[0], // Display only the date
+      sortable: true,
+      width: "120px", // Adjusted width for smaller display
+      style: { fontSize: "14px" }, // Reduced font size for smaller text
+    },
+    {
+      name: "Ảnh CMND mặt trước",
+      cell: (row) =>
+        row.frontIdcard ? (
+          <img
+            alt="Ảnh CMND mặt trước"
+            className="w-24 h-24 object-cover rounded-md" // Reduced size for image
+            src={row.frontIdcard}
+          />
+        ) : (
+          "Không có"
+        ),
+      width: "250px", // Adjusted width
+      height: "150px", // Adjusted height
+    },
+    {
+      name: "Số CMND",
+      selector: (row) => row.idcardNumber,
+      sortable: true,
+      width: "120px", // Adjusted width
+      style: { fontSize: "14px" }, // Reduced font size for smaller text
+    },
+    {
+      name: "Trạng thái",
+      cell: (row) =>
+        row.status === 0 ? (
+          <FaBan style={{ color: "red", fontSize: "18px" }} title="Bị khóa" /> // Reduced icon size
+        ) : row.status === 1 ? (
+          <FaCheckCircle
+            style={{ color: "green", fontSize: "18px" }}
+            title="Đã xác nhận"
+          />
+        ) : (
+          <FaRegClock
+            style={{ color: "orange", fontSize: "18px" }}
+            title="Chờ xác nhận"
+          />
+        ),
+      sortable: true,
+      width: "120px", // Adjusted width
+    },
+    {
+      name: "Thao tác",
+      cell: (row) => (
+        <button
+          className="btn btn-link p-0"
+          onClick={() => handleDetails(row.accountId)}
+        >
+          <FaInfoCircle
+            style={{ color: "#007bff", fontSize: "18px" }} // Reduced icon size
+            title="Chi tiết"
+          />
+        </button>
+      ),
+      width: "120px", // Adjusted width
+    },
+  ];
 
   return (
-    <div>
-      <ToastContainer />
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Account Name</th>
-            <th>Date of birth</th>
-            <th>Front ID Card</th>
-            <th>Back ID Card</th>
-            <th>Portrait</th>
-            <th>Bank Account QR</th>
-            <th>ID Card Number</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data && data.length > 0 ? (
-            data.map((item, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{item.Account?.userName || "NoName"}</td>
-                <td>{item.dateOfBirth}</td>
-                <td>{item.frontIdcard && <img alt="Front ID Card" style={{ width: "100px", height: "100px" }} src={item.frontIdcard} />}</td>
-                <td>{item.backIdcard && <img alt="Back ID Card" style={{ width: "100px", height: "100px" }} src={item.backIdcard} />}</td>
-                <td>{item.portrait && <img alt="Portrait" style={{ width: "100px", height: "100px" }} src={item.portrait} />}</td>
-                <td>{item.bankAccountQR && <img alt="Bank Account QR" style={{ width: "100px", height: "100px" }} src={item.bankAccountQR} />}</td>
-                <td>{item.idcardNumber}</td>
-                <td>
-                  <FaBan
-                    style={{
-                      color: item.status === 0 ? "red" : "grey",
-                      cursor: "pointer",
-                      fontSize: "24px",
-                    }}
-                    title="Blocked"
-                    onClick={() => handleStatusChange(item.accountId, 0)}
-                  />
-                  <FaCheckCircle
-                    style={{
-                      color: item.status === 1 ? "green" : "grey",
-                      cursor: "pointer",
-                      fontSize: "24px",
-                    }}
-                    title="Approved"
-                    onClick={() => handleStatusChange(item.accountId, 1)}
-                  />
-                  <FaRegClock
-                    style={{
-                      color: item.status === -1 ? "orange" : "grey",
-                      cursor: "pointer",
-                      fontSize: "24px",
-                    }}
-                    title="Uncensored"
-                    onClick={() => handleStatusChange(item.accountId, -1)}
-                  />
-                </td>
-                <td>
-                  <button className="btn btn-primary" onClick={() => handleDetails(item.accountId)}>
-                    Details
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="11">No data available</td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-7xl bg-white shadow-lg rounded-lg p-5">
+        {/* Filter Button */}
+        <div className="mb-4 flex items-center justify-between">
+          <button
+            className="flex items-center text-blue-500 hover:text-blue-700"
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            <FaFilter className="mr-2" />
+            Bộ lọc
+          </button>
+        </div>
+
+        {/* Filter Section */}
+        {showFilter && (
+          <div className="flex flex-wrap items-center mb-4 gap-4 bg-gray-100 p-4 rounded-md">
+            <input
+              type="text"
+              className="border p-2 rounded flex-1 min-w-[200px]"
+              placeholder="Tìm kiếm tên người dùng"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <select
+              className="border p-2 rounded flex-1 min-w-[200px]"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="-1">Chờ xác nhận</option>
+              <option value="0">Bị khóa</option>
+              <option value="1">Đã xác nhận</option>
+            </select>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("");
+              }}
+            >
+              Xóa lọc
+            </button>
+          </div>
+        )}
+
+        {/* DataTable */}
+        <DataTable
+          title="Danh sách tài khoản"
+          columns={columns}
+          data={filteredData}
+          pagination
+          highlightOnHover
+          striped
+          customStyles={{
+            rows: {
+              style: {
+                fontSize: "14px",
+                padding: "12px",
+              },
+            },
+            headCells: {
+              style: {
+                fontSize: "16px",
+                padding: "10px",
+              },
+            },
+            cells: {
+              style: {
+                padding: "10px",
+              },
+            },
+          }}
+        />
+      </div>
     </div>
   );
 };

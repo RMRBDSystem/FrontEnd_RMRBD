@@ -1,13 +1,15 @@
 import { React, useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import Swal from "sweetalert2";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
 import Cookies from "js-cookie";
 import Tesseract from "tesseract.js";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Swal from "sweetalert2";
-
+import { FaTrashAlt, FaCloudUploadAlt } from "react-icons/fa";
 const AccountProfile = () => {
   const [accountID, setAccountID] = useState();
   const [portrait, setPortrait] = useState(null);
@@ -18,9 +20,10 @@ const AccountProfile = () => {
   const [frontIDCardPreview, setFrontIDCardPreview] = useState(null);
   const [backIDCard, setBackIDCard] = useState(null);
   const [backIDCardPreview, setBackIDCardPreview] = useState(null);
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [dateOfBirth, setDateOfBirth] = useState(null);
   const [idCardNumber, setIdCardNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // State lưu lỗi cho từng trường
   const [errors, setErrors] = useState({
     portrait: "",
     frontIDCard: "",
@@ -49,24 +52,27 @@ const AccountProfile = () => {
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       Swal.fire({
-        title: 'Lỗi',
-        text: 'Vui lòng điền đầy đủ thông tin.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        icon: "error",
+        title: "Có lỗi xảy ra!",
+        text: "Vui lòng điền đầy đủ thông tin.",
       });
       return;
     }
 
-    const confirmSave = await Swal.fire({
-      title: 'Xác nhận',
-      text: 'Bạn có chắc chắn muốn gửi thông tin không?',
-      icon: 'question',
+    // Using SweetAlert for confirmation
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn muốn gửi thông tin không?",
+      text: "Thông tin bạn đã điền sẽ được gửi đi.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Hủy'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Có, gửi thông tin",
+      cancelButtonText: "Hủy",
     });
 
-    if (!confirmSave.isConfirmed) return;
+    // If the user cancels the action
+    if (!result.isConfirmed) return;
 
     const url = `https://rmrbdapi.somee.com/odata/AccountProfile/${accountID}`;
     const formData = new FormData();
@@ -78,6 +84,7 @@ const AccountProfile = () => {
     formData.append("iDCardNumber", idCardNumber);
 
     setIsLoading(true);
+
     try {
       const result = await axios.post(url, formData, {
         headers: {
@@ -88,26 +95,23 @@ const AccountProfile = () => {
       console.log("API Response:", result.data);
       clear();
       Swal.fire({
-        title: 'Thành công',
-        text: 'Đơn đăng kí của bạn đã được gửi thành công!',
-        icon: 'success',
-        confirmButtonText: 'OK'
+        icon: "success",
+        title: "Thành công!",
+        text: "Account Profile đã được thêm thành công.",
       });
     } catch (error) {
       if (error.response && error.response.data) {
         Swal.fire({
-          title: 'Lỗi',
-          text: error.response.data.message,
-          icon: 'error',
-          confirmButtonText: 'OK'
+          icon: "error",
+          title: "Lỗi!",
+          text: "Bạn đã gửi hồ sơ rồi, vui lòng chờ duyệt",
         });
         setIsLoading(false);
       } else {
         Swal.fire({
-          title: 'Lỗi',
-          text: 'Lỗi khi gửi hồ sơ.',
-          icon: 'error',
-          confirmButtonText: 'OK'
+          icon: "error",
+          title: "Lỗi khi gửi hồ sơ.",
+          text: "Đã xảy ra sự cố khi gửi hồ sơ.",
         });
         setIsLoading(false);
       }
@@ -133,6 +137,7 @@ const AccountProfile = () => {
     const file = e.target.files[0];
     setFile(file);
     setPreview(URL.createObjectURL(file));
+    // Khi người dùng chọn ảnh, ẩn thông báo lỗi nếu có
     if (file) {
       setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
     }
@@ -140,6 +145,8 @@ const AccountProfile = () => {
 
   const handlefrontIDCardFileChange = (e) => {
     const file = e.target.files[0];
+
+    // Clear error message if user selects a valid file
     if (file) {
       setErrors((prevErrors) => ({ ...prevErrors, frontIDCard: "" }));
     }
@@ -159,6 +166,7 @@ const AccountProfile = () => {
       logger: (m) => console.log(m),
     })
       .then(({ data: { text } }) => {
+        // Kiểm tra số căn cước
         const idMatch = text.match(/\b\d{10,12}\b/);
         if (idMatch) {
           setIdCardNumber(idMatch[0]);
@@ -169,6 +177,7 @@ const AccountProfile = () => {
           }));
         }
 
+        // Kiểm tra ngày sinh (DD/MM/YYYY)
         const dateMatch = text.match(/\b(\d{2})\/(\d{2})\/(\d{4})\b/);
         if (dateMatch) {
           const [_, day, month, year] = dateMatch;
@@ -181,6 +190,7 @@ const AccountProfile = () => {
           }));
         }
 
+        // Kiểm tra nếu thiếu số căn cước hoặc ngày sinh
         if (!idMatch && !dateMatch) {
           setErrors((prevErrors) => ({
             ...prevErrors,
@@ -198,6 +208,7 @@ const AccountProfile = () => {
       });
   };
 
+  // Handle delete for each image
   const handleDeleteImage = (field, setFile, setPreview) => {
     setFile(null);
     setPreview(null);
@@ -205,68 +216,93 @@ const AccountProfile = () => {
   };
 
   return (
-    <section className="section-center max-w-4xl bg-white rounded shadow-lg my-4">
-      <ToastContainer />
-      <Container className="items-center font-medium text-xl">
-        <h2 className="section-title">Thông tin tài khoản người bán</h2>
-        <Form>
-          <Row className="mb-4">
-            <Form.Label>Thêm ảnh CCCD mặt trước</Form.Label>
-            {!frontIDCardPreview ? (
+      <Container className="my-5 bg-white p-6 rounded-lg shadow-md">
+        <h1 className="text-4xl font-bold mb-6 flex items-center">
+          <span className="text-orange-500 mr-2 text-5xl">+</span> Trở thành
+          người bán hàng
+        </h1>
+        <p className="text-gray-600 mb-8">
+          Chúng tôi giúp bạn kết nối với hàng nghìn độc giả và tạo ra cơ hội
+          phát triển không giới hạn!
+        </p>
+        <Form >
+          {/* Front ID Card */}
+          <Row className="mb-6">
+            <Col>
               <Form.Group controlId="frontIDCard">
-                <label
-                  htmlFor="fileInput"
-                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
-                >
-                  <h1 className="material-icons text-6xl">cloud_upload</h1>
-                  <p className="text-lg">Ảnh CCCD Mặt Trước</p>
-                </label>
+                <Form.Label className="text-lg">
+                  Ảnh căn cước mặt trước
+                </Form.Label>
+
+                {/* Hidden file input */}
                 <input
                   type="file"
-                  id="fileInput"
                   name="frontIDCard"
-                  multiple
-                  accept="image/*"
+                  id="frontIDCard"
                   onChange={handlefrontIDCardFileChange}
                   disabled={isLoading}
-                  style={{ display: 'none' }}
+                  className="hidden"
+                  accept="image/*"
                 />
+
+                {/* Cloud icon trigger with flexbox centering */}
+                <div
+                  onClick={() => document.getElementById("frontIDCard").click()}
+                  className="cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-300 rounded-md hover:bg-gray-100"
+                >
+                  {/* Cloud Icon */}
+                  <FaCloudUploadAlt className="text-4xl text-gray-600 mb-2" />
+                  {/* Text below the icon */}
+                  <p className="text-gray-600">Chọn ảnh</p>
+                </div>
+
                 {errors.frontIDCard && (
-                  <Form.Text className="text-danger mt-2">{errors.frontIDCard}</Form.Text>
+                  <Form.Text className="text-red-500">
+                    {errors.frontIDCard}
+                  </Form.Text>
+                )}
+
+                {/* Image preview */}
+                {frontIDCardPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={frontIDCardPreview}
+                      alt="Front ID Preview"
+                      className="w-full max-w-[200px] rounded-md shadow-lg"
+                    />
+                    <Button
+                      variant="danger"
+                      onClick={() =>
+                        handleDeleteImage(
+                          "frontIDCard",
+                          setFrontIDCard,
+                          setFrontIDCardPreview
+                        )
+                      }
+                      disabled={isLoading}
+                      className="mt-2 inline-flex items-center bg-red-500 text-white hover:bg-red-600 py-2 px-4 rounded-md"
+                    >
+                      <FaTrashAlt className="mr-2" /> Xóa ảnh
+                    </Button>
+                  </div>
                 )}
               </Form.Group>
-            ) : (
-              <div className="mt-3">
-                <img
-                  src={frontIDCardPreview}
-                  alt="Front ID Preview"
-                  className="img-fluid rounded"
-                  style={{ maxWidth: "200px" }}
-                />
-                <div className="mt-2">
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteImage("frontIDCard", setFrontIDCard, setFrontIDCardPreview)}
-                    disabled={isLoading}
-                  >
-                    Xóa ảnh
-                  </Button>
-                </div>
-              </div>
-            )}
+            </Col>
           </Row>
+          {/* Birthday and ID Card Number */}
           <Row className="mb-4">
             <Form.Label>Số căn cước công dân</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Nhập số căn cước công dân"
               value={idCardNumber}
               onChange={(e) => setIdCardNumber(e.target.value)}
-              disabled={isLoading}
+              disabled={true}
               isInvalid={!!errors.idCardNumber}
             />
             {errors.idCardNumber && (
-              <Form.Text className="text-danger">{errors.idCardNumber}</Form.Text>
+              <Form.Text className="text-danger">
+                {errors.idCardNumber}
+              </Form.Text>
             )}
           </Row>
 
@@ -276,154 +312,235 @@ const AccountProfile = () => {
               selected={dateOfBirth}
               onChange={(date) => setDateOfBirth(date)}
               dateFormat="dd/MM/yyyy"
-              disabled={isLoading}
+              disabled={true}
               className="form-control"
             />
             {errors.dateOfBirth && (
-              <Form.Text className="text-danger">{errors.dateOfBirth}</Form.Text>
+              <Form.Text className="text-danger">
+                {errors.dateOfBirth}
+              </Form.Text>
             )}
           </Row>
-          <Row className="mb-4">
-            <Form.Label>Ảnh CCCD mặt sau</Form.Label>
-            {!backIDCardPreview ? (
+
+          {/* Back ID Card */}
+          <Row className="mb-6">
+            <Col>
               <Form.Group controlId="backIDCard">
-                <label
-                  htmlFor="backIDCardInput"
-                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
-                >
-                  <h1 className="material-icons text-6xl">cloud_upload</h1>
-                  <p className="text-lg">Ảnh CCCD Mặt Sau</p>
-                </label>
+                <Form.Label className="text-lg">
+                  Ảnh căn cước mặt sau
+                </Form.Label>
+
+                {/* Hidden file input */}
                 <input
                   type="file"
-                  id="backIDCardInput"
                   name="backIDCard"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, setBackIDCard, setBackIDCardPreview)}
+                  id="backIDCard"
+                  onChange={(e) =>
+                    handleFileChange(e, setBackIDCard, setBackIDCardPreview)
+                  }
                   disabled={isLoading}
-                  style={{ display: 'none' }}
+                  className="hidden"
+                  accept="image/*"
                 />
+
+                {/* Cloud icon trigger with flexbox centering */}
+                <div
+                  onClick={() => document.getElementById("backIDCard").click()}
+                  className="cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-300 rounded-md hover:bg-gray-100"
+                >
+                  {/* Cloud Icon */}
+                  <FaCloudUploadAlt className="text-4xl text-gray-600 mb-2" />
+                  {/* Text below the icon */}
+                  <p className="text-gray-600">Chọn ảnh</p>
+                </div>
+
                 {errors.backIDCard && (
-                  <Form.Text className="text-danger mt-2">{errors.backIDCard}</Form.Text>
+                  <Form.Text className="text-red-500">
+                    {errors.backIDCard}
+                  </Form.Text>
+                )}
+
+                {/* Image preview */}
+                {backIDCardPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={backIDCardPreview}
+                      alt="Back ID Preview"
+                      className="w-full max-w-[200px] rounded-md shadow-lg"
+                    />
+                    <Button
+                      variant="danger"
+                      onClick={() =>
+                        handleDeleteImage(
+                          "backIDCard",
+                          setBackIDCard,
+                          setBackIDCardPreview
+                        )
+                      }
+                      disabled={isLoading}
+                      className="mt-2 inline-flex items-center bg-red-500 text-white hover:bg-red-600 py-2 px-4 rounded-md"
+                    >
+                      <FaTrashAlt className="mr-2" /> Xóa ảnh
+                    </Button>
+                  </div>
                 )}
               </Form.Group>
-            ) : (
-              <div className="mt-3">
-                <img
-                  src={backIDCardPreview}
-                  alt="Back ID Preview"
-                  className="img-fluid rounded"
-                  style={{ maxWidth: "200px" }}
-                />
-                <div className="mt-2">
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteImage("backIDCard", setBackIDCard, setBackIDCardPreview)}
-                    disabled={isLoading}
-                  >
-                    Xóa ảnh
-                  </Button>
-                </div>
-              </div>
-            )}
+            </Col>
           </Row>
-          <Row className="mb-4">
-            <Form.Label>Ảnh chân dung</Form.Label>
-            {!portraitPreview ? (
+
+          {/* Portrait Image */}
+          <Row className="mb-6">
+            <Col>
               <Form.Group controlId="portrait">
-                <label
-                  htmlFor="portraitInput"
-                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
-                >
-                  <h1 className="material-icons text-6xl">cloud_upload</h1>
-                  <p className="text-lg">Ảnh chân dung</p>
-                </label>
+                <Form.Label className="text-lg">Ảnh chân dung</Form.Label>
+
+                {/* Hidden file input */}
                 <input
                   type="file"
-                  id="portraitInput"
                   name="portrait"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, setPortrait, setPortraitPreview)}
+                  id="portrait"
+                  onChange={(e) =>
+                    handleFileChange(e, setPortrait, setPortraitPreview)
+                  }
                   disabled={isLoading}
-                  style={{ display: 'none' }}
+                  className="hidden"
+                  accept="image/*"
                 />
+
+                {/* Cloud icon trigger with flexbox centering */}
+                <div
+                  onClick={() => document.getElementById("portrait").click()}
+                  className="cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-300 rounded-md hover:bg-gray-100"
+                >
+                  {/* Cloud Icon */}
+                  <FaCloudUploadAlt className="text-4xl text-gray-600 mb-2" />
+                  {/* Text below the icon */}
+                  <p className="text-gray-600">Chọn ảnh</p>
+                </div>
+
                 {errors.portrait && (
-                  <Form.Text className="text-danger mt-2">{errors.portrait}</Form.Text>
+                  <Form.Text className="text-red-500">
+                    {errors.portrait}
+                  </Form.Text>
+                )}
+
+                {/* Image preview */}
+                {portraitPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={portraitPreview}
+                      alt="Portrait Preview"
+                      className="w-full max-w-[200px] rounded-md shadow-lg"
+                    />
+                    <Button
+                      variant="danger"
+                      onClick={() =>
+                        handleDeleteImage(
+                          "portrait",
+                          setPortrait,
+                          setPortraitPreview
+                        )
+                      }
+                      disabled={isLoading}
+                      className="mt-2 inline-flex items-center bg-red-500 text-white hover:bg-red-600 py-2 px-4 rounded-md"
+                    >
+                      <FaTrashAlt className="mr-2" /> Xóa ảnh
+                    </Button>
+                  </div>
                 )}
               </Form.Group>
-            ) : (
-              <div className="mt-3">
-                <img
-                  src={portraitPreview}
-                  alt="Portrait Preview"
-                  className="img-fluid rounded"
-                  style={{ maxWidth: "200px" }}
-                />
-                <div className="mt-2">
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteImage("portrait", setPortrait, setPortraitPreview)}
-                    disabled={isLoading}
-                  >
-                    Xóa ảnh
-                  </Button>
-                </div>
-              </div>
-            )}
+            </Col>
           </Row>
 
-
-
-          <Row className="mb-4">
-            <Form.Label>Mã QR tài khoản ngân hàng</Form.Label>
-            {!bankAccountQRPreview ? (
+          {/* Bank Account QR Code */}
+          <Row className="mb-6">
+            <Col>
               <Form.Group controlId="bankAccountQR">
-                <label
-                  htmlFor="bankAccountQRInput"
-                  className="block cursor-pointer bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-600 hover:bg-gray-300 hover:border-gray-600"
-                >
-                  <h1 className="material-icons text-6xl">cloud_upload</h1>
-                  <p className="text-lg">Mã QR tài khoản ngân hàng</p>
-                </label>
+                <Form.Label className="text-lg">
+                  Mã QR tài khoản ngân hàng
+                </Form.Label>
+
+                {/* Hidden file input */}
                 <input
                   type="file"
-                  id="bankAccountQRInput"
                   name="bankAccountQR"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, setBankAccountQR, setBankAccountQRPreview)}
+                  id="bankAccountQR"
+                  onChange={(e) =>
+                    handleFileChange(
+                      e,
+                      setBankAccountQR,
+                      setBankAccountQRPreview
+                    )
+                  }
                   disabled={isLoading}
-                  style={{ display: 'none' }}
+                  className="hidden"
+                  accept="image/*"
                 />
+
+                {/* Cloud icon trigger with flexbox centering */}
+                <div
+                  onClick={() =>
+                    document.getElementById("bankAccountQR").click()
+                  }
+                  className="cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-300 rounded-md hover:bg-gray-100"
+                >
+                  {/* Cloud Icon */}
+                  <FaCloudUploadAlt className="text-4xl text-gray-600 mb-2" />
+                  {/* Text below the icon */}
+                  <p className="text-gray-600">Chọn mã QR</p>
+                </div>
+
                 {errors.bankAccountQR && (
-                  <Form.Text className="text-danger mt-2">{errors.bankAccountQR}</Form.Text>
+                  <Form.Text className="text-red-500">
+                    {errors.bankAccountQR}
+                  </Form.Text>
+                )}
+
+                {/* Image preview */}
+                {bankAccountQRPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={bankAccountQRPreview}
+                      alt="Bank Account QR Preview"
+                      className="w-full max-w-[200px] rounded-md shadow-lg"
+                    />
+                    <Button
+                      variant="danger"
+                      onClick={() =>
+                        handleDeleteImage(
+                          "bankAccountQR",
+                          setBankAccountQR,
+                          setBankAccountQRPreview
+                        )
+                      }
+                      disabled={isLoading}
+                      className="mt-2 inline-flex items-center bg-red-500 text-white hover:bg-red-600 py-2 px-4 rounded-md"
+                    >
+                      <FaTrashAlt className="mr-2" /> Xóa ảnh
+                    </Button>
+                  </div>
                 )}
               </Form.Group>
-            ) : (
-              <div className="mt-3">
-                <img
-                  src={bankAccountQRPreview}
-                  alt="Bank Account QR Preview"
-                  className="img-fluid rounded"
-                  style={{ maxWidth: "200px" }}
-                />
-                <div className="mt-2">
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteImage("bankAccountQR", setBankAccountQR, setBankAccountQRPreview)}
-                    disabled={isLoading}
-                  >
-                    Xóa ảnh
-                  </Button>
-                </div>
-              </div>
-            )}
+            </Col>
           </Row>
-            <Button className="font-semibold" variant="primary" onClick={handleSaveAccountProfile} disabled={isLoading}>
-              {isLoading ? 'Đang gửi...' : 'Gửi thông tin'}
+
+          {/* Save Button */}
+          <div className="d-flex justify-content-end mt-4">
+            <Button
+              variant="primary"
+              onClick={handleSaveAccountProfile}
+              disabled={isLoading}
+              className="px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-4 focus:ring-orange-300 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span>Đang gửi...</span>
+              ) : (
+                <span>Gửi thông tin</span>
+              )}
             </Button>
+          </div>
         </Form>
       </Container>
-    </section>
   );
 };
 
