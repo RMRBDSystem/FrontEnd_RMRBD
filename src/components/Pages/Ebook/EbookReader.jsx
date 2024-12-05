@@ -7,9 +7,12 @@ import { pdfjs } from 'react-pdf';
 import { getEbookById } from '../../services/EbookService';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import LoadingPage from '../../Loader/LoadingPage';
+import storage from '../../../firebase/config';
+import { ref, getDownloadURL } from 'firebase/storage';
 
 // Make sure to use the same version as your react-pdf
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
 
 const EbookReader = () => {
   const { ebookId } = useParams();
@@ -42,16 +45,8 @@ const EbookReader = () => {
         }
         setEbook(data);
 
-        // For Firebase Storage URLs, we can fetch directly
-        const response = await fetch(data.pdfurl);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch PDF');
-        }
-        
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        console.log("Created blob URL:", url);
+        const storageRef = ref(storage, data.pdfurl);
+        const url = await getDownloadURL(storageRef);
         setPdfBlob(url);
       } catch (error) {
         console.error('Error fetching ebook:', error);

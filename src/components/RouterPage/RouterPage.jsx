@@ -13,6 +13,7 @@ import WithdrawResponse from "../Pages/Withdraw/WithdrawResponse";
 import WithDrawRequest from "../Pages/Withdraw/WithdrawRequest";
 import WithdrawList from "../Pages/Withdraw/WithdrawList";
 import Product from "../HomePage/Products";
+import SinglePlacePage from '../HomePage/SinglePlacePage'
 //Customer
 import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
 import Book from '../Pages/Book/Book';
@@ -121,8 +122,9 @@ export default function RouterPage() {
               </ProtectedRoute>
             }
           />
+          <Route path="/ebook/:ebookId/read" element={<EbookReader />} />
           <Route element={<Layout />}>
-
+            <Route path="places/:id" element={<SinglePlacePage />}></Route>
             <Route path="/edit-profile/:accountID" element={<EditRoleUpdate />} />
             <Route path="/recipecustomer-detail/:recipeId" element={<DetailSavedRecipe />} />
             <Route path="/add-ebook-customer" element={<AddEBookCustomer />} />
@@ -139,7 +141,6 @@ export default function RouterPage() {
             <Route path="/book-detail/:bookId" element={<BookDetail />} />
             <Route path="/ebook" element={<Ebook />} />
             <Route path="/ebook/:ebookId" element={<EbookDetail />} />
-            <Route path="/ebook/:ebookId/read" element={<EbookReader />} />
             <Route path="/coinTransaction" element={<CoinTransaction />} />
             <Route path="/termsofpurchase" element={<TermsOfPurchase />} />
             <Route path="/edit-recipe" element={<EditRecipe />} />
@@ -228,7 +229,7 @@ export default function RouterPage() {
             <Route
               path="/add-recipe"
               element={
-                <ProtectedRoute allowedRoles={["Admin", "Moderator", "Customer"]}>
+                <ProtectedRoute allowedRoles={["Admin", "Moderator", "Customer", "Seller"]}>
                   <AddRecipePageForCustomer />
                 </ProtectedRoute>
               }

@@ -37,6 +37,7 @@ const Product = () => {
                                     <div className='card-body'>
                                         <h5 className='card-title'>{recipe.recipeName}</h5>
                                         <p className='card-text'>{recipe.price} xu</p>
+                                        <a href={`/recipe-detail/${recipe.recipeId}`} className='btn btn-primary btn-block'>Xem chi tiết</a>
                                     </div>
                                 </div>
                             </div>
@@ -70,6 +71,7 @@ const Product = () => {
                                     <div className='card-body'>
                                         <h5 className='card-title'>{ebook.ebookName}</h5>
                                         <p className='card-text'>{ebook.price} xu</p>
+                                        <a href={`/ebook/${ebook.ebookId}`} className='btn btn-primary btn-block'>Xem chi tiết</a>
                                     </div>
                                 </div>
                             </div>

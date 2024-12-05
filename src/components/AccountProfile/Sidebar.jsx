@@ -39,38 +39,44 @@ const Sidebar = () => {
     }
   };
 
+  const userRole = accountData.role?.roleName;  // Lấy vai trò người dùng từ accountData
+
   const menuItems = [
     {
       path: "/recipe-customer-list",
       label: "Công thức đã đăng",
       icon: <FiBookOpen />,
+      visibleFor: ["Seller"], 
     },
     {
       path: "/list-saved-recipe",
       label: "Công thức đã lưu",
       icon: <FiHeart />,
+      visibleFor: ["Customer","Seller"], 
     },
     {
       path: "/update-information",
       label: "Thông tin cá nhân",
       icon: <FiUser />,
+      visibleFor: ["Customer", "Seller"], 
     },
     {
       path: "/form-updated-role",
       label: "Thông tin đã yêu cầu",
       icon: <FiSettings />,
+      visibleFor: ["Customer","Seller"], 
     },
-
-
     {
       path: "/book-list-customer",
       label: "Sách đã đăng",
       icon: <FiBook />,
+      visibleFor: ["Seller"], 
     },
     {
       path: "/list-ebook-customer",
       label: "Sách điện tử đã đăng",
       icon: <FiFileText />,
+      visibleFor: ["Seller"], 
     },
   ];
 
@@ -89,20 +95,22 @@ const Sidebar = () => {
       </div>
       <div className="mt-4">
         <ul className="space-y-3">
-          {menuItems.map((item) => (
-            <li key={item.path} className="border-b border-gray-300 pb-2">
-              <Link
-                to={item.path}
-                className={`flex items-center transition duration-300 ease-in-out ${location.pathname === item.path
-                  ? "text-orange-800 font-bold"
-                  : "text-orange-600"
-                  } hover:text-orange-800 hover:translate-x-2`}
-              >
-                <span className="mr-2">{item.icon}</span>
-                {item.label}
-              </Link>
-            </li>
-          ))}
+          {menuItems
+            .filter(item => item.visibleFor.includes(userRole))  // Kiểm tra vai trò
+            .map((item) => (
+              <li key={item.path} className="border-b border-gray-300 pb-2">
+                <Link
+                  to={item.path}
+                  className={`flex items-center transition duration-300 ease-in-out ${location.pathname === item.path
+                    ? "text-orange-800 font-bold"
+                    : "text-orange-600"
+                    } hover:text-orange-800 hover:translate-x-2`}
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
         </ul>
       </div>
     </div>
