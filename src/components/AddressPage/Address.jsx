@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Swal from 'sweetalert2';
 import Navbar from "../Navbar/Navbar";
 import Footer from '../Footer/Footer';
 import Cookies from 'js-cookie';
@@ -42,7 +41,7 @@ const Address = () => {
         setProvinces(response.data.data || []);
       } catch (error) {
         console.error('Error fetching provinces:', error);
-        toast.error('Failed to load provinces.');
+        showAlert('error', 'Không thể tải danh sách tỉnh thành.');
       }
     };
 
@@ -68,7 +67,7 @@ const Address = () => {
     } else if (otpTimer === 0 && otpSent) {
       setOtpSent(false);
       setOtpCode('');
-      toast.error('OTP expired. Please request a new one.');
+      showAlert('error', 'OTP expired. Please request a new one.');
     }
     
     return () => clearInterval(timer);
@@ -88,7 +87,7 @@ const Address = () => {
       setDistricts(response.data.data || []);
     } catch (error) {
       console.error('Error fetching districts:', error);
-      toast.error('Failed to load districts.');
+      showAlert('error', 'Không thể tải danh sách quận huyện.');
     }
   };
 
@@ -105,7 +104,7 @@ const Address = () => {
       setWards(response.data.data || []);
     } catch (error) {
       console.error('Error fetching wards:', error);
-      toast.error('Failed to load wards.');
+      showAlert('error', 'Không thể tải danh sách phường xã.');
     }
   };
 
@@ -154,7 +153,7 @@ const Address = () => {
       }
     } catch (error) {
       console.error('Error checking phone number:', error);
-      toast.error('Error checking phone number. Please try again.');
+      showAlert('error', 'Lỗi kiểm tra số điện thoại. Vui lòng thử lại.');
       return false; // Return false in case of error
     }
   };
@@ -168,11 +167,11 @@ const handlephoneNumberCheck = async () => {
   
   if (phoneExists) {
     setIsPhoneAvailable(true); // Phone exists
-    toast.success('Phone number already exists. You can skip OTP and save the address.');
+    showAlert('success', 'Số điện thoại đã tồn tại. Bạn có thể bỏ qua OTP và lưu địa chỉ.');
     setOtpVerified(true); // Skip OTP verification
   } else {
     setIsPhoneAvailable(false); // Phone does not exist
-    toast.error('Phone number does not exist. Please send OTP to verify.');
+    showAlert('error', 'Số điện thoại chưa tồn tại. Vui lòng gửi OTP để xác thực.');
     setOtpSent(false); // Reset OTP state
     setOtpVerified(false); // Reset OTP verified state
   }
@@ -180,7 +179,7 @@ const handlephoneNumberCheck = async () => {
 
 const handleSendOtp = async () => {
   if (!address.phoneNumber || address.phoneNumber.length < 10) {
-    toast.error('Please enter a valid phone number.');
+    showAlert('error', 'Vui lòng nhập số điện thoại hợp lệ.');
     return;
   }
 
@@ -201,21 +200,21 @@ const handleSendOtp = async () => {
     console.log("OTP send response:", response.data); // Log the response from OTP sending API
 
     if (response.status === 200) {
-      toast.success('OTP sent successfully!');
+      showAlert('success', 'Đã gửi OTP thành công!');
       setOtpSent(true);
       setOtpTimer(300); 
     } else {
-      toast.error('Failed to send OTP.');
+      showAlert('error', 'Không thể gửi OTP.');
     }
   } catch (error) {
     console.error('Error sending OTP:', error);
-    toast.error('Error sending OTP. Please try again.');
+    showAlert('error', 'Lỗi khi gửi OTP. Vui lòng thử lại.');
   }
 };
 
   const handleVerifyOtp = async () => {
     if (!otpCode || otpCode.length < 6) {
-      toast.error('Please enter the OTP.');
+      showAlert('error', 'Vui lòng nhập mã OTP.');
       return;
     }
 
@@ -232,14 +231,14 @@ const handleSendOtp = async () => {
       );
 
       if (response.status === 200) {
-        toast.success('OTP verified successfully!');
+        showAlert('success', 'Xác thực OTP thành công!');
         setOtpVerified(true);
       } else {
-        toast.error('Failed to verify OTP. Please try again.');
+        showAlert('error', 'Xác thực OTP thất bại. Vui lòng thử lại.');
       }
     } catch (error) {
       console.error('Error verifying OTP:', error);
-      toast.error(`Error verifying OTP: ${error.message || 'Unknown error'}`);
+      showAlert('error', `Lỗi xác thực OTP: ${error.message || 'Unknown error'}`);
     }
   };
 
@@ -248,7 +247,7 @@ const handleSendOtp = async () => {
   
     // Check phone number existence and ensure OTP verification for new numbers
     if (!otpVerified && !(await checkphoneNumberExists(address.phoneNumber))) {
-      toast.error('Please verify your OTP before saving the address.');
+      showAlert('error', 'Vui lòng xác thực OTP trước khi lưu địa chỉ.');
       return;
     }
   
@@ -276,14 +275,14 @@ const handleSendOtp = async () => {
       });
   
       if (response.status === 200 || response.status === 201) {
-        toast.success('Address saved successfully!');
+        showAlert('success', 'Đã lưu địa chỉ thành công!');
         resetForm();
       } else {
-        toast.error('Error saving address. Please try again.');
+        showAlert('error', 'Lỗi khi lưu địa chỉ. Vui lòng thử lại.');
       }
     } catch (error) {
       console.error('Error saving address:', error);
-      toast.error('Error saving address. Please try again.');
+      showAlert('error', 'Lỗi khi lưu địa chỉ. Vui lòng thử lại.');
     }
   };
 
@@ -305,18 +304,26 @@ const handleSendOtp = async () => {
     setOtpVerified(false);
   };
 
+  const showAlert = (type, message) => {
+    Swal.fire({
+      icon: type,
+      title: message,
+      showConfirmButton: false,
+      timer: 1500,
+      position: 'top-end',
+    });
+  };
+
   return (
     <>
-      <ToastContainer />
-      <Navbar />
       <Container className="my-5">
-        <h2 className="text-center mb-4">Add Shipping Address</h2>
+        <h2 className="text-center mb-4">Thêm Địa Chỉ Giao Hàng</h2>
 
         <Form onSubmit={saveAddress}>
           <Row className="mb-4">
             <Col>
               <Form.Group controlId="provinceCode">
-                <Form.Label>Province</Form.Label>
+                <Form.Label>Tỉnh/Thành Phố</Form.Label>
                 <Form.Control
                   as="select"
                   name="provinceCode"
@@ -328,7 +335,7 @@ const handleSendOtp = async () => {
                   }}
                   required
                 >
-                  <option value="">Select Province</option>
+                  <option value="">Chọn Tỉnh/Thành Phố</option>
                   {provinces.map((province) => (
                     <option key={province.ProvinceID} value={province.ProvinceID}>
                       {province.ProvinceName}
@@ -340,7 +347,7 @@ const handleSendOtp = async () => {
 
             <Col>
               <Form.Group controlId="districtCode">
-                <Form.Label>District</Form.Label>
+                <Form.Label>Quận/Huyện</Form.Label>
                 <Form.Control
                   as="select"
                   name="districtCode"
@@ -352,7 +359,7 @@ const handleSendOtp = async () => {
                   }}
                   required
                 >
-                  <option value="">Select District</option>
+                  <option value="">Chọn Quận/Huyện</option>
                   {districts.map((district) => (
                     <option key={district.DistrictID} value={district.DistrictID}>
                       {district.DistrictName}
@@ -364,7 +371,7 @@ const handleSendOtp = async () => {
 
             <Col>
               <Form.Group controlId="wardCode">
-                <Form.Label>Ward</Form.Label>
+                <Form.Label>Phường/Xã</Form.Label>
                 <Form.Control
                   as="select"
                   name="wardCode"
@@ -373,7 +380,7 @@ const handleSendOtp = async () => {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="">Select Ward</option>
+                  <option value="">Chọn Phường/Xã</option>
                   {wards.map((ward) => (
                     <option key={ward.WardCode} value={ward.WardCode}>
                       {ward.WardName}
@@ -387,7 +394,7 @@ const handleSendOtp = async () => {
           <Row className="mb-4">
             <Col>
               <Form.Group controlId="AddressDetail">
-                <Form.Label>Address Detail</Form.Label>
+                <Form.Label>Chi Tiết Địa Chỉ</Form.Label>
                 <Form.Control
                   as="textarea"
                   name="AddressDetail"
@@ -403,10 +410,10 @@ const handleSendOtp = async () => {
           <Row className="mb-4">
           <Col xs={8}>
             <Form.Group controlId="phoneNumber">
-              <Form.Label>Phone Number</Form.Label>
+              <Form.Label>Số Điện Thoại</Form.Label>
               <Form.Control
                 type="tel"
-                placeholder="Enter phone number"
+                placeholder="Nhập số điện thoại"
                 name="phoneNumber"
                 value={address.phoneNumber}
                 onChange={handlephoneNumberChange}
@@ -419,15 +426,15 @@ const handleSendOtp = async () => {
           <Col xs={4} className="d-flex align-items-end">
             {isPhoneChecking ? (
               <div className="spinner-border" role="status">
-                <span className="visually-hidden">Loading...</span>
+                <span className="visually-hidden">Đang tải...</span>
               </div>
             ) : isPhoneAvailable ? (
               <Button variant="secondary" onClick={saveAddress} disabled={!otpVerified}>
-                {otpVerified ? 'Send OTP' : 'Verify OTP to Save'}
+                {otpVerified ? 'Gửi OTP' : 'Xác Thực OTP Để Lưu'}
               </Button>
             ) : (
               <Button variant="secondary" onClick={handleSendOtp} disabled={otpSent || isPhoneChecking}>
-                {otpSent ? 'Resend OTP' : 'Send OTP'}
+                {otpSent ? 'Gửi Lại OTP' : 'Gửi OTP'}
               </Button>
             )}
           </Col>
@@ -437,10 +444,10 @@ const handleSendOtp = async () => {
             <Row className="mb-4">
               <Col>
                 <Form.Group controlId="otpCode">
-                  <Form.Label>Enter OTP (expires in {Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, '0')})</Form.Label>
+                  <Form.Label>Nhập Mã OTP (hết hạn trong {Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, '0')})</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter OTP"
+                    placeholder="Nhập mã OTP"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     maxLength={6}
@@ -450,18 +457,17 @@ const handleSendOtp = async () => {
               </Col>
               <Col xs="auto" className="d-flex align-items-end">
                 <Button variant="success" onClick={handleVerifyOtp}>
-                  Verify OTP
+                  Xác Thực OTP
                 </Button>
               </Col>
             </Row>
           )}
 
           <Button type="submit" variant="primary">
-            Save Address
+            Lưu Địa Chỉ
           </Button>
         </Form>
       </Container>
-      <Footer />
     </>
   );
 };

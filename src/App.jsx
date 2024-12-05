@@ -51,7 +51,7 @@ const App = () => {
 
   // Emit 'newUser' event when socket and accountList are available
   useEffect(() => {
-    if (socket) {
+    if (socket && accountOnline) {
       socket.emit("newUser", accountOnline); // Emit current user
     }
   }, [socket, accountOnline]);

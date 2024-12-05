@@ -1,21 +1,21 @@
 import { Navigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-// Component yêu cầu xác thực
+
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = Cookies.get('UserRole');
 
-  // Nếu đã đăng nhập, điều hướng đến trang dashboard tương ứng
-  if (userRole) {
-    // Nếu người dùng có quyền hợp lệ, cho phép truy cập vào trang
-    if (!allowedRoles || allowedRoles.includes(userRole)) {
-      return children;  // Hiển thị nội dung của trang
-    }
+  // Nếu không đăng nhập, điều hướng về trang chủ
+  if (!userRole) {
+    return <Navigate to="/" />;
   }
-  else {
-    return <Navigate to="/login" />;
+
+  // Nếu có danh sách các quyền hợp lệ và quyền người dùng không nằm trong danh sách, chặn truy cập
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    return <Navigate to="/unauthorized" />; // Hoặc trang thông báo lỗi tùy chỉnh
   }
+
+  // Nếu tất cả điều kiện đều đúng, render nội dung con
   return children;
 };
-
 
 export default ProtectedRoute;

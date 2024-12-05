@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
@@ -15,6 +15,58 @@ function BookCard({ book }) {
   const filledStars = Math.round(book.bookRate || 0);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
   const { updateCartItems } = useCart();
+
+  useEffect(() => {
+    checkIfBookInCart();
+  }, []);
+
+  const checkIfBookInCart = async () => {
+    try {
+      const customerId = Cookies.get('UserId');
+      if (!customerId) return;
+
+      const existingOrderResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrder`, {
+        headers: {
+          'Token': '123-abc',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!existingOrderResponse.ok) return;
+
+      const allOrdersData = await existingOrderResponse.json();
+      
+      // Filter orders for current customer and cart status
+      const cartOrders = allOrdersData.filter(order => 
+        order.customerId === parseInt(customerId) && 
+        order.orderCode === null
+      );
+
+      if (cartOrders.length > 0) {
+        const orderIdToUse = cartOrders[0].orderId;
+
+        // Check if book is in order
+        const orderDetailResponse = await fetch(
+          `https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${orderIdToUse} and bookId eq ${book.bookId}`,
+          {
+            headers: {
+              'Token': '123-abc',
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!orderDetailResponse.ok) return;
+
+        const orderDetailData = await orderDetailResponse.json();
+        
+        // If book exists in cart, set isAddedToCart to true
+        setIsAddedToCart(orderDetailData.length > 0);
+      }
+    } catch (error) {
+      console.error('Error checking cart status:', error);
+    }
+  };
 
   const handleAddToCart = async () => {
     try {
@@ -187,6 +239,103 @@ function BookCard({ book }) {
     navigate(`/book-detail/${book.bookId}`);
   };
 
+  const handleDeleteFromCart = async () => {
+    try {
+      const customerId = Cookies.get('UserId');
+      if (!customerId) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Vui lòng đăng nhập để xóa khỏi giỏ hàng!',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        return;
+      }
+
+      // Fetch all orders for the customer that are in cart status (orderCode is null)
+      const existingOrderResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrder`, {
+        method: 'GET',
+        headers: {
+          'Token': '123-abc',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!existingOrderResponse.ok) {
+        throw new Error('Failed to fetch existing orders');
+      }
+
+      const allOrdersData = await existingOrderResponse.json();
+      
+      // Filter orders for current customer and cart status (orderCode is null)
+      const cartOrders = allOrdersData.filter(order => 
+        order.customerId === parseInt(customerId) && 
+        order.orderCode === null
+      );
+
+      if (cartOrders.length > 0) {
+        const orderIdToUse = cartOrders[0].orderId;
+
+        // Check if book is in order
+        const orderDetailResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${orderIdToUse} and bookId eq ${book.bookId}`, {
+          method: 'GET',
+          headers: {
+            'Token': '123-abc',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!orderDetailResponse.ok) {
+          throw new Error('Failed to check order details');
+        }
+
+        const orderDetailData = await orderDetailResponse.json();
+
+        if (orderDetailData.length > 0) {
+          const orderDetailId = orderDetailData[0].orderDetailId;
+
+          // Delete book from order
+          await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail/${orderDetailId}`, {
+            method: 'DELETE',
+            headers: {
+              'Token': '123-abc',
+              'Content-Type': 'application/json',
+            },
+          });
+
+          // Fetch updated cart items
+          const updatedOrderDetailsResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrderDetail?$filter=orderId eq ${orderIdToUse}`, {
+            headers: {
+              'Token': '123-abc',
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (updatedOrderDetailsResponse.ok) {
+            const updatedCartItems = await updatedOrderDetailsResponse.json();
+            updateCartItems(updatedCartItems); // Update the global cart state
+          }
+
+          setIsAddedToCart(false);
+          Swal.fire({
+            icon: 'success',
+            title: 'Đã xóa khỏi giỏ hàng!',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting from cart:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Có lỗi xảy ra khi xóa khỏi giỏ hàng!',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+  };
+
   return (
     <div className="book">
       <div className="book-container">
@@ -221,7 +370,7 @@ function BookCard({ book }) {
               <h1>{book.bookName}</h1>
               <p>Đã thêm vào giỏ hàng</p>
             </div>
-            <div className="remove cursor-pointer" onClick={handleRemoveFromCart}>
+            <div className="remove cursor-pointer" onClick={handleDeleteFromCart}>
               <i className="material-icons">clear</i>
             </div>
           </div>

@@ -1,0 +1,8 @@
+.blurred {
+    filter: blur(5px); /* Làm mờ */
+    color: transparent; /* Làm chữ trong suốt */
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Tạo hiệu ứng chữ bị ẩn */
+    pointer-events: none; /* Ngăn tương tác */
+    user-select: none; /* Ngăn chọn văn bản */
+    cursor: not-allowed; /* Thay đổi con trỏ chuột */
+}

@@ -30,7 +30,7 @@ import AddBookCustomer from '../CustomerBook/AddBookCustomer';
 import AddEBookCustomer from '../CustomerEbook/AddEbookCustomer';
 import DetailSavedRecipe from '../Pages/Recipe/DetailSavedRecipe';
 import EditRoleUpdate from '../AccountProfile/EditRoleUpdate';
-import AddressEdit from "../AddressPage/AddressEdit";
+import Address from "../AddressPage/Address";
 //import Addbook from '../Pages/Add Items/AddBook';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
@@ -67,7 +67,7 @@ import UpdateBookDetails from "../Moderator/Details/UpdateBookDetails";
 import UpdateAccountDetails from "../Moderator/Details/UpdateAccountDetails";
 import UpdateAccountMod from "../Moderator/UpdateAccount";
 //Admin
-import RecipeDetails from "../Admin/Recipemanagement/RecipeDetail";
+// import RecipeDetails from "../Admin/Recipemanagement/RecipeDetail";
 import AdminDashboard from "../Admin/Dashboard";
 import AccountManagement from '../Admin/AccountManagement';
 import IncomeManagement from '../Admin/IncomeManagement';
@@ -83,6 +83,7 @@ import AdminRecipe from "../Admin/Recipemanagement/ShowRecipe";
 import AdminCreateRecipe from "../Admin/Recipemanagement/CreateRecipe";
 import UpdateRole from "../Moderator/UpdateRole";
 import PDFProtect from '../API Test/PDFProtect';
+import Unauthorized from '../Pages/Unauthorized'
 export default function RouterPage() {
   return (
     <AuthProvider>
@@ -128,13 +129,12 @@ export default function RouterPage() {
             <Route path="/add-book-customer" element={<AddBookCustomer />} />
             <Route path="/list-ebook-customer" element={<ListEbookCustomer />} />
             <Route path="/book-list-customer/:bookId" element={<DetailsBookCustomer />} />
-            <Route path="/recipe-detail/:recipeId" element={<RecipeDetails />} />
             <Route path="/recipe-customer-detail/:recipeId" element={<RecipeCustomerDetail />} />
             <Route path="/update-account" element={<UpdateProfile />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/recipe/:searchString?" element={<Recipe />} />
-            <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
+            <Route path="/recipe-detail/:recipeId" element={<RecipeDetail />} />
             <Route path="/book/:searchString?" element={<Book />} />
             <Route path="/book-detail/:bookId" element={<BookDetail />} />
             <Route path="/ebook" element={<Ebook />} />
@@ -159,6 +159,8 @@ export default function RouterPage() {
             <Route path="/update-information" element={<UpdateAccount />} />
             <Route path="/form-updated-role" element={<ViewRoleUpdateSubmit />} />
             <Route path="/product/:searchString?" element={<Product />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+
             <Route
               path="/recipecustomer-list"
               element={
@@ -251,35 +253,49 @@ export default function RouterPage() {
               path="/address"
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <AddressEdit />
+                  <Address />
                 </ProtectedRoute>
               }
             />
           </Route>
           <Route element={<LayoutModerator />}>
-            <Route path="/update-ebook" element={<UpdateEbook />} />
-            <Route path="/update-book" element={<UpdateBook />} />
-            <Route path="/update-role" element={<UpdateRole />} />
-            <Route path="/update-recipe" element={<UpdateRecipe />} />
-            <Route path="/update-account-mod" element={<UpdateAccountMod />} />
-            <Route path="/update-account-mod/:accountId" element={<UpdateAccountDetails />} />
-            <Route
-              path="/update-moderator-information"
-              element={<UpdateInformation />}
-            />
-
-            <Route
-              path="/update-recipe/:recipeId"
-              element={<UpdateRecipeDetails />}
-            />
-            <Route
-              path="/update-role/:accountId"
-              element={<UpdateRoleDetails />}
-            />
-            <Route
-              path="/update-book/:bookId"
-              element={<UpdateBookDetails />}
-            />
+            {[
+              { path: "/update-ebook", component: <UpdateEbook /> },
+              { path: "/update-book", component: <UpdateBook /> },
+              { path: "/update-role", component: <UpdateRole /> },
+              { path: "/update-recipe", component: <UpdateRecipe /> },
+              { path: "/update-account-mod", component: <UpdateAccountMod /> },
+              {
+                path: "/update-moderator-information",
+                component: <UpdateInformation />,
+              },
+              {
+                path: "/update-recipe/:recipeId",
+                component: <UpdateRecipeDetails />,
+              },
+              {
+                path: "/update-role/:accountId",
+                component: <UpdateRoleDetails />,
+              },
+              {
+                path: "/update-book/:bookId",
+                component: <UpdateBookDetails />,
+              },
+              {
+                path: "/update-account-mod/:accountId",
+                component: <UpdateAccountDetails />,
+              },
+            ].map(({ path, component }) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <ProtectedRoute allowedRoles={["Moderator"]}>
+                    {component}
+                  </ProtectedRoute>
+                }
+              />
+            ))}
           </Route>
         </Routes>
       </Router>

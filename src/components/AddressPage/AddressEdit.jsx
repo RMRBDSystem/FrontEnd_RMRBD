@@ -311,7 +311,7 @@ const AddressEdit = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
             <FaMapMarkerAlt className="mr-2 text-orange-500" />
-            My Addresses
+            Địa chỉ của tôi
           </h2>
 
           <div className="grid gap-4">

@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
+import { useNavigate } from 'react-router-dom';
 
 const AddBook = () => {
   const [book, setBook] = useState({
@@ -28,13 +29,15 @@ const AddBook = () => {
   });
   
   const [categories, setCategories] = useState([]);
-  const [addresses, setAddresses] = useState([]);
+  const [formattedAddresses, setFormattedAddresses] = useState([]);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const userId = Cookies.get('UserId');
   const [isBookFormVisible, setIsBookFormVisible] = useState(true);
   const [previewImages, setPreviewImages] = useState([]);
+  const navigate = useNavigate();
 
+  // Fetch categories and addresses on component mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -55,7 +58,7 @@ const AddBook = () => {
       }
     };
 
-    const fetchAddresses = async () => {
+    const fetchAddressesWithDetails = async () => {
       try {
         const response = await axios.get('https://rmrbdapi.somee.com/odata/CustomerAddress', {
           headers: {
@@ -64,27 +67,66 @@ const AddBook = () => {
           },
         });
         const filteredAddresses = response.data.filter(address => address.accountId === parseInt(userId));
-        setAddresses(filteredAddresses);
+        console.log('Filtered Addresses: ', filteredAddresses);
+
+        const addressesWithDetails = await Promise.all(
+          filteredAddresses.map(async (address) => {
+            try {
+              const provinceResponse = await axios.get(
+                'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province',
+                { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
+              );
+              const province = provinceResponse.data.data.find(p => p.ProvinceID === Number(address.provinceCode));
+              
+              const districtResponse = await axios.post(
+                'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district',
+                { province_id: Number(address.provinceCode) },
+                { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
+              );
+              const district = districtResponse.data.data.find(d => d.DistrictID === Number(address.districtCode));
+
+              const wardResponse = await axios.post(
+                'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward',
+                { district_id: Number(address.districtCode) },
+                { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
+              );
+              const ward = wardResponse.data.data.find(w => w.WardCode === String(address.wardCode));
+
+              return {
+                ...address,
+                formattedAddress: `${address.addressDetail}, ${ward?.WardName || ''}, ${district?.DistrictName || ''}, ${province?.ProvinceName || ''}`
+              };
+            } catch (error) {
+              console.error('Error fetching location details:', error);
+              return {
+                ...address,
+                formattedAddress: address.addressDetail
+              };
+            }
+          })
+        );
+
+        setFormattedAddresses(addressesWithDetails);
       } catch (error) {
-        console.error('Lỗi khi tải địa chỉ:', error);
+        console.error('Error fetching addresses:', error);
         Swal.fire({
           icon: 'error',
-          title: 'Lỗi',
-          text: 'Không thể tải địa chỉ.'
+          title: 'Error',
+          text: 'Failed to load addresses'
         });
       }
     };
 
     fetchCategories();
-    fetchAddresses();
+    fetchAddressesWithDetails();
   }, [userId]);
 
+  // Image handling functions
   const handleImageDrop = useCallback((acceptedFiles) => {
     const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
     const maxSize = 5 * 1024 * 1024; // 5MB
-    const maxFiles = 10; // Số lượng tệp tối đa cho phép
+    const maxFiles = 10;
 
-    // Kiểm tra tổng số tệp (đã có + mới)
     const totalFiles = (book.image?.length || 0) + acceptedFiles.length;
     if (totalFiles > maxFiles) {
       Swal.fire({
@@ -116,21 +158,17 @@ const AddBook = () => {
     });
 
     if (validFiles.length > 0) {
-      // Cập nhật trạng thái sách với các tệp mới
       setBook(prev => ({
         ...prev,
         image: prev.image ? [...prev.image, ...validFiles] : validFiles
       }));
 
-      // Tạo và lưu trữ URL xem trước cho các hình ảnh mới
       const newPreviews = validFiles.map(file => ({
         url: URL.createObjectURL(file),
         name: file.name
       }));
       
       setPreviewImages(prev => [...prev, ...newPreviews]);
-      
-      console.log(`Đã thêm ${validFiles.length} hình ảnh mới. Tổng cộng: ${totalFiles}`);
     }
   }, [book.image]);
 
@@ -139,8 +177,8 @@ const AddBook = () => {
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.gif']
     },
-    multiple: true, // Cho phép chọn nhiều tệp
-    maxSize: 5 * 1024 * 1024 // 5MB
+    multiple: true,
+    maxSize: 5 * 1024 * 1024
   });
 
   const removeImage = useCallback((index) => {
@@ -163,10 +201,9 @@ const AddBook = () => {
     });
   }, []);
 
-  // Thêm hiệu ứng dọn dẹp
+  // Cleanup effect for image previews
   useEffect(() => {
     return () => {
-      // Dọn dẹp URL khi thành phần bị hủy
       previewImages.forEach(image => {
         if (image?.url) {
           URL.revokeObjectURL(image.url);
@@ -175,10 +212,10 @@ const AddBook = () => {
     };
   }, [previewImages]);
 
+  // Form handling functions
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Xác thực các trường biểu mẫu
     const safeTrim = (value) => value?.trim() || '';
     const safeNumber = (value) => Number(value) || 0;
 
@@ -197,14 +234,13 @@ const AddBook = () => {
       senderAddressId: safeNumber(book.senderAddressId)
     };
 
-    // Xác thực các trường bắt buộc
     const requiredFields = {
       bookName: 'Tên sách',
       author: 'Tên tác giả',
       description: 'Mô tả',
       price: 'Giá',
       categoryId: 'Danh mục',
-      senderAddressId: 'Địa chỉ gửi',
+      senderAddressId: 'Địa chỉ gi',
       isbn: 'ISBN'
     };
 
@@ -213,42 +249,34 @@ const AddBook = () => {
       .map(([_, label]) => label);
 
     if (missingFields.length > 0) {
-      const errorMessage = `Vui lòng điền vào các trường bắt buộc sau: ${missingFields.join(', ')}`;
       Swal.fire({
         icon: 'error',
         title: 'Lỗi',
-        text: errorMessage
+        text: `Vui lòng điền vào các trường bắt buộc sau: ${missingFields.join(', ')}`
       });
       return;
     }
 
-    // Thêm xác thực cụ thể cho senderAddressId
     if (!selectedAddress || !book.senderAddressId) {
       Swal.fire({
         icon: 'error',
         title: 'Lỗi',
-        text: 'Vui lòng chọn địa chỉ gửi'
+        text: 'Vui lòng chọn địa chỉ gi'
       });
       return;
     }
 
-    // Nếu xác thực thành công, hiển thị phần tải lên hình ảnh
     setIsBookFormVisible(false);
   };
 
   const resetForm = () => {
-    // Xóa URL xem trước
     previewImages.forEach(image => {
       if (image.url) {
         URL.revokeObjectURL(image.url);
       }
     });
     setPreviewImages([]);
-
-    // Đặt lại trạng thái địa chỉ đã chọn
     setSelectedAddress(null);
-
-    // Đặt lại tất cả dữ liệu sách bao gồm hình ảnh
     setBook({
       createById: '',
       categoryId: '',
@@ -266,13 +294,11 @@ const AddBook = () => {
       height: '',
       image: null
     });
-
-    // Hiển thị biểu mẫu sách
     setIsBookFormVisible(true);
   };
 
   const handleAddressSelect = (address) => {
-    setBook((prev) => ({
+    setBook(prev => ({
       ...prev,
       senderAddressId: address.addressId,
     }));
@@ -432,7 +458,7 @@ const AddBook = () => {
 
               if (imageResponse?.status === 200 || imageResponse?.status === 201) {
                 successfulUploads++;
-                // Cập nhật thông báo tải lên
+                // Cập nhật thng báo tải lên
                 Swal.update(loadingToast, {
                   title: `Đang tải lên hình ảnh (${successfulUploads}/${totalImages})...`
                 });
@@ -466,7 +492,7 @@ const AddBook = () => {
                 title: 'Tải lên thất bại',
                 text: 'Không thể tải lên bất kỳ hình ảnh nào'
               });
-              // Tùy chọn xử lý trường hợp không có hình ảnh nào được tải lên
+              // Tùy chọn xử lý trường hợp không có hình ảnh nào được tải ln
             }
 
           } catch (uploadError) {
@@ -535,6 +561,193 @@ const AddBook = () => {
     setIsBookFormVisible(true);
   };
 
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+          headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' }
+        });
+        setProvinces(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      }
+    };
+
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    if (selectedAddress?.provinceCode) {
+      fetchDistricts(selectedAddress.provinceCode);
+    }
+  }, [selectedAddress?.provinceCode]);
+
+  useEffect(() => {
+    if (selectedAddress?.districtCode) {
+      fetchWards(selectedAddress.districtCode);
+    }
+  }, [selectedAddress?.districtCode]);
+
+  const fetchDistricts = async (provinceCode) => {
+    try {
+      const response = await axios.post(
+        'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district',
+        { province_id: Number(provinceCode) },
+        { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
+      );
+      setDistricts(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching districts:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load districts.'
+      });
+    }
+  };
+
+  const fetchWards = async (districtCode) => {
+    try {
+      const response = await axios.post(
+        'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward',
+        { district_id: Number(districtCode) },
+        { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
+      );
+      setWards(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching wards:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load wards.'
+      });
+    }
+  };
+
+  // Update the address modal content
+  const addressModalContent = (
+    <div className="space-y-4">
+      {/* Add New Address Button at the top */}
+      <div className="mb-4 border-b pb-4">
+        <Button
+          onClick={() => {
+            setShowAddressModal(false);
+            navigate('/address');
+          }}
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white 
+                    font-semibold px-4 py-3 rounded-lg transition-all duration-200
+                    flex items-center justify-center gap-2"
+        >
+          <svg 
+            className="w-5 h-5" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth="2" 
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Add New Address
+        </Button>
+      </div>
+
+      {/* Existing Addresses List */}
+      {formattedAddresses.length > 0 ? (
+        <>
+          <div className="text-sm text-gray-600 mb-2">
+            Select an existing address:
+          </div>
+          <div className="max-h-[400px] overflow-y-auto space-y-3">
+            {formattedAddresses.map((address) => (
+              <div
+                key={address.addressId}
+                onClick={() => handleAddressSelect(address)}
+                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200
+                  ${selectedAddress?.addressId === address.addressId
+                    ? 'border-orange-500 bg-orange-50'
+                    : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
+                  }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-medium text-gray-900">{address.phoneNumber}</span>
+                  </div>
+                </div>
+                <div className="text-gray-600 text-sm">
+                  {address.formattedAddress}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-6">
+          <div className="mb-4 text-gray-500">
+            <svg 
+              className="mx-auto h-12 w-12" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth="2" 
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+              />
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth="2" 
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No Addresses Found
+          </h3>
+          <p className="text-gray-500 mb-2">
+            Please add an address to continue
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  // Update the address selection button in your form
+  const renderAddressButton = () => (
+    <div className="relative">
+      <Form.Label 
+        className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                  bg-white px-2 z-10"
+      >
+        Địa Chỉ Gửi Hàng *
+      </Form.Label>
+      <button
+        type="button"
+        onClick={() => setShowAddressModal(true)}
+        className="w-full px-4 py-3 text-left border-2 border-gray-200 rounded-lg 
+                  shadow-sm hover:border-orange-500 focus:outline-none 
+                  focus:ring-2 focus:ring-orange-200 transition-all duration-200"
+      >
+        {selectedAddress ? (
+          <>
+            <div className="font-medium">{selectedAddress.phoneNumber}</div>
+            <div className="text-gray-600 text-sm">{selectedAddress.formattedAddress}</div>
+          </>
+        ) : (
+          <span className="text-gray-500">
+            Chọn hoặc thêm địa chỉ gửi hàng
+          </span>
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div 
     >
@@ -553,13 +766,12 @@ const AddBook = () => {
               </h2>
 
               <Form onSubmit={handleSubmit} className="space-y-4">
-                {/* Phần Tên Sách & Tác Giả */}
+                {/* Phần Tên Sách & Tác Giả với floating labels */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="relative">
                     <Form.Control
                       type="text"
                       id="bookName"
-                      name="bookName"
                       value={book.bookName || ''}
                       onChange={(e) => setBook(prev => ({
                         ...prev,
@@ -567,7 +779,7 @@ const AddBook = () => {
                       }))}
                       required
                       className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
-                                focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                                focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
                                 transition-all duration-200 outline-none
                                 placeholder-transparent"
                       placeholder="Tên Sách"
@@ -575,15 +787,15 @@ const AddBook = () => {
                     <Form.Label
                       htmlFor="bookName"
                       className="absolute left-3 -top-2.5 text-gray-600 text-sm 
-                                transition-all duration-200 
-                                peer-placeholder-shown:text-base 
-                                peer-placeholder-shown:text-gray-400
+                                bg-white px-2 pointer-events-none
+                                transition-all duration-200
+                                peer-placeholder-shown:text-base
+                                peer-placeholder-shown:text-gray-500
                                 peer-placeholder-shown:top-3.5
-                                peer-focus:-top-2.5 
+                                peer-placeholder-shown:left-4
+                                peer-focus:-top-2.5
                                 peer-focus:text-sm
-                                peer-focus:text-gray-600
-                                bg-white px-2
-                                pointer-events-none"
+                                peer-focus:text-gray-600"
                     >
                       Tên Sách
                     </Form.Label>
@@ -593,7 +805,6 @@ const AddBook = () => {
                     <Form.Control
                       type="text"
                       id="author"
-                      name="author"
                       value={book.author || ''}
                       onChange={(e) => setBook(prev => ({
                         ...prev,
@@ -601,7 +812,7 @@ const AddBook = () => {
                       }))}
                       required
                       className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
-                                focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                                focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
                                 transition-all duration-200 outline-none
                                 placeholder-transparent"
                       placeholder="Tên Tác Giả"
@@ -609,15 +820,15 @@ const AddBook = () => {
                     <Form.Label
                       htmlFor="author"
                       className="absolute left-3 -top-2.5 text-gray-600 text-sm 
-                                transition-all duration-200 
-                                peer-placeholder-shown:text-base 
-                                peer-placeholder-shown:text-gray-400
+                                bg-white px-2 pointer-events-none
+                                transition-all duration-200
+                                peer-placeholder-shown:text-base
+                                peer-placeholder-shown:text-gray-500
                                 peer-placeholder-shown:top-3.5
-                                peer-focus:-top-2.5 
+                                peer-placeholder-shown:left-4
+                                peer-focus:-top-2.5
                                 peer-focus:text-sm
-                                peer-focus:text-gray-600
-                                bg-white px-2
-                                pointer-events-none"
+                                peer-focus:text-gray-600"
                     >
                       Tên Tác Giả
                     </Form.Label>
@@ -761,38 +972,149 @@ const AddBook = () => {
 
                 {/* Phần Kích Thước */}
                 <div className="grid md:grid-cols-4 gap-4">
-                  {['weight', 'length', 'width', 'height'].map((dimension) => (
-                    <div key={dimension} className="relative">
-                      <Form.Control
-                        type="number"
-                        id={dimension}
-                        name={dimension}
-                        value={book[dimension] || ''}
-                        onChange={(e) => setBook(prev => ({
-                          ...prev,
-                          [dimension]: e.target.value
-                        }))}
-                        required
-                        className={`${numberInputClass} peer`}
-                        placeholder={dimension}
-                      />
-                      <Form.Label
-                        htmlFor={dimension}
-                        className="absolute left-3 -top-2.5 text-gray-600 text-sm 
-                                  transition-all duration-200 
-                                  peer-placeholder-shown:text-base 
-                                  peer-placeholder-shown:text-gray-400
-                                  peer-placeholder-shown:top-3.5
-                                  peer-focus:-top-2.5 
-                                  peer-focus:text-sm
-                                  peer-focus:text-gray-600
-                                  bg-white px-2
-                                  pointer-events-none"
-                      >
-                        {dimension.charAt(0).toUpperCase() + dimension.slice(1)} (cm)
-                      </Form.Label>
-                    </div>
-                  ))}
+                  <div className="relative">
+                    <Form.Control
+                      type="number"
+                      id="weight"
+                      value={book.weight || ''}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        weight: e.target.value
+                      }))}
+                      required
+                      className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
+                                transition-all duration-200 outline-none
+                                placeholder-transparent
+                                [appearance:textfield]
+                                [&::-webkit-outer-spin-button]:appearance-none
+                                [&::-webkit-inner-spin-button]:appearance-none"
+                      placeholder="Cân nặng (g)"
+                    />
+                    <Form.Label
+                      htmlFor="weight"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                bg-white px-2 pointer-events-none
+                                transition-all duration-200
+                                peer-placeholder-shown:text-base
+                                peer-placeholder-shown:text-gray-500
+                                peer-placeholder-shown:top-3.5
+                                peer-placeholder-shown:left-4
+                                peer-focus:-top-2.5
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600"
+                    >
+                      Cân nặng (g)
+                    </Form.Label>
+                  </div>
+
+                  <div className="relative">
+                    <Form.Control
+                      type="number"
+                      id="length"
+                      value={book.length || ''}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        length: e.target.value
+                      }))}
+                      required
+                      className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
+                                transition-all duration-200 outline-none
+                                placeholder-transparent
+                                [appearance:textfield]
+                                [&::-webkit-outer-spin-button]:appearance-none
+                                [&::-webkit-inner-spin-button]:appearance-none"
+                      placeholder="Chiều dài (cm)"
+                    />
+                    <Form.Label
+                      htmlFor="length"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                bg-white px-2 pointer-events-none
+                                transition-all duration-200
+                                peer-placeholder-shown:text-base
+                                peer-placeholder-shown:text-gray-500
+                                peer-placeholder-shown:top-3.5
+                                peer-placeholder-shown:left-4
+                                peer-focus:-top-2.5
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600"
+                    >
+                      Chiều dài (cm)
+                    </Form.Label>
+                  </div>
+
+                  <div className="relative">
+                    <Form.Control
+                      type="number"
+                      id="width"
+                      value={book.width || ''}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        width: e.target.value
+                      }))}
+                      required
+                      className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
+                                transition-all duration-200 outline-none
+                                placeholder-transparent
+                                [appearance:textfield]
+                                [&::-webkit-outer-spin-button]:appearance-none
+                                [&::-webkit-inner-spin-button]:appearance-none"
+                      placeholder="Chiều rộng (cm)"
+                    />
+                    <Form.Label
+                      htmlFor="width"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                bg-white px-2 pointer-events-none
+                                transition-all duration-200
+                                peer-placeholder-shown:text-base
+                                peer-placeholder-shown:text-gray-500
+                                peer-placeholder-shown:top-3.5
+                                peer-placeholder-shown:left-4
+                                peer-focus:-top-2.5
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600"
+                    >
+                      Chiều rộng (cm)
+                    </Form.Label>
+                  </div>
+
+                  <div className="relative">
+                    <Form.Control
+                      type="number"
+                      id="height"
+                      value={book.height || ''}
+                      onChange={(e) => setBook(prev => ({
+                        ...prev,
+                        height: e.target.value
+                      }))}
+                      required
+                      className="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                                focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
+                                transition-all duration-200 outline-none
+                                placeholder-transparent
+                                [appearance:textfield]
+                                [&::-webkit-outer-spin-button]:appearance-none
+                                [&::-webkit-inner-spin-button]:appearance-none"
+                      placeholder="Chiều cao (cm)"
+                    />
+                    <Form.Label
+                      htmlFor="height"
+                      className="absolute left-3 -top-2.5 text-gray-600 text-sm 
+                                bg-white px-2 pointer-events-none
+                                transition-all duration-200
+                                peer-placeholder-shown:text-base
+                                peer-placeholder-shown:text-gray-500
+                                peer-placeholder-shown:top-3.5
+                                peer-placeholder-shown:left-4
+                                peer-focus:-top-2.5
+                                peer-focus:text-sm
+                                peer-focus:text-gray-600"
+                    >
+                      Chiều cao (cm)
+                    </Form.Label>
+                  </div>
                 </div>
 
                 {/* Trường ISBN */}
@@ -830,19 +1152,8 @@ const AddBook = () => {
                   </Form.Label>
                 </div>
 
-                {/* Lựa Chọn Địa Chỉ - cập nhật kiểu dáng */}
-                <Button
-                  onClick={() => setShowAddressModal(true)}
-                  className="bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 font-medium 
-                            px-6 py-2 rounded-lg transition-all duration-200 
-                            border-2 border-gray-200 hover:border-gray-300
-                            shadow-sm hover:shadow
-                            transform hover:-translate-y-0.5"
-                >
-                  {selectedAddress 
-                    ? `${selectedAddress.addressDetail} - ${selectedAddress.phoneNumber}`
-                    : 'Chọn Địa Chỉ'}
-                </Button>
+                {/* Address Selection Section */}
+                {renderAddressButton()}
 
                 {/* Nút Gửi */}
                 <div className="flex justify-end mt-6">
@@ -975,24 +1286,20 @@ const AddBook = () => {
         </AnimatePresence>
       </Container>
 
-      {/* Modal Địa Chỉ */}
-      <Modal show={showAddressModal} onHide={() => setShowAddressModal(false)} className="custom-modal">
-        <Modal.Header closeButton>
-          <Modal.Title>Chọn Địa Chỉ</Modal.Title>
+      {/* Address Modal */}
+      <Modal 
+        show={showAddressModal} 
+        onHide={() => setShowAddressModal(false)}
+        className="fade"
+        centered
+      >
+        <Modal.Header closeButton className="border-b px-6 py-4">
+          <Modal.Title className="text-xl font-semibold">
+            Select Sender Address
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <ul className="address-list">
-            {addresses.map(address => (
-              <li
-                key={address.addressId}
-                className="address-item"
-                onClick={() => handleAddressSelect(address)}
-              >
-                <div className="address-detail">{address.addressDetail}</div>
-                <div className="address-phone">{address.phoneNumber}</div>
-              </li>
-            ))}
-          </ul>
+        <Modal.Body className="p-6">
+          {addressModalContent}
         </Modal.Body>
       </Modal>
     </div>
