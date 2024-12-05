@@ -199,7 +199,7 @@ const EditRecipe = () => {
             fullWidth
             value={editFields.purchasePrice}
             onChange={(e) => handleFieldChange("purchasePrice", e.target.value)}
-            disabled={!isEditing}
+            disabled={true}
           />
         </Box>
         <hr className="my-6 border-t-2 border-gray-500" />

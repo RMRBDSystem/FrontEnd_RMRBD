@@ -21,8 +21,8 @@ const App = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    //const newSocket = io("https://socket-db-c8gm.onrender.com");
-    const newSocket = io("http://localhost:3000");
+    const newSocket = io("https://socket-db-c8gm.onrender.com");
+    // const newSocket = io("http://localhost:3000");
     setSocket(newSocket);
     // Show loading for 1 second
     setTimeout(() => setIsLoading(false), 1000);
