@@ -74,10 +74,10 @@ const SavedEbooks = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+        <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
             <Sidebar />
-            <div className="flex-1 p-4">
-                <div className="container mx-auto">
+            <section className="flex flex-col">
+                <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
                     <h2 className="text-2xl font-bold mb-6">Sách điện tử đã lưu</h2>
                     <div className="relative">
                         {loading ? (
@@ -124,7 +124,7 @@ const SavedEbooks = () => {
                         )}
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     );
 };

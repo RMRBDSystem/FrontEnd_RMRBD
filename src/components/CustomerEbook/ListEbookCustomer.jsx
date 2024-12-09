@@ -291,8 +291,8 @@ const EditEbookCustomer = () => {
   return (
     <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
       <Sidebar />
-      <div className="min-h-screen bg-gray-50">
-        <main className="container mx-auto px-4 py-8">
+      <section className="flex flex-col">
+        <main className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
           {/* Header Section */}
           <div className="mb-8 flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-800">Quản lý Ebook</h1>
@@ -526,7 +526,7 @@ const EditEbookCustomer = () => {
             </div>
           )}
         </main>
-      </div>
+      </section>
     </div>
   );
 };

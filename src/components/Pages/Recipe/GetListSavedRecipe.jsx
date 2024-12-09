@@ -63,7 +63,7 @@ const GetListSaveRecipe = () => {
       <Sidebar />
       <div className="flex flex-col">
         <Container
-          className="section-center w-[1000px] bg-white p-4 rounded-lg shadow-md flex flex-col"
+          className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col"
         >
           <h2 className="text-2xl font-bold text-gray-800 pb-10">
             Công thức nấu ăn đã lưu
@@ -77,7 +77,7 @@ const GetListSaveRecipe = () => {
                 justifyContent: "center",
                 alignItems: "center",
                 height: "50vh", // Center the loading spinner in the middle of the screen
-                width: "100vh"
+                width: "150vh"
               }}
             >
               <CircularProgress />
@@ -97,7 +97,7 @@ const GetListSaveRecipe = () => {
                   sx={{
                     display: "flex",
                     flexDirection: "column", // Ensures the content is stacked vertically
-                    maxWidth: 350,
+                    maxWidth: 250,
                     width: "100%", // Ensures it spans full width on small screens
                     flex: "1 1 calc(33.333% - 16px)", // 3 cards per row with 16px gap
                     "@media (max-width: 900px)": {

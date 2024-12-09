@@ -250,11 +250,11 @@ const Orders = () => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
       <Sidebar />
-      <div className="flex-1">
+      <section className="flex flex-col">
         {isProcessing && <LoadingOverlay />}
-        <div className="container mx-auto px-4 py-8">
+        <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
           <h1 className="text-2xl font-bold mb-6">Đơn Hàng Của Tôi</h1>
           
           {orders.length === 0 ? (
@@ -350,7 +350,7 @@ const Orders = () => {
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 };

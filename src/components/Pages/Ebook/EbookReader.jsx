@@ -134,7 +134,7 @@ const EbookReader = () => {
               ${isDarkMode ? 'text-white hover:text-gray-300' : 'text-gray-800 hover:text-gray-600'}`}
           >
             <span className="material-icons">arrow_back</span>
-            <span className="font-medium">Back to Details</span>
+            <span className="font-medium">Quay lại trang chi tiết</span>
           </button>
           {ebook && (
             <h1 className={`font-medium transition-colors duration-300 ease-in-out 
