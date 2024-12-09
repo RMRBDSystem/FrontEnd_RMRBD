@@ -9,7 +9,8 @@ import {
   FiBookOpen,
   FiBook,
   FiFileText,
-} from "react-icons/fi"; // Import icons
+  FiBookmark,
+} from "react-icons/fi";
 
 const Sidebar = () => {
   const [accountID, setAccountID] = useState(null);
@@ -39,79 +40,80 @@ const Sidebar = () => {
     }
   };
 
-  const userRole = accountData.role?.roleName;  // Lấy vai trò người dùng từ accountData
-
   const menuItems = [
     {
       path: "/recipe-customer-list",
       label: "Công thức đã đăng",
-      icon: <FiBookOpen />,
-      visibleFor: ["Seller"], 
+      icon: <FiBookOpen className="text-orange-500" />,
     },
     {
       path: "/list-saved-recipe",
       label: "Công thức đã lưu",
-      icon: <FiHeart />,
-      visibleFor: ["Customer","Seller"], 
+      icon: <FiHeart className="text-orange-500" />,
     },
     {
       path: "/update-information",
       label: "Thông tin cá nhân",
-      icon: <FiUser />,
-      visibleFor: ["Customer", "Seller"], 
+      icon: <FiUser className="text-orange-500" />,
     },
     {
       path: "/form-updated-role",
       label: "Thông tin đã yêu cầu",
-      icon: <FiSettings />,
-      visibleFor: ["Customer","Seller"], 
+      icon: <FiSettings className="text-orange-500" />,
     },
     {
       path: "/book-list-customer",
       label: "Sách đã đăng",
-      icon: <FiBook />,
-      visibleFor: ["Seller"], 
+      icon: <FiBook className="text-orange-500" />,
     },
     {
       path: "/list-ebook-customer",
       label: "Sách điện tử đã đăng",
-      icon: <FiFileText />,
-      visibleFor: ["Seller"], 
+      icon: <FiFileText className="text-orange-500" />,
+    },
+    {
+      path: "/saved-ebooks",
+      label: "Sách điện tử đã lưu",
+      icon: <FiBookmark className="text-orange-500" />,
+    },
+    {
+      path: "/orders",
+      label: "Lịch sử đơn hàng của sách",
+      icon: <FiBook className="text-orange-500" />,
     },
   ];
 
   return (
-    <div className="w-full md:w-1/6 bg-white p-3 shadow-md">
-      <div className="text-center">
-        <img
-          src={accountData.avatar || "/default-avatar.png"}
-          alt="User Avatar"
-          className="w-16 h-16 mx-auto mb-2 object-cover border border-gray-300 rounded-full"
-        />
-        <h3 className="font-bold text-lg text-gray-800">
-          {accountData.userName || "User"}
-        </h3>
-        <p className="text-sm text-gray-500">{accountData.email}</p>
-      </div>
-      <div className="mt-4">
-        <ul className="space-y-3">
-          {menuItems
-            .filter(item => item.visibleFor.includes(userRole))  // Kiểm tra vai trò
-            .map((item) => (
-              <li key={item.path} className="border-b border-gray-300 pb-2">
+    <div className="w-full md:w-1/4 lg:w-1/5 bg-white p-6 shadow-sm min-h-screen">
+      <div className="sticky top-0">
+        <div className="text-center mb-8">
+          <img
+            src={accountData.avatar || "/default-avatar.png"}
+            alt="User Avatar"
+            className="w-24 h-24 mx-auto mb-4 rounded-full border-2 border-gray-200"
+          />
+          <h2 className="text-xl font-semibold text-gray-800">
+            {accountData.userName || "User"}
+          </h2>
+          <p className="text-sm text-gray-500">{accountData.email}</p>
+        </div>
+        <nav>
+          <ul className="space-y-2">
+            {menuItems.map((item) => (
+              <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center transition duration-300 ease-in-out ${location.pathname === item.path
-                    ? "text-orange-800 font-bold"
-                    : "text-orange-600"
-                    } hover:text-orange-800 hover:translate-x-2`}
+                  className={`flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ${
+                    location.pathname === item.path ? "bg-gray-50" : ""
+                  }`}
                 >
-                  <span className="mr-2">{item.icon}</span>
-                  {item.label}
+                  <span className="mr-3">{item.icon}</span>
+                  <span className="text-sm">{item.label}</span>
                 </Link>
               </li>
             ))}
-        </ul>
+          </ul>
+        </nav>
       </div>
     </div>
   );

@@ -387,7 +387,7 @@ const Navbar = () => {
                   </span>
                   {/* Coin */}
                   <span className="text-base font-bold text-white">
-                    {accountData.coin} <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 inline-block"/>
+                    {Intl.NumberFormat('de-DE').format(accountData.coin)} <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 inline-block"/>
                   </span>
                 </div>
               </div>

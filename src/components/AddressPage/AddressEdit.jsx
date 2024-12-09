@@ -255,13 +255,37 @@ const AddressEdit = () => {
     }
   };
 
+  const showSuccessToast = () => {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+
+    Toast.fire({
+      icon: 'success',
+      title: 'Đã cập nhật địa chỉ thành công!'
+    });
+  };
+
   const saveAddress = async (e) => {
     e.preventDefault();
   
     if (!selectedAddress.wardCode || !selectedAddress.districtCode || 
         !selectedAddress.provinceCode || !selectedAddress.addressDetail || 
         !selectedAddress.phoneNumber) {
-      showErrorAlert('Please fill in all required fields.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: 'Vui lòng điền đầy đủ thông tin.',
+        confirmButtonColor: '#f97316'
+      });
       return;
     }
   
@@ -276,7 +300,14 @@ const AddressEdit = () => {
       addressDetail: selectedAddress.addressDetail,
     };
   
-    showLoadingAlert();
+    // Show loading spinner
+    Swal.fire({
+      title: 'Đang xử lý...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   
     try {
       const response = await axios.put(
@@ -290,17 +321,57 @@ const AddressEdit = () => {
         }
       );
   
-      Swal.close(); // Close loading alert
-      
       if (response.status === 200 || response.status === 201) {
-        showSuccessAlert('Address updated successfully!').then(() => {
-          setShowModal(false);
-          window.location.reload();
+        // Update the address in the local state
+        setAddresses(prevAddresses => {
+          return prevAddresses.map(addr => {
+            if (addr.addressId === selectedAddress.addressId) {
+              const province = provinces.find(p => p.ProvinceID === Number(selectedAddress.provinceCode));
+              const district = districts.find(d => d.DistrictID === Number(selectedAddress.districtCode));
+              const ward = wards.find(w => w.WardCode === selectedAddress.wardCode);
+              
+              return {
+                ...addr,
+                addressDetail: selectedAddress.addressDetail,
+                phoneNumber: selectedAddress.phoneNumber,
+                provinceCode: selectedAddress.provinceCode,
+                districtCode: selectedAddress.districtCode,
+                wardCode: selectedAddress.wardCode,
+                provinceName: province?.ProvinceName || addr.provinceName,
+                districtName: district?.DistrictName || addr.districtName,
+                WardName: ward?.WardName || addr.WardName
+              };
+            }
+            return addr;
+          });
         });
+
+        // Close loading spinner
+        Swal.close();
+
+        // Show success toast
+        showSuccessToast();
+
+        // Close the modal with animation
+        setShowModal(false);
+
+        // Add animation to the updated address card
+        const updatedCard = document.querySelector(`[data-address-id="${selectedAddress.addressId}"]`);
+        if (updatedCard) {
+          updatedCard.classList.add('highlight-update');
+          setTimeout(() => {
+            updatedCard.classList.remove('highlight-update');
+          }, 2000);
+        }
       }
     } catch (error) {
       Swal.close();
-      showErrorAlert('Error updating address. Please try again.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: 'Lỗi cập nhật địa chỉ. Vui lòng thử lại.',
+        confirmButtonColor: '#f97316'
+      });
       console.error('Error saving address:', error);
     }
   };
@@ -318,6 +389,7 @@ const AddressEdit = () => {
             {addresses.map((address) => (
               <motion.div
                 key={address.addressId}
+                data-address-id={address.addressId}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -535,5 +607,28 @@ const AddressEdit = () => {
     </div>
   );
 };
+
+// Add this CSS to your stylesheet
+const styles = `
+  .highlight-update {
+    animation: highlightFade 2s ease-in-out;
+  }
+
+  @keyframes highlightFade {
+    0% {
+      background-color: rgba(249, 115, 22, 0.2);
+      transform: scale(1.02);
+    }
+    100% {
+      background-color: transparent;
+      transform: scale(1);
+    }
+  }
+`;
+
+// Add styles to document
+const styleSheet = document.createElement("style");
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
 
 export default AddressEdit;

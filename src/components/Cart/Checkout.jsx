@@ -784,7 +784,7 @@ const Checkout = () => {
           <div className="text-center py-4">
             <p className="text-gray-500 mb-2">Không tìm thấy địa chỉ đã lưu</p>
             <button
-              onClick={() => navigate('/profile/addresses')}
+              onClick={() => navigate('/address')}
               className="text-orange-600 hover:text-orange-700 font-medium"
             >
               + Thêm Địa Chỉ Mới Vào Hồ Sơ

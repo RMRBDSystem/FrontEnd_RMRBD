@@ -4,10 +4,10 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { getShippingOrderStatus } from '../../services/ShippingService';
 import { cancelOrder } from '../../services/OrderService';
-import { motion } from 'framer-motion';
 import LoadingOverlay from '../../shared/LoadingOverlay';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../AccountProfile/Sidebar';
 
 const formatAmount = (amount, paymentType) => {
   if (paymentType === 1) { // COINS payment
@@ -240,118 +240,118 @@ const Orders = () => {
 
   if (isLoading) {
     return (
-      <motion.div className="container mx-auto px-4 py-8">
-        <LoadingOverlay />
-      </motion.div>
+      <div className="flex">
+        <Sidebar />
+        <div className="container mx-auto px-4 py-8 flex-1">
+          <LoadingOverlay />
+        </div>
+      </div>
     );
   }
 
   return (
-    <motion.div>
-      {isProcessing && <LoadingOverlay />}
-      <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "-100%" }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-        className="container mx-auto px-4 py-8"
-      >
-        <h1 className="text-2xl font-bold mb-6">Đơn Hàng Của Tôi</h1>
-        
-        {orders.length === 0 ? (
-          <div className="text-center text-gray-500">
-            Không tìm thấy đơn hàng nào
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <div 
-                key={order.orderId} 
-                className="bg-white rounded-lg shadow p-6 mb-4"
-              >
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h3 className="font-semibold">Mã Đơn Hàng #{order.orderId}</h3>
-                    <p className="text-sm text-gray-500">
-                      {new Date(order.purchaseDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold">
-                      {formatAmount(order.totalPrice, order.paymentType)}
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1">
+        {isProcessing && <LoadingOverlay />}
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-2xl font-bold mb-6">Đơn Hàng Của Tôi</h1>
+          
+          {orders.length === 0 ? (
+            <div className="text-center text-gray-500">
+              Không tìm thấy đơn hàng nào
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <div 
+                  key={order.orderId} 
+                  className="bg-white rounded-lg shadow p-6 mb-4"
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h3 className="font-semibold">Mã Đơn Hàng #{order.orderId}</h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(order.purchaseDate).toLocaleDateString()}
+                      </p>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      <span className="font-semibold">Mã Vận Đơn: </span>
-                      {order.orderCode}
-                    </div>
-                  </div>
-                </div>
-
-                {orderDetails[order.orderId]?.map((detail) => (
-                  <div 
-                    key={detail.orderDetailId} 
-                    className="flex items-start gap-4 py-4 border-t cursor-pointer hover:bg-gray-50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/orders/${order.orderId}`);
-                    }}
-                  >
-                    <img
-                      src={detail.book?.images?.[0]?.imageUrl || 'placeholder.jpg'}
-                      alt={detail.book?.bookName}
-                      className="w-16 h-20 object-cover rounded"
-                    />
-                    <div className="flex flex-1 justify-between">
-                      <div>
-                        <h4 className="font-medium">{detail.book?.bookName}</h4>
-                        <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                    <div className="text-right">
+                      <div className="font-semibold">
+                        {formatAmount(order.totalPrice, order.paymentType)}
                       </div>
-                      <div className="text-right">
+                      <div className="text-sm text-gray-500 mt-1">
+                        <span className="font-semibold">Mã Vận Đơn: </span>
+                        {order.orderCode}
+                      </div>
+                    </div>
+                  </div>
+
+                  {orderDetails[order.orderId]?.map((detail) => (
+                    <div 
+                      key={detail.orderDetailId} 
+                      className="flex items-start gap-4 py-4 border-t cursor-pointer hover:bg-gray-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/orders/${order.orderId}`);
+                      }}
+                    >
+                      <img
+                        src={detail.book?.images?.[0]?.imageUrl || 'placeholder.jpg'}
+                        alt={detail.book?.bookName}
+                        className="w-16 h-20 object-cover rounded"
+                      />
+                      <div className="flex flex-1 justify-between">
                         <div>
-                          {formatAmount(detail.price, order.paymentType)}
+                          <h4 className="font-medium">{detail.book?.bookName}</h4>
+                          <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                        </div>
+                        <div className="text-right">
+                          <div>
+                            {formatAmount(detail.price, order.paymentType)}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex justify-between items-center font-semibold text-lg">
-                    <span>Thành tiền:</span>
-                    <span className="text-orange-800">
-                      {formatAmount(order.totalPrice, order.paymentType)}
-                    </span>
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex justify-between items-center font-semibold text-lg">
+                      <span>Thành tiền:</span>
+                      <span className="text-orange-800">
+                        {formatAmount(order.totalPrice, order.paymentType)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <div>
+                      <span className="font-semibold">Tình Trạng: </span>
+                      <span className="text-orange-800">
+                        {getStatusDisplay(order)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold">Phí Vận Chuyển: </span>
+                      {formatAmount(order.shipFee, order.paymentType)}
+                    </div>
+                    
+                    {orderStatuses[order.orderId]?.status === 1 && (
+                      <button
+                        onClick={() => handleCancelOrder(order.orderCode)}
+                        className="px-4 py-2 bg-orange-400 text-white rounded 
+                        hover:bg-orange-600 transition-colors duration-300 ease-in-out"
+                      >
+                        Hủy Đơn Hàng
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="mt-4 flex justify-between items-center">
-                  <div>
-                    <span className="font-semibold">Tình Trạng: </span>
-                    <span className="text-orange-800">
-                      {getStatusDisplay(order)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-semibold">Phí Vận Chuyển: </span>
-                    {formatAmount(order.shipFee, order.paymentType)}
-                  </div>
-                  
-                  {orderStatuses[order.orderId]?.status === 1 && (
-                    <button
-                      onClick={() => handleCancelOrder(order.orderCode)}
-                      className="px-4 py-2 bg-orange-400 text-white rounded 
-                      hover:bg-orange-600 transition-colors duration-300 ease-in-out"
-                    >
-                      Hủy Đơn Hàng
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </motion.div>
-    </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -178,13 +178,14 @@ const ShoppingCart = () => {
         // Step 3: Find the orderId associated with the deleted orderDetailId
         const orderToCheck = prevOrders.find(order => order.orderDetailId === orderDetailId);
         
-        if (orderToCheck && orderToCheck.orderId)  {
+        if (orderToCheck && orderToCheck.orderId) {
           const remainingDetails = updatedOrders.filter(order => order.orderId === orderToCheck.orderId);
           
           // Step 4: If no remaining orderDetailId, delete the orderId (parent order)
           if (remainingDetails.length === 0) {
             console.log(`Order ${orderToCheck.orderId} has no remaining orderDetails. Deleting the entire order...`);
 
+            // Try to delete the parent order, but don't throw an error if it fails
             axios.delete(`https://rmrbdapi.somee.com/odata/BookOrder/${orderToCheck.orderId}`, {
               headers: {
                 "Content-Type": "application/json",
@@ -193,23 +194,10 @@ const ShoppingCart = () => {
             })
             .then(() => {
               console.log(`Order ${orderToCheck.orderId} deleted successfully.`);
-              Swal.fire({
-                icon: 'success',
-                title: 'Đã xóa thành công!',
-                text: `Đơn hàng ${orderToCheck.orderId} đã được xóa vì không còn sản phẩm.`,
-                showConfirmButton: false,
-                timer: 1500
-              });
             })
             .catch((err) => {
-              console.error("Failed to delete BookOrder:", err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Lỗi!',
-                text: 'Không thể xóa đơn hàng.',
-                showConfirmButton: false,
-                timer: 1500
-              });
+              // Just log the error, don't show it to the user since the item was already removed
+              console.log(`Parent order ${orderToCheck.orderId} might have been already deleted:`, err);
             });
             
             return updatedOrders.filter(order => order.orderId !== orderToCheck.orderId);
@@ -219,21 +207,27 @@ const ShoppingCart = () => {
         return updatedOrders;
       });
 
+      // Show success message
       Swal.fire({
         icon: 'success',
         title: 'Đã xóa thành công!',
         text: 'Sản phẩm đã được xóa khỏi giỏ hàng.',
         showConfirmButton: false,
-        timer: 1500
+        timer: 1500,
+        position: 'top-end',
+        toast: true
       });
+
     } catch (error) {
-      console.error("Error deleting order detail from API:", error.response || error.message);
+      console.error("Error deleting order detail:", error);
       Swal.fire({
         icon: 'error',
         title: 'Lỗi!',
         text: 'Không thể xóa sản phẩm khỏi giỏ hàng.',
         showConfirmButton: false,
-        timer: 1500
+        timer: 1500,
+        position: 'top-end',
+        toast: true
       });
     }
   };

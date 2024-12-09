@@ -82,62 +82,50 @@ const NavbarModerator = () => {
   return (
     <>
       <ToastContainer />
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center p-4 bg-gradient-to-r from-purple-500 via-blue-600 to-blue-800 shadow-lg">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center px-4 bg-gradient-to-r from-purple-500 via-blue-600 to-blue-800 shadow-lg">
         <div className="flex items-center justify-between w-full md:w-auto">
           <NavLink to="/update-recipe" className="text-white text-2xl font-semibold">
             <span className="text-yellow-400">Moderator</span> Dashboard
           </NavLink>
         </div>
-
-        <div className="flex space-x-6 mt-4 md:mt-0">
+        <div className="flex space-x-6 my-2 md:mt-0">
           {isLoggedIn && (
             <div ref={dropdownRef} className="relative">
               <div
                 onClick={toggleDropdown}
-                className="flex items-center cursor-pointer space-x-3"
+                className="flex items-center cursor-pointer"
               >
                 <img
                   src={accountData.avatar || "https://via.placeholder.com/50"}
                   alt="User Avatar"
                   className="w-14 h-14 object-cover rounded-full border-2 border-white"
                 />
-                <span className="ml-2 text-white font-medium text-lg">
-                  {accountData.userName || "No name"}
+                <span className="material-icons text-white">
+                  keyboard_arrow_down
                 </span>
               </div>
 
               {/* Dropdown */}
               {isDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-64 bg-white shadow-xl rounded-lg text-black z-10 transition-all transform scale-100"
+                  className="absolute right-0 mt-2 w-64 bg-white shadow-xl rounded-lg font-semibold text-black z-10 transition-all transform scale-100"
                   onClick={(e) => e.stopPropagation()} // Prevent click propagation to the document
                 >
                   {userRole === "Moderator" && (
-                    <>
-                      <NavLink
-                        to="/update-moderator-information"
-                        className="block px-4 py-3 hover:bg-gray-200 transition-all flex items-center space-x-2"
-                      >
-                        <FaEdit className="text-blue-600" />
-                        <span>Cập nhật tài khoản</span>
-                      </NavLink>
-
-                      <NavLink
+                    <><NavLink
                         to="/"
                         className="block px-4 py-3 hover:bg-gray-200 transition-all flex items-center space-x-2"
                       >
                         <FaHome className="text-blue-600" />
                         <span>Trang chủ</span>
                       </NavLink>
-
                       <NavLink
-                        to="/update-recipe"
+                        to="/update-moderator-information"
                         className="block px-4 py-3 hover:bg-gray-200 transition-all flex items-center space-x-2"
                       >
-                        <FaShieldAlt className="text-blue-600" />
-                        <span>Trang quản trị</span>
+                        <FaEdit className="text-yellow-600" />
+                        <span>Cập nhật tài khoản</span>
                       </NavLink>
-
                       <div
                         className="block px-4 py-3 hover:bg-gray-200 transition-all cursor-pointer flex items-center space-x-2"
                         onClick={handleLogout}

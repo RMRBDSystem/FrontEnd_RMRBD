@@ -55,26 +55,37 @@ const AccountList = () => {
       name: "#",
       selector: (row, index) => index + 1,
       sortable: true,
+      width: "50px",
+      style: {
+        textAlign: "center",
+        fontSize: "1.125rem", // Font lớn hơn (18px)
+      },
     },
     {
       name: "Tên người dùng",
-      selector: (row) => row.userName || "Unknown",
+      selector: (row) => row.userName || "Không rõ",
       sortable: true,
-      filterable: true,
+      style: {
+        textAlign: "left",
+        fontSize: "1.125rem", // Font lớn hơn (18px)
+      },
     },
     {
       name: "Vai trò",
-      selector: (row) => row.role?.roleName || "Unknown",
+      selector: (row) => row.role?.roleName || "Không rõ",
       sortable: true,
-      filterable: true,
+      style: {
+        textAlign: "left",
+        fontSize: "1.125rem", // Font lớn hơn (18px)
+      },
     },
     {
-      name: "Ảnh",
+      name: "Hình ảnh",
       selector: (row) => (
         <img
           src={row.avatar || ""}
           alt="Account preview"
-          className="w-16 h-16 object-cover rounded-md"
+          className="w-24 h-24 object-cover rounded-md"
         />
       ),
       sortable: false,
@@ -84,40 +95,32 @@ const AccountList = () => {
       selector: (row) => {
         if (row.accountStatus === 0) {
           return (
-            <FaBan style={{ color: "red", fontSize: "24px" }} title="Bị khóa" />
+            <FaBan className="text-red-500 text-2xl" title="Bị khóa" />
           );
         }
         if (row.accountStatus === 1) {
           return (
-            <FaCheckCircle
-              style={{ color: "green", fontSize: "24px" }}
-              title="Đã xác nhận"
-            />
+            <FaCheckCircle className="text-green-500 text-2xl" title="Đã xác nhận" />
           );
         }
         if (row.accountStatus === -1) {
           return (
-            <FaRegClock
-              style={{ color: "orange", fontSize: "24px" }}
-              title="Chờ được xác nhận"
-            />
+            <FaRegClock className="text-orange-500 text-2xl" title="Chờ xác nhận" />
           );
         }
       },
       sortable: true,
-      filterable: true,
     },
     {
       name: "Thao tác",
       selector: (row) => (
         <button
-          className="btn btn-link"
+          className="text-blue-500 hover:text-blue-700 text-xl" // Cỡ chữ lớn hơn cho icon
           onClick={() => handleDetails(row.accountId)}
         >
-          <FaInfoCircle
-            style={{ color: "#007bff", fontSize: "24px" }}
-            title="Chi tiết"
-          />
+          <svg className="w-8 h-8 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" title="Chi tiết">
+            <path stroke="currentColor" strokeLinecap="square" strokeLinejoin="round" strokeWidth="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z" />
+          </svg>
         </button>
       ),
       sortable: false,
@@ -134,13 +137,15 @@ const AccountList = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl">
-        <div className="mb-4 flex items-center">
+      <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-5xl">
+        <div className="flex justify-end mr-4">
           <button
-            className="flex items-center text-blue-500 hover:text-blue-700"
+            className="flex items-center text-blue-500 hover:text-blue-700 text-xl"
             onClick={() => setShowFilter(!showFilter)}
           >
-            <FaFilter className="mr-2" />
+            <svg className="w-6 h-6 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M20 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6h-2m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4" />
+            </svg>
             Bộ lọc
           </button>
         </div>
@@ -150,13 +155,13 @@ const AccountList = () => {
             <input
               type="text"
               placeholder="Tìm kiếm theo tên người dùng"
-              className="border border-gray-300 p-2 rounded flex-1 min-w-[200px]"
+              className="border border-gray-300 p-2 rounded flex-1 min-w-[200px] text-lg"
               value={nameFilter}
               onChange={(e) => setNameFilter(e.target.value)}
             />
             {/* Filter by Status */}
             <select
-              className="border border-gray-300 p-2 rounded flex-1 min-w-[200px]"
+              className="border border-gray-300 p-2 rounded flex-1 min-w-[200px] text-lg"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -167,7 +172,7 @@ const AccountList = () => {
             </select>
             {/* Clear Filter Button */}
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-lg"
               onClick={() => {
                 setNameFilter("");
                 setStatusFilter("");
@@ -182,10 +187,39 @@ const AccountList = () => {
           title="Danh sách tài khoản"
           columns={columns}
           data={filteredAccounts}
-          progressPending={loading}
+          progressPending={loading} // Shows a loading spinner when data is being fetched
           pagination
+          paginationPerPage={10} // Set the number of rows per page
+          paginationRowsPerPageOptions={[5, 10, 15, 20]} // Options for rows per page
           responsive
           highlightOnHover
+          striped // Adds alternating row colors for better readability
+          customStyles={{
+            table: {
+              style: {
+                fontSize: '16px', // Apply font size to table
+                padding: '10px',
+              },
+            },
+            rows: {
+              style: {
+                fontSize: '14px', // Font size for rows
+              },
+            },
+            headCells: {
+              style: {
+                fontSize: '16px', // Font size for header cells
+                padding: '10px', // Adjust padding for header cells
+                fontWeight: 'bold', // Make header text bold
+              },
+            },
+            cells: {
+              style: {
+                fontSize: '14px', // Font size for cell content
+                padding: '8px', // Padding for individual cells
+              },
+            },
+          }}
         />
       </div>
     </div>

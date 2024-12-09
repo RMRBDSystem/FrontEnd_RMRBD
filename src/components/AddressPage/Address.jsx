@@ -3,22 +3,20 @@ import axios from 'axios';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from 'sweetalert2';
-import Navbar from "../Navbar/Navbar";
-import Footer from '../Footer/Footer';
+import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 
 const Address = () => {
+  const userId = Cookies.get('UserId');
   const [address, setAddress] = useState({
     AddressID: '',
-    AccountID: '',
+    AccountID: userId,
     AddressStatus: 1,
     wardCode: '',
     districtCode: '',
     provinceCode: '',
     AddressDetail: '',
     phoneNumber: '',
-    Latitude: '',
-    Longitude: ''
   });
 
   const [provinces, setProvinces] = useState([]);
@@ -27,10 +25,9 @@ const Address = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0); 
+  const [otpTimer, setOtpTimer] = useState(0);
   const [isPhoneChecking, setIsPhoneChecking] = useState(false);
   const [isPhoneAvailable, setIsPhoneAvailable] = useState(null);
-  const userId = Cookies.get('UserId');
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -116,6 +113,27 @@ const Address = () => {
     }));
   };
 
+  const formatPhoneNumber = (number) => {
+    // Remove any non-digit characters and the '+' symbol
+    let cleaned = number.replace(/\D/g, '');
+    
+    // Remove '84' prefix if it exists
+    if (cleaned.startsWith('84')) {
+      cleaned = cleaned.slice(2);
+    }
+    
+    // Remove leading '0' if it exists
+    if (cleaned.startsWith('0')) {
+      cleaned = cleaned.slice(1);
+    }
+    
+    // Ensure the number doesn't exceed 9 digits (after removing prefix)
+    cleaned = cleaned.slice(0, 9);
+    
+    // Add '84' prefix for API submission
+    return cleaned ? `84${cleaned}` : '';
+  };
+
   const handlephoneNumberChange = (e) => {
     let numericValue = e.target.value.replace(/\D/g, '');
     
@@ -124,9 +142,17 @@ const Address = () => {
     }
   
     setAddress((prev) => ({ ...prev, phoneNumber: numericValue.trim() }));
-    setOtpSent(false); // Reset OTP sent status
-    setOtpCode('');    // Reset OTP code input
-    setOtpVerified(false); // Reset OTP verified status
+    setOtpSent(false);
+    setOtpCode('');
+    setOtpVerified(false);
+  };
+
+  const displayPhoneNumber = (number) => {
+    if (!number) return '';
+    if (number.startsWith('84')) {
+      return '0' + number.slice(2);
+    }
+    return number;
   };
 
   const checkphoneNumberExists = async (phoneNumber) => {
@@ -242,7 +268,7 @@ const handleSendOtp = async () => {
     }
   };
 
-  const saveAddress = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
   
     // Check phone number existence and ensure OTP verification for new numbers
@@ -289,50 +315,133 @@ const handleSendOtp = async () => {
   const resetForm = () => {
     setAddress({
       AddressID: '',
-      AccountID: '',
+      AccountID: userId,
       AddressStatus: 1,
       wardCode: '',
       districtCode: '',
       provinceCode: '',
       AddressDetail: '',
       phoneNumber: '',
-      Latitude: '',
-      Longitude: '',
     });
     setOtpSent(false);
     setOtpCode('');
     setOtpVerified(false);
   };
 
-  const showAlert = (type, message) => {
+  const showAlert = (icon, text) => {
     Swal.fire({
-      icon: type,
-      title: message,
-      showConfirmButton: false,
-      timer: 1500,
-      position: 'top-end',
+      icon,
+      text,
+      toast: false,
+      position: 'center',
+      showConfirmButton: true,
+      timer: 3000,
+      timerProgressBar: true,
+      customClass: {
+        popup: 'swal2-show',
+        container: 'swal2-container'
+      }
     });
   };
 
   return (
-    <>
-      <Container className="my-5">
-        <h2 className="text-center mb-4">Thêm Địa Chỉ Giao Hàng</h2>
-
-        <Form onSubmit={saveAddress}>
-          <Row className="mb-4">
-            <Col>
-              <Form.Group controlId="provinceCode">
-                <Form.Label>Tỉnh/Thành Phố</Form.Label>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
+      <Container className="px-4 max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6"
+        >
+          <h2 className="text-2xl font-semibold mb-6 text-gray-800">Thêm Địa Chỉ Mới</h2>
+          
+          <Form onSubmit={handleSubmit} className="space-y-6">
+            {/* Phone Number Input */}
+            <div className="flex gap-4">
+              <div className="flex-grow">
                 <Form.Control
-                  as="select"
+                  type="tel"
+                  placeholder="Nhập số điện thoại"
+                  value={displayPhoneNumber(address.phoneNumber)}
+                  onChange={handlephoneNumberChange}
+                  className="w-full px-4 py-3 rounded-lg border-2"
+                  required
+                />
+              </div>
+              <div className="flex-shrink-0">
+                {isPhoneChecking ? (
+                  <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Đang tải...</span>
+                  </div>
+                ) : isPhoneAvailable ? (
+                  <Button 
+                    variant="secondary" 
+                    onClick={handleSubmit} 
+                    disabled={!otpVerified}
+                    className="px-6 py-2 rounded-lg"
+                  >
+                    {otpVerified ? 'Lưu' : 'Xác Thực OTP Để Lưu'}
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="secondary" 
+                    onClick={handleSendOtp} 
+                    disabled={otpSent || isPhoneChecking}
+                    className="px-6 py-2 rounded-lg"
+                  >
+                    {otpSent ? 'Gửi Lại OTP' : 'Gửi OTP'}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* OTP Section */}
+            <AnimatePresence>
+              {otpSent && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-4"
+                >
+                  <div className="flex gap-4">
+                    <Form.Control
+                      type="text"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      placeholder="Nhập mã OTP"
+                      maxLength={6}
+                      className="flex-grow px-4 py-3 rounded-lg border-2"
+                    />
+                    <Button
+                      variant="success"
+                      onClick={handleVerifyOtp}
+                      className="px-6 py-2 rounded-lg"
+                    >
+                      Xác Thực OTP
+                    </Button>
+                  </div>
+                  {otpTimer > 0 && (
+                    <div className="text-sm text-gray-500">
+                      Mã OTP hết hạn trong {Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, '0')}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Location Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Form.Group>
+                <Form.Label>Tỉnh/Thành Phố</Form.Label>
+                <Form.Select
                   name="provinceCode"
-                  id="provinceCode"
                   value={address.provinceCode}
                   onChange={(e) => {
                     handleInputChange(e);
                     fetchDistricts(e.target.value);
                   }}
+                  className="w-full px-4 py-3 rounded-lg border-2"
                   required
                 >
                   <option value="">Chọn Tỉnh/Thành Phố</option>
@@ -341,22 +450,19 @@ const handleSendOtp = async () => {
                       {province.ProvinceName}
                     </option>
                   ))}
-                </Form.Control>
+                </Form.Select>
               </Form.Group>
-            </Col>
 
-            <Col>
-              <Form.Group controlId="districtCode">
+              <Form.Group>
                 <Form.Label>Quận/Huyện</Form.Label>
-                <Form.Control
-                  as="select"
+                <Form.Select
                   name="districtCode"
-                  id="districtCode"
                   value={address.districtCode}
                   onChange={(e) => {
                     handleInputChange(e);
                     fetchWards(e.target.value);
                   }}
+                  className="w-full px-4 py-3 rounded-lg border-2"
                   required
                 >
                   <option value="">Chọn Quận/Huyện</option>
@@ -365,19 +471,16 @@ const handleSendOtp = async () => {
                       {district.DistrictName}
                     </option>
                   ))}
-                </Form.Control>
+                </Form.Select>
               </Form.Group>
-            </Col>
 
-            <Col>
-              <Form.Group controlId="wardCode">
+              <Form.Group>
                 <Form.Label>Phường/Xã</Form.Label>
-                <Form.Control
-                  as="select"
+                <Form.Select
                   name="wardCode"
-                  id="wardCode"
                   value={address.wardCode}
                   onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border-2"
                   required
                 >
                   <option value="">Chọn Phường/Xã</option>
@@ -386,89 +489,40 @@ const handleSendOtp = async () => {
                       {ward.WardName}
                     </option>
                   ))}
-                </Form.Control>
+                </Form.Select>
               </Form.Group>
-            </Col>
-          </Row>
+            </div>
 
-          <Row className="mb-4">
-            <Col>
-              <Form.Group controlId="AddressDetail">
-                <Form.Label>Chi Tiết Địa Chỉ</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  name="AddressDetail"
-                  rows={3}
-                  value={address.AddressDetail}
-                  onChange={handleInputChange}
-                  required
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <Row className="mb-4">
-          <Col xs={8}>
-            <Form.Group controlId="phoneNumber">
-              <Form.Label>Số Điện Thoại</Form.Label>
+            {/* Address Detail */}
+            <Form.Group>
+              <Form.Label>Chi Tiết Địa Chỉ</Form.Label>
               <Form.Control
-                type="tel"
-                placeholder="Nhập số điện thoại"
-                name="phoneNumber"
-                value={address.phoneNumber}
-                onChange={handlephoneNumberChange}
-                maxLength={15}
-                inputMode="numeric"
+                as="textarea"
+                name="AddressDetail"
+                value={address.AddressDetail}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 rounded-lg border-2"
+                rows={3}
                 required
               />
             </Form.Group>
-          </Col>
-          <Col xs={4} className="d-flex align-items-end">
-            {isPhoneChecking ? (
-              <div className="spinner-border" role="status">
-                <span className="visually-hidden">Đang tải...</span>
-              </div>
-            ) : isPhoneAvailable ? (
-              <Button variant="secondary" onClick={saveAddress} disabled={!otpVerified}>
-                {otpVerified ? 'Gửi OTP' : 'Xác Thực OTP Để Lưu'}
-              </Button>
-            ) : (
-              <Button variant="secondary" onClick={handleSendOtp} disabled={otpSent || isPhoneChecking}>
-                {otpSent ? 'Gửi Lại OTP' : 'Gửi OTP'}
-              </Button>
-            )}
-          </Col>
-        </Row>
 
-          {otpSent && (
-            <Row className="mb-4">
-              <Col>
-                <Form.Group controlId="otpCode">
-                  <Form.Label>Nhập Mã OTP (hết hạn trong {Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, '0')})</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Nhập mã OTP"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    maxLength={6}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col xs="auto" className="d-flex align-items-end">
-                <Button variant="success" onClick={handleVerifyOtp}>
-                  Xác Thực OTP
-                </Button>
-              </Col>
-            </Row>
-          )}
-
-          <Button type="submit" variant="primary">
-            Lưu Địa Chỉ
-          </Button>
-        </Form>
+            {/* Submit Button */}
+            <div className="flex justify-end">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                className="px-6 py-2 bg-orange-500 text-white rounded-lg 
+                          hover:bg-orange-600 transition-colors"
+              >
+                Lưu Địa Chỉ
+              </motion.button>
+            </div>
+          </Form>
+        </motion.div>
       </Container>
-    </>
+    </div>
   );
 };
 

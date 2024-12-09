@@ -132,7 +132,7 @@ const RechargePage = () => {
             />
             <div>
               <p className="font-bold text-gray-800">{userName}</p>
-              <p className="text-sm text-gray-500"><img src="images/icon/dollar.png" alt="" className='h-5 w-5 inline-block'/> {coin}</p>
+              <p className="text-sm text-gray-500"><img src="images/icon/dollar.png" alt="" className='h-5 w-5 inline-block'/> {Intl.NumberFormat('de-DE').format(coin)}</p>
             </div>
           </div>
           <a href="/coinTransaction" className="text-gray-900 font-bold cursor-pointer">
@@ -142,7 +142,7 @@ const RechargePage = () => {
 
         {/* Thông báo khuyến mãi */}
         <div className="max-w-[450px] bg-yellow-100 p-2 rounded-md mb-4">
-          <p className="font-bold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-red-500">Tiết kiệm 15% khi nạp từ 100000 xu.</span></span>
+          <p className="font-bold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-red-500">Tiết kiệm 15% khi nạp từ 100.000 XU.</span></span>
         </div>
         {/* Lựa chọn số xu */}
         <div className="grid grid-cols-4 gap-4 mb-6">
@@ -153,7 +153,7 @@ const RechargePage = () => {
                 } cursor-pointer`}
               onClick={() => handleSelect(option)}
             >
-              <div className="font-bold text-gray-900 text-xl text-center mb-1"><img src="images/icon/dollar.png" alt="" className='h-5 w-5 inline-block'/> {option.coins}</div>
+              <div className="font-bold text-gray-900 text-xl text-center mb-1"><img src="images/icon/dollar.png" alt="" className='h-5 w-5 inline-block'/> {Intl.NumberFormat('de-DE').format(option.coins)}</div>
               <div className="text-gray-600 text-sm text-center">
                 {typeof option.price === 'number' ? `₫${option.price.toLocaleString()}` : option.price}
               </div>
@@ -165,8 +165,8 @@ const RechargePage = () => {
             className="p-3 rounded-sm shadow-sm cursor-pointer border-3"
             onClick={handleOpenCustomModal}
           >
-            <div className="font-semibold text-2xl mb-1 text-center">&#11088; Tùy chỉnh</div>
-            <div className="text-gray-600 font-bold text-sm">Khuyến mãi nạp từ 100000 xu</div>
+            <div className="font-semibold text-xl mb-1 text-center">&#11088; Tùy chỉnh</div>
+            <div className="text-gray-600 font-semibold text-sm">Khuyến mãi nạp từ 100.000 XU</div>
           </div>
         </div>
 

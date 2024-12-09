@@ -32,6 +32,7 @@ import AddEBookCustomer from '../CustomerEbook/AddEbookCustomer';
 import DetailSavedRecipe from '../Pages/Recipe/DetailSavedRecipe';
 import EditRoleUpdate from '../AccountProfile/EditRoleUpdate';
 import Address from "../AddressPage/Address";
+import SavedEbook from '../AccountProfile/SavedEbooks';
 //import Addbook from '../Pages/Add Items/AddBook';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
@@ -72,10 +73,8 @@ import UpdateAccountMod from "../Moderator/UpdateAccount";
 import AdminDashboard from "../Admin/Dashboard";
 import AccountManagement from '../Admin/AccountManagement';
 import IncomeManagement from '../Admin/IncomeManagement';
-import Reports from '../Admin/Reports';
 import CategoryManagement from '../Admin/CategoryManagement';
 import RecipeManagement from '../Admin/Recipe';
-import EBookTest from '../Admin/TestEbook';
 import Feedback from '../Admin/Feedback';
 import GetListSaveRecipe from "../Pages/Recipe/GetListSavedRecipe";
 
@@ -93,7 +92,6 @@ export default function RouterPage() {
           <Route path="/login" element={<Login />} />
           <Route path="/admin/account-management" element={<AccountManagement />} />
           <Route path="/admin/income-management" element={<IncomeManagement />} />
-          <Route path="/admin/reports" element={<Reports />} />
           <Route path="/admin/category-management" element={<CategoryManagement />} />
           <Route path="/admin/recipemanagement" element={<RecipeManagement />} />
           <Route path="/adminrecipe" element={<AdminRecipe />} />
@@ -101,7 +99,6 @@ export default function RouterPage() {
           <Route path="/admincreaterecipe" element={<AdminCreateRecipe />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
-          <Route path="/admin/ebooktest" element={<EBookTest />} />
           <Route path="/admin/feedback" element={<Feedback />} />
           <Route path="/pdf-protect" element={<PDFProtect />} />
           <Route
@@ -255,6 +252,14 @@ export default function RouterPage() {
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
                   <Address />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/saved-ebooks"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <SavedEbook />
                 </ProtectedRoute>
               }
             />

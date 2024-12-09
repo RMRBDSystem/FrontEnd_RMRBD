@@ -53,27 +53,33 @@ const AccountProfile = () => {
 
   const columns = [
     {
-      name: "STT",
+      name: "#",
       selector: (row, index) => index + 1,
       sortable: true,
-      width: "80px", // Reduced width for smaller display
+      width: "50px",
+      style: {
+        textAlign: "center",
+        fontSize: "1.125rem", // Font lớn hơn (18px)
+      },
     },
     {
       name: "Tên người dùng",
       selector: (row) => row.account?.userName || "Không có tên",
       sortable: true,
-      width: "250px", // Adjusted width
-      style: { fontSize: "14px" }, // Reduced font size for smaller text
+      style: {
+        textAlign: "left",
+        fontSize: "1.125rem", // Font lớn hơn (18px)
+      },
     },
     {
       name: "Ngày sinh",
       selector: (row) => row.dateOfBirth.split("T")[0], // Display only the date
       sortable: true,
-      width: "120px", // Adjusted width for smaller display
+      width: "200px", // Adjusted width for smaller display
       style: { fontSize: "14px" }, // Reduced font size for smaller text
     },
     {
-      name: "Ảnh CMND mặt trước",
+      name: "Hình ảnh CCCD",
       cell: (row) =>
         row.frontIdcard ? (
           <img
@@ -84,7 +90,7 @@ const AccountProfile = () => {
         ) : (
           "Không có"
         ),
-      width: "250px", // Adjusted width
+      width: "200px", // Adjusted width
       height: "150px", // Adjusted height
     },
     {
@@ -132,7 +138,7 @@ const AccountProfile = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-7xl bg-white shadow-lg rounded-lg p-5">
+      <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-5xl">
         {/* Filter Button */}
         <div className="mb-4 flex items-center justify-between">
           <button
@@ -178,28 +184,35 @@ const AccountProfile = () => {
 
         {/* DataTable */}
         <DataTable
-          title="Danh sách tài khoản"
+          title="Cập nhật vai trò người dùng"
           columns={columns}
           data={filteredData}
           pagination
           highlightOnHover
           striped
           customStyles={{
+            table: {
+              style: {
+                fontSize: '16px', // Apply font size to table
+                padding: '10px',
+              },
+            },
             rows: {
               style: {
-                fontSize: "14px",
-                padding: "12px",
+                fontSize: '14px', // Font size for rows
               },
             },
             headCells: {
               style: {
-                fontSize: "16px",
-                padding: "10px",
+                fontSize: '16px', // Font size for header cells
+                padding: '10px', // Adjust padding for header cells
+                fontWeight: 'bold', // Make header text bold
               },
             },
             cells: {
               style: {
-                padding: "10px",
+                fontSize: '14px', // Font size for cell content
+                padding: '8px', // Padding for individual cells
               },
             },
           }}
