@@ -70,12 +70,11 @@ import UpdateAccountDetails from "../Moderator/Details/UpdateAccountDetails";
 import UpdateAccountMod from "../Moderator/UpdateAccount";
 //Admin
 // import RecipeDetails from "../Admin/Recipemanagement/RecipeDetail";
-import AdminDashboard from "../Admin/Dashboard";
-import AccountManagement from '../Admin/AccountManagement';
-import IncomeManagement from '../Admin/IncomeManagement';
-import CategoryManagement from '../Admin/CategoryManagement';
+import AdminDashboard from "../Admin/Dashboard/index";
+// import AccountManagement from '../Admin/AccountManagement';
+import IncomeManagement from '../Admin/IncomeManagement/index';
+import CategoryManagement from '../Admin/CategoryManagement/index';
 import RecipeManagement from '../Admin/Recipe';
-import Feedback from '../Admin/Feedback';
 import GetListSaveRecipe from "../Pages/Recipe/GetListSavedRecipe";
 
 //API TEST
@@ -99,10 +98,9 @@ export default function RouterPage() {
           <Route path="/admincreaterecipe" element={<AdminCreateRecipe />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
-          <Route path="/admin/feedback" element={<Feedback />} />
           <Route path="/pdf-protect" element={<PDFProtect />} />
           <Route
-            path="/admin-dashboard"
+            path="/admin- dashboard"
             element={
               <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
                 <AdminDashboard />
