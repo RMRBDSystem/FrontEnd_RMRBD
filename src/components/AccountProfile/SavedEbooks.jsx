@@ -4,7 +4,6 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { FiBookOpen } from 'react-icons/fi';
 import Sidebar from './Sidebar';
-import LoadingPage from '../shared/LoadingPage';
 
 const SavedEbooks = () => {
     const [ebooks, setEbooks] = useState([]);
@@ -82,7 +81,7 @@ const SavedEbooks = () => {
                     <h2 className="text-2xl font-bold mb-6">Sách điện tử đã lưu</h2>
                     <div className="relative">
                         {loading ? (
-                            <LoadingPage />
+                            <div className="text-center py-4">Loading...</div>
                         ) : error ? (
                             <div className="bg-white rounded-lg shadow-md p-4">
                                 <div className="text-center text-red-500 py-4">{error}</div>
