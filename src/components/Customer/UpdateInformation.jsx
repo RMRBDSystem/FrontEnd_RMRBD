@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
-import Sidebar from './Sidebar';
+import Sidebar from "./Sidebar";
+import {
+  getAccountData,
+  updateInformation,
+} from "../services/CustomerService/api";
 
-const UpdateAccount = () => {
+const UpdateInformation = () => {
   const [accountID, setAccountID] = useState(null);
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState(null);
@@ -22,13 +25,7 @@ const UpdateAccount = () => {
 
   const fetchAccountData = async (userId) => {
     try {
-      const response = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Account/${userId}`,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
-      const data = response.data;
+      const data = await getAccountData(userId);
       setAccountData(data);
       setUserName(data.userName);
     } catch (error) {
@@ -40,7 +37,7 @@ const UpdateAccount = () => {
       });
     }
   };
-
+// Gọi tới api put Account để cập nhật thônng tin
   const handleUpdate = async () => {
     if (!userName) {
       Swal.fire({
@@ -67,13 +64,7 @@ const UpdateAccount = () => {
     try {
       setIsLoading(true);
 
-      await axios.put(
-        `https://rmrbdapi.somee.com/odata/Account/${accountID}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data", Token: "123-abc" },
-        }
-      );
+      await updateInformation(accountID, formData);
 
       Swal.fire({
         icon: "success",
@@ -99,6 +90,7 @@ const UpdateAccount = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Kiểm tra xem loại tệp có phải là ảnh hay không
       if (!file.type.startsWith("image/")) {
         Swal.fire({
           icon: "error",
@@ -113,12 +105,12 @@ const UpdateAccount = () => {
   };
 
   return (
-    <>
-      <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
-        {/* Sidebar */}
-        <Sidebar />
-        {/* Update Form */}
-        <div className="flex-1 bg-white shadow-lg max-w-xl w-full p-4">
+    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
+      {/* Sidebar */}
+      <Sidebar />
+      {/* Update Form */}
+      <section className="flex flex-col">
+        <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col text-xl">
           <form
             className="space-y-4"
             onSubmit={(e) => {
@@ -147,10 +139,12 @@ const UpdateAccount = () => {
             <div className="mt-4 text-xs text-gray-500 border-b border-gray-300 pb-2 opacity-50">
               <p>
                 Chức năng "Cập nhật tài khoản" cho phép bạn thay đổi thông tin
-                cá nhân như tên người dùng và ảnh đại diện. Bạn có thể cập nhật
-                những thông tin này và nhấn "Cập nhật" để lưu thay đổi. Lưu ý,
-                bạn không thể thay đổi địa chỉ email vì nó là thông tin xác thực
-                của tài khoản.
+                cá nhân như tên người dùng và ảnh đại diện.
+                <p>
+                  Bạn có thể cập nhật những thông tin này và nhấn "Cập nhật" để
+                  lưu thay đổi. Lưu ý, bạn không thể thay đổi địa chỉ email vì
+                  nó là thông tin xác thực của tài khoản.
+                </p>
               </p>
             </div>
 
@@ -163,7 +157,7 @@ const UpdateAccount = () => {
                 type="text"
                 value={accountData.email || ""}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700"
+                className="mx-auto px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700"
               />
             </div>
 
@@ -177,7 +171,7 @@ const UpdateAccount = () => {
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-4 py-2 border border-gray-300 text-gray-700 focus:ring-2 focus:ring-indigo-500"
+                className="mx-auto px-4 py-2 border border-gray-300 text-gray-700 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
@@ -222,9 +216,9 @@ const UpdateAccount = () => {
             </div>
           </form>
         </div>
-      </div>
-    </>
+      </section>
+    </div>
   );
 };
 
-export default UpdateAccount;
+export default UpdateInformation;

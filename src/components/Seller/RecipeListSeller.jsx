@@ -4,10 +4,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
-import EditIcon from "/icon/edit.svg";
-import EyeIcon from "/icon/eye.svg";
-import Sidebar from "../AccountProfile/Sidebar";
-
+import EditIcon from "/images/icon/edit.svg";
+import EyeIcon from "/images/icon/eye.svg";
+import Sidebar from "../Customer/Sidebar";
+import {fetchRecipes} from "../services/SellerService/Api";
+import Swal from "sweetalert2";
 import {
   FaFilter,
   FaSearch,
@@ -27,7 +28,11 @@ const ShowRecipes = () => {
     if (storedUserId) {
       setAccountID(storedUserId);
     } else {
-      toast.error("No user found, please login first.");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không tìm thấy người dùng. Vui lòng đăng nhập.",
+      });
     }
   }, []);
 
@@ -39,19 +44,15 @@ const ShowRecipes = () => {
 
   const getData = async () => {
     try {
-      const result = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Recipe?$filter=createbyid eq ${accountId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Token: "123-abc", // Ensure the correct token is passed here
-          },
-        }
-      );
-      setData(result.data);
+      const result = await fetchRecipes(accountId);
+      setData(result);
     } catch (error) {
       console.error("Error fetching recipes:", error);
-      toast.error("Failed to fetch recipes.");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể tải danh sách công thức. Vui lòng thử lại.",
+      });
     }
   };
 
@@ -171,17 +172,17 @@ const ShowRecipes = () => {
   );
   const [searchQuery, setSearchQuery] = useState("");
   return (
-    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-5">
+    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
       {/* Sidebar */}
       <Sidebar />
-      <section className="flex flex-col section-center">
-        <div className="max-w-7xl mx-auto bg-white p-4 rounded-lg shadow-md flex flex-col">
+      <section className="flex flex-col">
+        <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
           <ToastContainer />
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-800">
               Danh sách công thức
             </h2>
-            <Link to="/add-recipe">
+            <Link to="/create-recipe-seller">
               <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center">
                 <FaPlus className="mr-2" /> Thêm công thức
               </button>
@@ -336,7 +337,7 @@ const ShowRecipes = () => {
                         className="w-6 h-6 mr-2"
                       />
                     </Link>
-                    <Link to={`/recipe-customer-detail/${recipe.recipeId}`}>
+                    <Link to={`/recipe-seller-detail/${recipe.recipeId}`}>
                       <img
                         src={EyeIcon}
                         alt="Edit Icon"
