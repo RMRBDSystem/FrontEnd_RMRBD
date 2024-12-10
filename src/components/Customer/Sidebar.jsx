@@ -10,7 +10,7 @@ import {
   FiFileText,
   FiBookmark,
 } from "react-icons/fi";
-import { getAccountData } from "../services/CustomerService/api";
+import { getAccountData } from "../services/CustomerService/CustomerService";
 const Sidebar = () => {
   const [accountData, setAccountData] = useState({});
   const location = useLocation();

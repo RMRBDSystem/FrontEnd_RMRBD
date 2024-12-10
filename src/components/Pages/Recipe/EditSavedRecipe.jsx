@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import BuildIcon from "@mui/icons-material/Build";
 import Swal from "sweetalert2";
-import { fetchRecipeData,saveRecipeData } from "../../services/CustomerService/api";
+import { fetchRecipeData,saveRecipeData } from "../../services/CustomerService/CustomerService";
 const EditSavedRecipe = () => {
   const { recipeId } = useParams();
   const [recipeData, setRecipeData] = useState(null);

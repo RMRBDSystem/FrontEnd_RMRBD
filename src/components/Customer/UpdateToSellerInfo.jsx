@@ -4,7 +4,7 @@ import { FaCheckCircle, FaTimesCircle, FaClock, FaBan } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Swal from "sweetalert2";
-import { getAccountProfile } from "../services/CustomerService/api";
+import { getAccountProfile } from "../services/CustomerService/CustomerService";
 
 const UpdateToSellerInfo = () => {
   const navigate = useNavigate();

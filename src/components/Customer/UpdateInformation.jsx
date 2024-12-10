@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar";
 import {
   getAccountData,
   updateInformation,
-} from "../services/CustomerService/api";
+} from "../services/CustomerService/CustomerService";
 
 const UpdateInformation = () => {
   const [accountID, setAccountID] = useState(null);

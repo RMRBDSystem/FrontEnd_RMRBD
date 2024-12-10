@@ -10,7 +10,7 @@ import {
   getImagesByRecipeId,
   fetchActiveTags,
 } from "../../services/SellerService/Api";
-import { fetchRecipeData } from "../../services/CustomerService/api";
+import { fetchRecipeData } from "../../services/CustomerService/CustomerService";
 const DetailSavedRecipe = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);

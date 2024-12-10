@@ -9,7 +9,7 @@ import { FaTrashAlt, FaCloudUploadAlt } from "react-icons/fa";
 import { useSocket } from "../../App";
 import { getAccountByRoleId } from "../services/AccountService";
 import { createNotification } from "../services/NotificationService";
-import { updateToSeller } from "../services/CustomerService/api";
+import { updateToSeller } from "../services/CustomerService/CustomerService"
 
 const UpdateToSeller = () => {
   const [accountID, setAccountID] = useState();

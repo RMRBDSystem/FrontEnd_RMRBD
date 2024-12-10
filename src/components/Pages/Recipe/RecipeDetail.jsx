@@ -12,7 +12,7 @@ import {
 import {
   getAccountData,
   fetchPurchasedRecipes,
-} from "../../services/CustomerService/api";
+} from "../../services/CustomerService/CustomerService";
 
 import { getAccountById } from "../../services/AccountService";
 import Cookies from "js-cookie";

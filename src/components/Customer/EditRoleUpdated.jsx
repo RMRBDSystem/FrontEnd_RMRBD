@@ -10,7 +10,7 @@ import {
   getAccountProfile,
   updateToSellerResubmit,
   convertURLToFile,
-} from "../services/CustomerService/api";
+} from "../services/CustomerService/CustomerService";
 
 const EditRoleUpdated = () => {
   const { accountID } = useParams();

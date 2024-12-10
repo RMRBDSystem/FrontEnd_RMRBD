@@ -2,7 +2,6 @@
 import Swal from "sweetalert2";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useNavigate } from 'react-router-dom';
 
 const HandleBuy = async (
   recipe,
@@ -46,7 +45,7 @@ const HandleBuy = async (
     }).then((result) => {
       if (result.isConfirmed) {
         // Điều hướng tới trang chi tiết công thức
-        navigate(`/recipe-customer-detail/${recipe.recipeId}`);
+        navigate(`/recipe-list-seller/${recipe.recipeId}`);
       }
       // Nếu nhấn "Hủy", không làm gì cả, ở lại trang
     });

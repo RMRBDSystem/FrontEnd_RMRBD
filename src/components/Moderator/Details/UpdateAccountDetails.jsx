@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaSave, FaArrowLeft } from "react-icons/fa";
-import { getAccountData } from "../../services/CustomerService/api";
+import { getAccountData } from "../../services/CustomerService/CustomerService";
 import { updateAccount } from "../../services/ModeratorService/Api";
 
 const AccountDetail = () => {

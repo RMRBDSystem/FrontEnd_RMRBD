@@ -14,7 +14,7 @@ import {
   fetchActiveTags,
   updateRecipe,
 } from "../../services/SellerService/Api";
-import { getAccountData } from "../../services/CustomerService/api";
+import { getAccountData } from "../../services/CustomerService/CustomerService";
 
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL

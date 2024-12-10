@@ -9,7 +9,7 @@ import { FaSave, FaArrowLeft } from "react-icons/fa";
 import { useSocket } from "../../../App";
 import { createNotification } from "../../services/NotificationService";
 import { getBook, updateBook } from "../../services/ModeratorService/Api";
-import { getAccountData } from "../../services/CustomerService/api";
+import { getAccountData } from "../../services/CustomerService/CustomerService";
 
 const BookDetail = () => {
   const { bookId } = useParams(); // Lấy ID từ URL

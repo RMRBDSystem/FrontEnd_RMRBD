@@ -10,7 +10,7 @@ import { createNotification } from "../../services/NotificationService";
 import {
   getAccountData,
   getAccountProfile,
-} from "../../services/CustomerService/api";
+} from "../../services/CustomerService/CustomerService";
 
 import {
   updateAccountProfile,

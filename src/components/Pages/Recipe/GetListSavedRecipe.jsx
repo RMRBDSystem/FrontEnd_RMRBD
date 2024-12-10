@@ -13,7 +13,7 @@ import {
   Link,
 } from "@mui/material";
 import Sidebar from "../../Customer/Sidebar";
-import {fetchPersonalRecipes} from "../../services/CustomerService/api"
+import {fetchPersonalRecipes} from "../../services/CustomerService/CustomerService"
 const GetListSaveRecipe = () => {
   const [data, setData] = useState([]); 
   const [accountId, setAccountID] = useState(null); 

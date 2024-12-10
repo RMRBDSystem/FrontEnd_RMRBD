@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import {
   getAccountData,
   updateInformation,
-} from "../services/CustomerService/api";
+} from "../services/CustomerService/CustomerService";
 
 const UpdateInformation = () => {
   const [accountID, setAccountID] = useState(null);

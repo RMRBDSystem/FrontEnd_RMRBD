@@ -15,7 +15,7 @@ import { useSocket } from "../../App"
 import { getNotificationbyAccountId } from "../services/NotificationService"
 import CartDropdown from './CartDropDown'
 import Swal from "sweetalert2";
-import { getAccountData, logout } from "../services/CustomerService/api";
+import { getAccountData, logout } from "../services/CustomerService/CustomerService";
 const categoriesContent = {
   "Công Thức Nấu Ăn": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
