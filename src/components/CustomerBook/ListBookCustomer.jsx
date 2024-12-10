@@ -12,7 +12,7 @@ import {
 import Cookies from "js-cookie";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../AccountProfile/Sidebar";
+import Sidebar from "../Customer/Sidebar";
 
 const BookList = () => {
   const [Books, setBooks] = useState([]);

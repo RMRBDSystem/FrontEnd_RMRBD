@@ -6,8 +6,11 @@ import SpoonIcon from "/images/icon/iconsspoon.png";
 import Cookies from "js-cookie";
 import Swal from "sweetalert2"; // Import SweetAlert2
 import { FaSave, FaArrowLeft } from "react-icons/fa";
-import { useSocket } from "../../../App"
-import {createNotification} from "../../services/NotificationService"
+import { useSocket } from "../../../App";
+import { createNotification } from "../../services/NotificationService";
+import { getBook, updateBook } from "../../services/ModeratorService/Api";
+import { getAccountData } from "../../services/CustomerService/api";
+
 const BookDetail = () => {
   const { bookId } = useParams(); // Lấy ID từ URL
   const [book, setBook] = useState(null);
@@ -18,14 +21,8 @@ const BookDetail = () => {
   const { socket, accountOnline } = useSocket();
   // Hàm lấy chi tiết công thức
   const fetchBookDetail = async (id) => {
-    const response = await axios.get(
-      `https://rmrbdapi.somee.com/odata/Book/${id}`,
-      {
-        headers: { "Content-Type": "application/json", Token: "123-abc" },
-      }
-    );
-    const bookData = response.data;
-    console.log("Book Data",bookData);
+    const bookData = await getBook(id);
+    console.log("Book Data", bookData);
     setBook(bookData);
     setStatus(bookData.status);
     setMainImage(bookData.images[0]?.imageUrl);
@@ -35,15 +32,8 @@ const BookDetail = () => {
 
   // Hàm lấy thông tin tài khoản
   const fetchAccount = async (createById) => {
-    const response = await axios.get(
-      `https://rmrbdapi.somee.com/odata/Account/${createById}`,
-      {
-        headers: { "Content-Type": "application/json", Token: "123-abc" },
-      }
-    );
-    setAccountID(response.data);
-    console.log("account data",response.data);
-
+    const response = await getAccountData(createById);
+    setAccountID(response);
   };
 
   // Hàm gọi tất cả các API
@@ -77,13 +67,10 @@ const BookDetail = () => {
         censorId,
       };
       console.log(updatedBook);
-      await axios.put(
-        `https://rmrbdapi.somee.com/odata/Book/${bookId}`,
-        updatedBook,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
+
+      // Gọi tới api để cập nhật
+
+      await updateBook(bookId, updatedBook);
       Swal.fire({
         icon: "success",
         title: "Thành công!",
@@ -216,9 +203,11 @@ const BookDetail = () => {
           </div>
           <div className="flex space-x-4">
             <button
-              onClick={()=>{
+              onClick={() => {
                 const statusText = status === 1 ? "Xác nhận" : "Khóa";
-                handleNotification(`Mod ${accountOnline} đã ${statusText} sách ${book.bookName} của bạn`);
+                handleNotification(
+                  `Mod ${accountOnline} đã ${statusText} sách ${book.bookName} của bạn`
+                );
                 handleSave();
               }}
               className="flex items-center justify-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform duration-300 hover:scale-105"

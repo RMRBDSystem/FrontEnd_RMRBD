@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import Cookies from "js-cookie";
 import Tesseract from "tesseract.js";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { useParams } from "react-router-dom";
-
 import { FaTrashAlt, FaCloudUploadAlt } from "react-icons/fa";
-const AccountProfile = () => {
-  const { accountID } = useParams();
+import { useSocket } from "../../App";
+import { getAccountByRoleId } from "../services/AccountService";
+import { createNotification } from "../services/NotificationService";
+import { updateToSeller } from "../services/CustomerService/api";
+
+const UpdateToSeller = () => {
+  const [accountID, setAccountID] = useState();
   const [portrait, setPortrait] = useState(null);
   const [portraitPreview, setPortraitPreview] = useState(null);
   const [bankAccountQR, setBankAccountQR] = useState(null);
@@ -21,8 +24,6 @@ const AccountProfile = () => {
   const [dateOfBirth, setDateOfBirth] = useState(null);
   const [idCardNumber, setIdCardNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [accountProfile, setAccountProfileData] = useState({});
-
   // State lưu lỗi cho từng trường
   const [errors, setErrors] = useState({
     portrait: "",
@@ -32,63 +33,37 @@ const AccountProfile = () => {
     idCardNumber: "",
     dateOfBirth: "",
   });
+  const { socket, accountOnline } = useSocket();
+  const [listModer, setListModer] = useState([]);
 
   useEffect(() => {
-    fetchAccountProfileData();
-  }, [accountID]);
-  const fetchAccountProfileData = async () => {
-    try {
-      const response = await axios.get(
-        `https://rmrbdapi.somee.com/odata/AccountProfile/${accountID}`,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
+    const fetchReport = async () => {
+      try {
+        const storedUserId = Cookies.get("UserId");
+        if (storedUserId) {
+          setAccountID(storedUserId);
         }
-      );
-      const data = response.data;
-      console.log(data);
-
-      // Lưu dữ liệu vào state để hiển thị trong UI
-      setAccountProfileData(data);
-
-      // Cập nhật các preview ảnh
-      setFrontIDCardPreview(data.frontIdcard);
-      setBackIDCardPreview(data.backIdcard);
-      setPortraitPreview(data.portrait);
-      setBankAccountQRPreview(data.bankAccountQR);
-
-      // Kiểm tra và tải ảnh từ URL Firebase nếu có
-      if (data.frontIdcard) {
-        const imageUrl = data.frontIdcard;
-
-        // Tải ảnh từ URL Firebase dưới dạng Blob
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-
-        // Chuyển Blob thành đối tượng File
-        const file = new File([blob], "frontIdcard.jpg", {
-          type: "image/jpeg",
-        });
-
-        // Gọi handlefrontIDCardFileChange để xử lý tệp tin
-        handlefrontIDCardFileChange({ target: { files: [file] } });
+        const stored = await getAccountByRoleId();
+        const extractedModeratornames = stored.map((account) => ({
+          Id: account.accountId,
+          userName: account.userName,
+        }));
+        setListModer(extractedModeratornames);
+      } catch (err) {
+        console.error(err);
       }
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi",
-        text: "Không thể lấy thông tin cá nhân.",
-      });
-    }
-  };
+    };
+    fetchReport();
+  }, []);
+  // Xử lý post thông tin lên db cho bảng AccountProfile
   const handleSaveAccountProfile = async () => {
     let formErrors = {};
-    if (!portraitPreview) formErrors.portrait = "Vui lòng chọn ảnh chân dung.";
-    if (!frontIDCardPreview)
+    if (!portrait) formErrors.portrait = "Vui lòng chọn ảnh chân dung.";
+    if (!frontIDCard)
       formErrors.frontIDCard = "Vui lòng chọn ảnh căn cước mặt trước.";
-    if (!backIDCardPreview)
+    if (!backIDCard)
       formErrors.backIDCard = "Vui lòng chọn ảnh căn cước mặt sau.";
-    if (!bankAccountQRPreview)
+    if (!bankAccountQR)
       formErrors.bankAccountQR = "Vui lòng chọn mã QR tài khoản ngân hàng.";
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
@@ -99,8 +74,7 @@ const AccountProfile = () => {
       });
       return;
     }
-
-    // Using SweetAlert for confirmation
+    // Cửa sổ confirm cho người dùng
     const result = await Swal.fire({
       title: "Bạn có chắc chắn muốn gửi thông tin không?",
       text: "Thông tin bạn đã điền sẽ được gửi đi.",
@@ -111,59 +85,21 @@ const AccountProfile = () => {
       confirmButtonText: "Có, gửi thông tin",
       cancelButtonText: "Hủy",
     });
-
-    // If the user cancels the action
+    // Trả về nếu người dùng cancel
     if (!result.isConfirmed) return;
 
-    // Convert previews to files before sending
     const formData = new FormData();
-    if (portraitPreview && typeof portraitPreview === "string") {
-      const file = await convertURLToFile(portraitPreview, "portrait.jpg");
-      formData.append("portrait", file);
-    } else {
-      formData.append("portrait", portrait);
-    }
-
-    if (frontIDCardPreview && typeof frontIDCardPreview === "string") {
-      const file = await convertURLToFile(
-        frontIDCardPreview,
-        "frontIdcard.jpg"
-      );
-      formData.append("frontIDCard", file);
-    } else {
-      formData.append("frontIDCard", frontIDCard);
-    }
-
-    if (backIDCardPreview && typeof backIDCardPreview === "string") {
-      const file = await convertURLToFile(backIDCardPreview, "backIdcard.jpg");
-      formData.append("backIDCard", file);
-    } else {
-      formData.append("backIDCard", backIDCard);
-    }
-
-    if (bankAccountQRPreview && typeof bankAccountQRPreview === "string") {
-      const file = await convertURLToFile(
-        bankAccountQRPreview,
-        "bankAccountQR.jpg"
-      );
-      formData.append("bankAccountQR", file);
-    } else {
-      formData.append("bankAccountQR", bankAccountQR);
-    }
-
+    formData.append("portrait", portrait);
+    formData.append("bankAccountQR", bankAccountQR);
+    formData.append("frontIDCard", frontIDCard);
+    formData.append("backIDCard", backIDCard);
     formData.append("dateOfBirth", dateOfBirth.toISOString().split("T")[0]);
     formData.append("iDCardNumber", idCardNumber);
 
-    const url = `https://rmrbdapi.somee.com/odata/AccountProfile/${accountID}`;
-
     setIsLoading(true);
+
     try {
-      const result = await axios.put(url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Token: "123-abc",
-        },
-      });
+      const result = await updateToSeller(accountID, formData);
       console.log("API Response:", result.data);
       clear();
       Swal.fire({
@@ -172,20 +108,24 @@ const AccountProfile = () => {
         text: "Account Profile đã được thêm thành công.",
       });
     } catch (error) {
-      console.error(error);
-      setIsLoading(false);
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi khi gửi hồ sơ.",
-        text: "Đã xảy ra sự cố khi gửi hồ sơ.",
-      });
+      if (error.response && error.response.data) {
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi!",
+          text: "Bạn đã gửi hồ sơ rồi, vui lòng chờ duyệt",
+        });
+        setIsLoading(false);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi khi gửi hồ sơ.",
+          text: "Đã xảy ra sự cố khi gửi hồ sơ.",
+        });
+        setIsLoading(false);
+      }
     }
   };
-  const convertURLToFile = async (url, filename) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new File([blob], filename, { type: blob.type });
-  };
+
   const clear = () => {
     setPortrait(null);
     setPortraitPreview(null);
@@ -210,10 +150,11 @@ const AccountProfile = () => {
       setErrors((prevErrors) => ({ ...prevErrors, [e.target.name]: "" }));
     }
   };
+
   const handlefrontIDCardFileChange = (e) => {
     const file = e.target.files[0];
 
-    // Clear error message if user selects a valid file
+    // Xóa thông báo lỗi nếu có tệp hợp lệ
     if (file) {
       setErrors((prevErrors) => ({ ...prevErrors, frontIDCard: "" }));
     }
@@ -227,9 +168,13 @@ const AccountProfile = () => {
     }
 
     setFrontIDCard(file);
+
+    // Tạo URL cho ảnh vừa chọn để hiển thị trước (preview)
     setFrontIDCardPreview(URL.createObjectURL(file));
 
+    // Sử dụng thư viện Tesseract.js để nhận diện văn bản từ ảnh
     Tesseract.recognize(file, "vie", {
+      // In ra thông tin tiến trình nhận diện văn bản
       logger: (m) => console.log(m),
     })
       .then(({ data: { text } }) => {
@@ -238,7 +183,7 @@ const AccountProfile = () => {
         if (idMatch) {
           setIdCardNumber(idMatch[0]);
         } else {
-          setIdCardNumber(null);
+          setIdCardNumber("");
           setErrors((prevErrors) => ({
             ...prevErrors,
             frontIDCard: "Không tìm thấy số căn cước trong ảnh.",
@@ -248,6 +193,7 @@ const AccountProfile = () => {
         // Kiểm tra ngày sinh (DD/MM/YYYY)
         const dateMatch = text.match(/\b(\d{2})\/(\d{2})\/(\d{4})\b/);
         if (dateMatch) {
+          // Nếu có, lưu ngày sinh vào state dưới dạng đối tượng Date
           const [_, day, month, year] = dateMatch;
           const date = new Date(`${year}-${month}-${day}`);
           setDateOfBirth(date);
@@ -261,7 +207,7 @@ const AccountProfile = () => {
 
         // Kiểm tra nếu thiếu số căn cước hoặc ngày sinh
         if (!idMatch && !dateMatch) {
-          setIdCardNumber(null);
+          setIdCardNumber("");
           setDateOfBirth(null);
           setErrors((prevErrors) => ({
             ...prevErrors,
@@ -271,6 +217,7 @@ const AccountProfile = () => {
         }
       })
       .catch((err) => {
+        // Xử lý lỗi nếu Tesseract nhận diện văn bản thất bại
         console.error("OCR Error: ", err);
         setErrors((prevErrors) => ({
           ...prevErrors,
@@ -279,11 +226,37 @@ const AccountProfile = () => {
       });
   };
 
-  // Handle delete for each image
+  // Xóa ảnh
   const handleDeleteImage = (field, setFile, setPreview) => {
     setFile(null);
     setPreview(null);
     setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+    if (field === "frontIDCard") {
+      setIdCardNumber("");
+      setDateOfBirth(null);
+    }
+  };
+
+  const handleNotification = (text) => {
+    for (let i = 0; i < listModer.length; i++) {
+      // Gửi thông báo qua socket
+      socket.emit("sendNotification", {
+        senderName: accountOnline,
+        receiverName: listModer[i].userName,
+        content: text,
+      });
+
+      // Tạo thông báo mới
+      const newNotificationData = {
+        accountId: listModer[i].Id,
+        content: text,
+        date: new Date().toISOString(),
+        status: 1,
+      };
+
+      // Gọi hàm tạo thông báo (không cần await nếu bạn không cần phải chờ)
+      createNotification(newNotificationData);
+    }
   };
 
   return (
@@ -587,7 +560,12 @@ const AccountProfile = () => {
         <div className="d-flex justify-content-end mt-4">
           <Button
             variant="primary"
-            onClick={handleSaveAccountProfile}
+            onClick={() => {
+              handleNotification(
+                `${accountOnline} đã gửi thông tin đăng kí bán hàng về hệ thống`
+              );
+              handleSaveAccountProfile();
+            }}
             disabled={isLoading}
             className="px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-4 focus:ring-orange-300 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50"
           >
@@ -599,4 +577,4 @@ const AccountProfile = () => {
   );
 };
 
-export default AccountProfile;
+export default UpdateToSeller;

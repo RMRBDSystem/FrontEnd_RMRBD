@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { useState, useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../Navbar/Navbar";
-import Footer from "../Footer/Footer";
 import Swal from "sweetalert2";
 import {
   Container,
@@ -16,6 +12,15 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import BuildIcon from "@mui/icons-material/Build";
+import {
+  fetchActiveTags2,
+  getRecipeById,
+  updateRecipe,
+  getRecipeTags,
+  deleteRecipeTag,
+  addRecipeTag,
+} from "../services/SellerService/Api";
 const EditRecipe = () => {
   const [recipe, setRecipe] = useState(null);
   const [recipeName, setRecipeName] = useState("");
@@ -34,27 +39,18 @@ const EditRecipe = () => {
   const [selectedTagIds, setSelectedTagIds] = useState([]); // Các tag được chọn
   const [selectedTagNames, setSelectedTagNames] = useState([]);
   const [tagMap, setTagMap] = useState({});
+  const [energy, setEnergy] = useState("");
   const [updatedDate, setUpdatedDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
-
+  const [errors, setErrors] = useState({});
   const { id } = useParams();
   const navigate = useNavigate();
 
   // Lấy dữ liệu Recipe từ API
   const fetchRecipeData = async () => {
     try {
-      const recipeResult = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Recipe/${id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Token: "123-abc",
-          },
-        }
-      );
-
-      const recipeData = recipeResult.data;
+      const recipeData = await getRecipeById(id);
       setRecipe(recipeData);
       setRecipeName(recipeData.recipeName);
       setPrice(recipeData.price);
@@ -65,6 +61,7 @@ const EditRecipe = () => {
       setVideo(recipeData.video);
       setDescription(recipeData.description);
       setIngredient(recipeData.ingredient);
+      setEnergy(recipeData.energy);
       setCreateById(recipeData.createById);
       setCreateDate(recipeData.createDate?.slice(0, 10) || "");
       setTotalTime(recipeData.totalTime);
@@ -74,33 +71,54 @@ const EditRecipe = () => {
       setSelectedTagNames(recipeData.tags?.map((tag) => tag.tagName) || []);
     } catch (error) {
       console.error("Error fetching recipe:", error);
-      toast.error("Failed to load recipe.");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể tải dữ liệu công thức!",
+        footer: "Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.",
+      });
     }
   };
+  // Kiểm tra giá trị nhập vào
+  const validateFields = () => {
+    const newErrors = {};
 
+    if (!recipeName) newErrors.recipeName = "Tên công thức là bắt buộc.";
+    if (!numberOfService || isNaN(numberOfService) || numberOfService <= 0) {
+      newErrors.numberOfService = "Vui lòng nhập số lượng phần ăn hợp lệ.";
+    }
+    if (!price || isNaN(price) || price < 0) {
+      newErrors.price = "Vui lòng nhập giá hợp lệ.";
+    }
+    if (!nutrition) newErrors.nutrition = "Thông tin dinh dưỡng là cần thiết.";
+    if (!tutorial) newErrors.tutorial = "Hướng dẫn là cần thiết.";
+    if (!video) newErrors.video = "Video là bắt buộc.";
+    if (!ingredient) newErrors.ingredient = "Thành phần là bắt buộc.";
+    if (!description) newErrors.description = "Mô tả là bắt buộc.";
+    if (!energy) newErrors.energy = "Năng lượng là bắt buộc.";
+
+    if (!totalTime || isNaN(totalTime) || totalTime <= 0) {
+      newErrors.totalTime = "Vui lòng nhập tổng thời gian hợp lệ.";
+    }
+    if (selectedTagIds.length === 0) {
+      newErrors.selectedTagIds = "Vui lòng chọn ít nhất một thẻ.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   // Lấy tất cả các tag có `status = 1`
-  const fetchActiveTags = async () => {
+  const fetchTags = async () => {
     try {
-      const response = await axios.get("https://rmrbdapi.somee.com/odata/Tag", {
-        params: {
-          $filter: "status eq 1",
-        },
-        headers: {
-          "Content-Type": "application/json",
-          Token: "123-abc",
-        },
-      });
+      const response = await fetchActiveTags2();
 
-      const tags = response.data || [];
-      setTags(tags);
+      setTags(response);
 
       // Lưu map tagId -> tagName
-      setTagMap(
-        tags.reduce((acc, tag) => {
-          acc[tag.tagId] = tag.tagName;
-          return acc;
-        }, {})
-      );
+      const newTagMap = response.reduce((acc, tag) => {
+        acc[tag.tagId] = tag.tagName;
+        return acc;
+      }, {});
+      setTagMap(newTagMap);
     } catch (error) {
       console.error("Error fetching tags:", error);
       Swal.fire("Lỗi", "Lỗi khi tải thẻ", "error");
@@ -108,7 +126,7 @@ const EditRecipe = () => {
   };
 
   useEffect(() => {
-    fetchActiveTags();
+    fetchTags();
     fetchRecipeData();
   }, [id]);
 
@@ -128,9 +146,15 @@ const EditRecipe = () => {
     }
   };
 
+  // Khi trường input thay đổi thì lỗi sẽ reset về null
+  const handleInputChange = (setter, field) => (e) => {
+    setter(e.target.value);
+    setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+  };
   // Cập nhật công thức khi submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateFields()) return;
     const updatedRecipe = {
       ...recipe,
       recipeName,
@@ -146,72 +170,51 @@ const EditRecipe = () => {
       updatedDate,
       totalTime,
       createById,
+      energy,
     };
-
+    Swal.fire({
+      title: "Đang cập nhật...",
+      text: "Vui lòng đợi trong giây lát.",
+      allowOutsideClick: false, // Người dùng không thể click bên ngoài cửa sổ
+      didOpen: () => {
+        Swal.showLoading(); // Hiển thị spinner khi đang loading
+      },
+    });
     try {
       // Cập nhật recipe
-      await axios.put(
-        `https://rmrbdapi.somee.com/odata/Recipe/${id}`,
-        updatedRecipe,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Token: "123-abc",
-          },
-        }
-      );
+      await updateRecipe(id, updatedRecipe);
 
       // Lấy các tag hiện tại của recipe từ cơ sở dữ liệu
-      const oldTagsResponse = await axios.get(
-        `https://rmrbdapi.somee.com/odata/RecipeTag/${id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Token: "123-abc",
-          },
-        }
-      );
+      const oldTags = await getRecipeTags(id);
 
-      const oldTagIds = oldTagsResponse.data.map((tag) => tag.tagId);
+      const oldTagIds = oldTags.map((tag) => tag.tagId);
 
       // Xóa các tag không còn trong danh sách đã chọn
       for (const tagId of oldTagIds) {
         if (!selectedTagIds.includes(tagId)) {
-          await axios.delete(
-            `https://rmrbdapi.somee.com/odata/RecipeTag/${id}/${tagId}`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Token: "123-abc",
-              },
-            }
-          );
+          await deleteRecipeTag(id, tagId);
         }
       }
 
       // Thêm các tag mới vào danh sách
       for (const tagId of selectedTagIds) {
         if (!oldTagIds.includes(tagId)) {
-          await axios.post(
-            `https://rmrbdapi.somee.com/odata/RecipeTag`,
-            { tagId, recipeId: id },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Token: "123-abc",
-              },
-            }
-          );
+          await addRecipeTag(tagId, id);
         }
       }
 
       // Gọi lại fetchRecipeData để làm mới danh sách tag
       await fetchRecipeData();
       Swal.fire("Thành công", "Cập nhật công thức thành công!", "success").then(
-        () => navigate("/recipecustomer-list")
+        () => navigate("/recipe-list-seller")
       );
     } catch (error) {
-      toast.error("Error updating recipe!");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể cập nhật công thức!",
+        footer: "Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.",
+      });
       console.error("Error:", error);
     }
   };
@@ -220,7 +223,6 @@ const EditRecipe = () => {
 
   return (
     <>
-      <ToastContainer />
       <Container
         style={{
           color: "Black",
@@ -231,114 +233,147 @@ const EditRecipe = () => {
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
-          Edit Recipe
+          <BuildIcon sx={{ color: "#FF6F00", marginRight: 1 }} /> Chỉnh sửa công
+          thức
         </Typography>
 
         <form onSubmit={handleSubmit}>
           <Box mb={2}>
+            {errors.recipeName && (
+              <p className="text-danger">{errors.recipeName}</p>
+            )}
             <TextField
-              label="Recipe Name"
+              label="Tên công thức"
               variant="outlined"
               fullWidth
               value={recipeName}
-              onChange={(e) => setRecipeName(e.target.value)}
-              required
+              onChange={handleInputChange(setRecipeName, "recipeName")}
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
+            {errors.price && <p className="text-danger">{errors.price}</p>}
             <TextField
-              label="Price"
+              label="Giá"
               variant="outlined"
               fullWidth
               type="number"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
+              onChange={handleInputChange(setPrice, "price")}
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
+            {errors.numberOfService && (
+              <p className="text-danger">{errors.numberOfService}</p>
+            )}
             <TextField
-              label="Number of Services"
+              label="Số người phục vụ"
               variant="outlined"
               fullWidth
               type="number"
               value={numberOfService}
-              onChange={(e) => setNumberOfService(e.target.value)}
+              onChange={handleInputChange(
+                setNumberOfService,
+                "numberOfService"
+              )}
               required
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
+            {errors.nutrition && (
+              <p className="text-danger">{errors.nutrition}</p>
+            )}
             <TextField
-              label="Nutrition"
+              label="Dinh dưỡng"
               variant="outlined"
               fullWidth
               multiline
               rows={4}
               value={nutrition}
-              onChange={(e) => setNutrition(e.target.value)}
+              onChange={handleInputChange(setNutrition, "nutrition")}
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
+            {errors.tutorial && (
+              <p className="text-danger">{errors.tutorial}</p>
+            )}
             <TextField
-              label="Tutorial"
+              label="Hướng dẫn"
               variant="outlined"
               fullWidth
               multiline
               rows={4}
               value={tutorial}
-              onChange={(e) => setTutorial(e.target.value)}
+              onChange={handleInputChange(setTutorial, "tutorial")}
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
+            {errors.video && <p className="text-danger">{errors.video}</p>}
             <TextField
-              label="Video URL"
+              label="Video"
               variant="outlined"
               fullWidth
               value={video}
-              onChange={(e) => setVideo(e.target.value)}
+              onChange={handleInputChange(setVideo, "video")}
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
+            {errors.description && (
+              <p className="text-danger">{errors.description}</p>
+            )}
             <TextField
-              label="Description"
+              label="Chi tiết"
               variant="outlined"
               fullWidth
               multiline
               rows={4}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={handleInputChange(setDescription, "description")}
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
+            {errors.ingredient && (
+              <p className="text-danger">{errors.ingredient}</p>
+            )}
             <TextField
-              label="Ingredient"
+              label="Nguyên liệu"
               variant="outlined"
               fullWidth
               multiline
               rows={4}
               value={ingredient}
-              onChange={(e) => setIngredient(e.target.value)}
+              onChange={handleInputChange(setIngredient, "ingredient")}
               sx={{ color: "black" }}
             />
           </Box>
-
+          <Box mb={2}>
+            {errors.energy && <p className="text-danger">{errors.energy}</p>}
+            <TextField
+              label="Năng lượng"
+              variant="outlined"
+              fullWidth
+              type="number"
+              value={energy}
+              onChange={handleInputChange(setEnergy, "energy")}
+              sx={{ color: "black" }}
+            />
+          </Box>
           <Box mb={2}>
             <TextField
-              label="Create Date"
+              label="Ngày tạo"
               variant="outlined"
               fullWidth
               type="date"
@@ -349,20 +384,23 @@ const EditRecipe = () => {
           </Box>
 
           <Box mb={2}>
+            {errors.totalTime && (
+              <p className="text-danger">{errors.totalTime}</p>
+            )}
             <TextField
-              label="Total Time (in minutes)"
+              label="Tổng thời gian(phút)"
               variant="outlined"
               fullWidth
               type="number"
               value={totalTime}
-              onChange={(e) => setTotalTime(e.target.value)}
+              onChange={handleInputChange(setTotalTime, "totalTime")}
               sx={{ color: "black" }}
             />
           </Box>
 
           <Box mb={2}>
             <TextField
-              label="Updated Date"
+              label="Ngày cập nhật"
               variant="outlined"
               fullWidth
               type="date"
@@ -373,7 +411,7 @@ const EditRecipe = () => {
           </Box>
 
           <Box mb={2}>
-            <Typography variant="subtitle1">Tags</Typography>
+            <Typography variant="subtitle1">Tất cả các thẻ</Typography>
             <FormGroup>
               {tags.map((tag) => (
                 <FormControlLabel
@@ -393,7 +431,7 @@ const EditRecipe = () => {
 
           <Box mb={2}>
             <Typography variant="h6" color="black">
-              Old Tags:
+              Thẻ của công thức:
             </Typography>
             <ul>
               {recipe?.recipeTags?.length > 0 ? (
@@ -403,26 +441,36 @@ const EditRecipe = () => {
                   </li>
                 ))
               ) : (
-                <li style={{ color: "black" }}>No tags</li>
+                <li style={{ color: "black" }}>Không có thẻ</li>
               )}
             </ul>
           </Box>
 
           <Box mb={2}>
             <Typography variant="h6" color="black">
-              Selected Tags:
+              Các thẻ đã chọn:
             </Typography>
             <p style={{ color: "black" }}>{selectedTagNames.join(", ")}</p>
           </Box>
 
-          <Box mb={2}>
+          <Box mb={2} className="flex justify-between gap-4">
+            {/* Nút Back */}
+            <Button
+              type="button"
+              variant="outlined"
+              className="w-1/2 bg-gradient-to-r from-gray-100 to-gray-300 text-gray-700 border-none rounded-md shadow-md hover:from-gray-200 hover:to-gray-400 hover:shadow-lg transition-all"
+              onClick={() => navigate(-1)} // Sử dụng navigate để quay lại trang trước
+            >
+              Quay lại
+            </Button>
+
+            {/* Nút Lưu */}
             <Button
               type="submit"
-              fullWidth
               variant="contained"
-              style={{ color: "black" }}
+              className="w-1/2 bg-gradient-to-r from-orange-500 to-orange-700 text-white rounded-md shadow-md hover:from-orange-400 hover:to-orange-600 hover:shadow-lg transition-all"
             >
-              Save
+              Lưu
             </Button>
           </Box>
         </form>

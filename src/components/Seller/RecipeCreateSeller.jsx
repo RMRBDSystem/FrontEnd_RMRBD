@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
-import "./addrecipecus.css"
+import "./addrecipecus.css";
 import { FiPlus, FiX } from "react-icons/fi";
-import { useSocket } from "../../App"
-import { getAccountByRoleId } from '../services/AccountService'
-import { createNotification } from "../services/NotificationService"
+import { useSocket } from "../../App";
+import { getAccountByRoleId } from "../services/AccountService";
+import { createNotification } from "../services/NotificationService";
+import {
+  fetchActiveTags,
+  saveRecipeApi,
+  saveRecipeTagApi,
+  uploadImageApi,
+} from "../services/SellerService/Api";
+import Swal from "sweetalert2";
+
 const RecipeCustomer = () => {
   const [recipeName, setRecipeName] = useState("");
   const [numberOfService, setNumberOfService] = useState("");
@@ -42,28 +47,17 @@ const RecipeCustomer = () => {
     }
     const today = new Date().toISOString().slice(0, 10);
     setCreateDate(today);
-    fetchActiveTags();
+    fetchTags();
   }, []);
 
-  const fetchActiveTags = async () => {
+  const fetchTags = async () => {
     try {
-      //"https://localhost:7220/odata/Tag",
-      //https://rmrbdapi.somee.com/odata/Tag
-      const response = await axios.get("https://rmrbdapi.somee.com/odata/Tag", {
-        params: {
-          $filter: "status eq 1",
-        },
-        headers: {
-          "Content-Type": "application/json",
-          Token: "123-abc",
-        },
-      });
-      console.log("API Response:", response.data); // Thêm dòng log này
-      setTags(response.data);
+      const response = await fetchActiveTags();
+      setTags(response);
       const stored = await getAccountByRoleId();
-      const extractedModeratornames = stored.map(account => ({
+      const extractedModeratornames = stored.map((account) => ({
         Id: account.accountId,
-        userName: account.userName
+        userName: account.userName,
       }));
       setListModer(extractedModeratornames);
     } catch (error) {
@@ -101,57 +95,9 @@ const RecipeCustomer = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const uploadImage = async (image, recipeId) => {
-    // const url = `https://localhost:7220/odata/UploadImage/Recipe/${recipeId}`;
-    const url = `https://rmrbdapi.somee.com/odata/UploadImage/Recipe/${recipeId}`;
-    const formData = new FormData();
-    formData.append("image", image);
-    formData.append("recipeId", recipeId);
-    try {
-      const response = await axios.post(url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Token: "123-abc",
-        },
-      });
-
-      if (response.status === 200) {
-        return response.data;
-      } else {
-        throw new Error(`Upload failed with status code: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("There was an error uploading the image!", error);
-      throw error;
-    }
-  };
-  const saveRecipeTag = async (tagId, recipeId) => {
-    // const urlRecipeTag = "https://localhost:7220/odata/RecipeTag";
-    const urlRecipeTag = "https://rmrbdapi.somee.com/odata/RecipeTag";
-
-    const RecipeTagData = {
-      tagId,
-      recipeId,
-    };
-
-    try {
-      const result = await axios.post(urlRecipeTag, RecipeTagData, {
-        headers: {
-          "Content-Type": "application/json",
-          Token: "123-abc",
-        },
-      });
-      console.log("Response from RecipeTag server:", result);
-    } catch (error) {
-      console.error("Error saving RecipeTag:", error);
-      throw new Error("Failed to save RecipeTag.");
-    }
-  };
-
   const handleSave = async () => {
     if (!validateFields()) return;
     // const url = "https://localhost:7220/odata/Recipe";
-    const url = "https://rmrbdapi.somee.com/odata/Recipe";
     const formattedTutorial = tutorial.map((step, index) => `Bước ${step}`);
     const recipeData = {
       recipeName,
@@ -166,40 +112,46 @@ const RecipeCustomer = () => {
       description,
       video,
       censorNote,
-      energy
+      energy,
     };
 
     console.log("Recipe data:", recipeData);
     setIsLoading(true);
     try {
-      // Step 1: Save the recipe data
-      const result = await axios.post(url, recipeData, {
-        headers: {
-          "Content-Type": "application/json",
-          Token: "123-abc",
-        },
-      });
-      const recipeId = result.data.recipeId;
-      console.log("Response from server:", result);
+      // Step 1:Lưu dữ liệu công thức
+      const result = await saveRecipeApi(recipeData);
+      const recipeId = result.recipeId;
       if (!recipeId) {
-        throw new Error("Failed to retrieve recipe ID from server response.");
+        throw new Error("Không thể lấy ID công thức từ phản hồi của máy chủ.");
       }
 
+      // Step 2: Lưu tag của công thức
       for (const tagId of selectedTagIds) {
-        await saveRecipeTag(tagId, recipeId);
+        await saveRecipeTagApi(tagId, recipeId);
       }
-      // Step 2: Upload images if any are selected
+
+      // Step 3: Tải ảnh lên
       if (recipeImage.length > 0) {
         for (const image of recipeImage) {
-          await uploadImage(image, recipeId);
+          await uploadImageApi(image, recipeId);
         }
       }
 
       clear();
-      toast.success("Công thức và hình ảnh đã được thêm thành công!");
+      Swal.fire({
+        title: "Thành công!",
+        text: "Công thức và hình ảnh đã được thêm thành công!",
+        icon: "success",
+        confirmButtonText: "Đóng",
+      });
     } catch (error) {
       console.error("Error saving recipe or uploading images:", error);
-      toast.error(`Failed to add recipe or upload images: ${error.message}`);
+      Swal.fire({
+        title: "Lỗi!",
+        text: `Thêm công thức hoặc tải hình ảnh thất bại: ${error.message}`,
+        icon: "error",
+        confirmButtonText: "Đóng",
+      });
       setIsLoading(false);
     }
   };
@@ -323,16 +275,6 @@ const RecipeCustomer = () => {
     setTutorial(updatedTutorial);
   };
 
-  // const [showNoteForm, setShowNoteForm] = useState(false);
-
-  // const handleAddNoteClick = () => {
-  //   setShowNoteForm(true);
-  // };
-
-  // const handleCancelNote = () => {
-  //   setShowNoteForm(false);
-  // };
-
   const toggleTagSelection = (tagId) => {
     const isSelected = selectedTagIds.includes(tagId);
     const updatedSelection = isSelected
@@ -362,16 +304,17 @@ const RecipeCustomer = () => {
       // Gọi hàm tạo thông báo (không cần await nếu bạn không cần phải chờ)
       createNotification(newNotificationData);
     }
-
   };
 
   return (
     <section className="section-center">
-      <ToastContainer />
       <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md">
         {/* Header */}
         <h1 className="text-3xl font-bold mb-6 flex items-center">
-          <span className="flex justify-center text-orange-500 mr-2 text-5xl items-center">+</span> Viết món mới
+          <span className="flex justify-center text-orange-500 mr-2 text-5xl items-center">
+            +
+          </span>{" "}
+          Viết món mới
         </h1>
         <hr className="mb-4" />
         {/* Form */}
@@ -423,8 +366,12 @@ const RecipeCustomer = () => {
                     <h1 className="material-icons text-6xl my-4">
                       cloud_upload
                     </h1>
-                    <p className="text-lg">Bạn đã đăng hình món mình nấu ở đây chưa?</p>
-                    <p className="text-sm">Chia sẻ thành phần nấu nướng của bạn với mọi người nào!</p>
+                    <p className="text-lg">
+                      Bạn đã đăng hình món mình nấu ở đây chưa?
+                    </p>
+                    <p className="text-sm">
+                      Chia sẻ thành phần nấu nướng của bạn với mọi người nào!
+                    </p>
                     <input
                       type="file"
                       id="fileInput"
@@ -481,7 +428,6 @@ const RecipeCustomer = () => {
                 )}
               </Form.Group>
             </div>
-
           </div>
 
           <hr className="mb-8" />
@@ -495,16 +441,23 @@ const RecipeCustomer = () => {
                     <Form.Group controlId={`ingredients-${index}`}>
                       <Form.Control
                         type="text"
-                        placeholder={`${index === 0 ? "250g bột" : "100ml nước"}`}
+                        disabled={isLoading}
+                        placeholder={`${
+                          index === 0 ? "250g bột" : "100ml nước"
+                        }`}
                         value={ingredient_chirld}
-                        onChange={(e) => handleIngredientChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleIngredientChange(index, e.target.value)
+                        }
                         rows={4}
                         className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                       />
-
                     </Form.Group>
                   </Col>
-                  <Col xs="auto" className="d-flex align-items-center justify-content-center">
+                  <Col
+                    xs="auto"
+                    className="d-flex align-items-center justify-content-center"
+                  >
                     <Button
                       variant="link"
                       onClick={() => removeIngredient(index)}
@@ -520,7 +473,8 @@ const RecipeCustomer = () => {
                 onClick={addIngredient}
                 className="custom-button d-flex align-items-center mt-4"
               >
-                <FiPlus className="mr-2" />Thêm nguyên liệu
+                <FiPlus className="mr-2" />
+                Thêm nguyên liệu
               </Button>
             </div>
             <div className="col-span-1">
@@ -536,19 +490,25 @@ const RecipeCustomer = () => {
                       )}
                       <Form.Control
                         as="textarea"
-                        placeholder={`${index === 0
-                          ? "Làm nóng lò ở 350 ° F..."
-                          : "Kết hợp các nguyên liệu khô trong một cái bát..."
-                          }`}
+                        placeholder={`${
+                          index === 0
+                            ? "Làm nóng lò ở 350 ° F..."
+                            : "Kết hợp các nguyên liệu khô trong một cái bát..."
+                        }`}
                         value={step}
-                        onChange={(e) => handleTutorialChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleTutorialChange(index, e.target.value)
+                        }
                         rows={3}
                         disabled={isLoading}
                         className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                       />
                     </Form.Group>
                   </Col>
-                  <Col xs="auto" className="d-flex align-items-center justify-content-center">
+                  <Col
+                    xs="auto"
+                    className="d-flex align-items-center justify-content-center"
+                  >
                     <Button
                       variant="link"
                       onClick={() => removeTutorialStep(index)}
@@ -584,7 +544,10 @@ const RecipeCustomer = () => {
                     type="number"
                     placeholder="e.g. 8 người"
                     value={numberOfService}
-                    onChange={handleInputChange(setNumberOfService, "numberOfService")}
+                    onChange={handleInputChange(
+                      setNumberOfService,
+                      "numberOfService"
+                    )}
                     disabled={isLoading}
                     className="w-full px-2 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
                   />
@@ -697,7 +660,9 @@ const RecipeCustomer = () => {
                   <button
                     key={tag.tagId}
                     type="button"
-                    className={`tag-button ${selectedTagIds.includes(tag.tagId) ? 'selected' : ''}`}
+                    className={`tag-button ${
+                      selectedTagIds.includes(tag.tagId) ? "selected" : ""
+                    }`}
                     onClick={() => toggleTagSelection(tag.tagId)}
                     disabled={isLoading}
                   >
@@ -710,7 +675,7 @@ const RecipeCustomer = () => {
                 as="select"
                 multiple
                 value={selectedTagIds}
-                onChange={() => { }}
+                onChange={() => {}}
                 disabled={isLoading}
                 className="custom-multi-select"
               >
@@ -723,13 +688,16 @@ const RecipeCustomer = () => {
             </Form.Group>
           </Col>
           <div className="d-flex justify-content-between align-items-center mt-4">
-            <Button 
-            variant="danger" 
-            onClick={()=>{
-              handleNotification(`${accountOnline} đã tạo công thức ${recipeName} mới. Vui lòng mod phê duyệt!!`);
-              handleSave();
-            }} 
-            className="px-4 py-2 fw-bold">
+            <Button
+              variant="danger"
+              onClick={() => {
+                handleNotification(
+                  `${accountOnline} đã tạo công thức ${recipeName} mới. Vui lòng mod phê duyệt!!`
+                );
+                handleSave();
+              }}
+              className="px-4 py-2 fw-bold"
+            >
               Gửi công thức
             </Button>
           </div>

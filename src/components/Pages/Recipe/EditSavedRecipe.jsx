@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import axios from "axios";
 import {
   Container,
   Typography,
@@ -16,12 +15,13 @@ import {
   DialogTitle,
 } from "@mui/material";
 import BuildIcon from "@mui/icons-material/Build";
-import Swal from "sweetalert2"; // Import SweetAlert2
-
-const EditRecipe = () => {
+import Swal from "sweetalert2";
+import { fetchRecipeData,saveRecipeData } from "../../services/CustomerService/api";
+const EditSavedRecipe = () => {
   const { recipeId } = useParams();
   const [recipeData, setRecipeData] = useState(null);
   const [editFields, setEditFields] = useState({});
+  const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({
@@ -31,23 +31,17 @@ const EditRecipe = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchRecipeData(recipeId);
+    getRecipeData(recipeId);
   }, [recipeId]);
 
-  const fetchRecipeData = async (recipeId) => {
+  const getRecipeData = async (recipeId) => {
     setLoading(true);
     try {
       const userId = Cookies.get("UserId");
-      const url = `https://rmrbdapi.somee.com/odata/PersonalRecipe/${userId}/${recipeId}`;
-      const response = await axios.get(url, {
-        headers: {
-          "Content-Type": "application/json",
-          Token: "123-abc",
-        },
-      });
+      const data = await fetchRecipeData(userId, recipeId);
 
-      const data = response.data;
       setRecipeData(data);
+      console.log(data);
       setEditFields({
         ingredient: data.ingredient || "",
         numberOfService: data.numberOfService || 0,
@@ -64,6 +58,28 @@ const EditRecipe = () => {
 
   const handleFieldChange = (field, value) => {
     setEditFields((prev) => ({ ...prev, [field]: value }));
+    // Xóa lỗi khi người dùng nhập
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const validateFields = () => {
+    const newErrors = {};
+
+    if (!editFields.ingredient?.trim()) {
+      newErrors.ingredient = "Nguyên liệu không được để trống.";
+    }
+    if (editFields.numberOfService <= 0) {
+      newErrors.numberOfService = "Số người phục vụ phải lớn hơn 0.";
+    }
+    if (!editFields.nutrition?.trim()) {
+      newErrors.nutrition = "Dinh dưỡng không được để trống.";
+    }
+    if (!editFields.tutorial?.trim()) {
+      newErrors.tutorial = "Hướng dẫn không được để trống.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const restoreFields = () => {
@@ -74,33 +90,18 @@ const EditRecipe = () => {
   };
 
   const saveChanges = () => {
-    setConfirmDialog({
-      open: true,
-      action: "save",
-    });
+    if (validateFields()) {
+      setConfirmDialog({
+        open: true,
+        action: "save",
+      });
+    }
   };
-
   const executeAction = async () => {
     if (confirmDialog.action === "save") {
       try {
         const userId = Cookies.get("UserId");
-        const updatedData = {
-          recipeId,
-          customerId: userId,
-          ...editFields,
-          status: -1,
-        };
-
-        await axios.put(
-          `https://rmrbdapi.somee.com/odata/PersonalRecipe/${userId}/${recipeId}`,
-          updatedData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
+        await saveRecipeData(userId, recipeId, editFields);
 
         Swal.fire({
           title: "Thành công!",
@@ -179,6 +180,8 @@ const EditRecipe = () => {
           value={editFields.ingredient}
           onChange={(e) => handleFieldChange("ingredient", e.target.value)}
           disabled={!isEditing}
+          error={!!errors.ingredient}
+          helperText={errors.ingredient}
         />
         <hr className="my-6 border-t-2 border-gray-500" />
 
@@ -191,6 +194,8 @@ const EditRecipe = () => {
             onChange={(e) =>
               handleFieldChange("numberOfService", e.target.value)
             }
+            error={!!errors.numberOfService}
+            helperText={errors.numberOfService}
             disabled={!isEditing}
           />
           <TextField
@@ -212,6 +217,8 @@ const EditRecipe = () => {
           value={editFields.nutrition}
           onChange={(e) => handleFieldChange("nutrition", e.target.value)}
           disabled={!isEditing}
+          error={!!errors.nutrition}
+          helperText={errors.nutrition}
         />
         <hr className="my-6 border-t-2 border-gray-500" />
         <p className="text-gray-500 text-sm mb-2">
@@ -229,6 +236,8 @@ const EditRecipe = () => {
           value={editFields.tutorial}
           onChange={(e) => handleFieldChange("tutorial", e.target.value)}
           disabled={!isEditing}
+          error={!!errors.tutorial}
+          helperText={errors.tutorial}
         />
       </Box>
       <hr className="my-6 border-t-2 border-gray-500" />
@@ -300,4 +309,4 @@ const EditRecipe = () => {
   );
 };
 
-export default EditRecipe;
+export default EditSavedRecipe;

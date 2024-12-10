@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import LogoA from '/images/LogoA.png';
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import NavLinks from './NavLinks';
@@ -7,7 +7,6 @@ import { rightLinks } from '../../data/data';
 import { Button, IconButton } from "@material-tailwind/react";
 import SearchWrapper from "../Search/SearchWrapper";
 import { Widgets, ArrowDropDown } from "@mui/icons-material";
-import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "../RouterPage/AuthContext";
 import Notification from "/images/notification.svg";
@@ -15,6 +14,8 @@ import "./navbar.css"
 import { useSocket } from "../../App"
 import { getNotificationbyAccountId } from "../services/NotificationService"
 import CartDropdown from './CartDropDown'
+import Swal from "sweetalert2";
+import { getAccountData, logout } from "../services/CustomerService/api";
 const categoriesContent = {
   "Công Thức Nấu Ăn": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
@@ -133,6 +134,7 @@ const Navbar = () => {
   const userRole = Cookies.get("UserRole");
   const accountonlineId = Cookies.get("UserId");
   const [accountData, setAccountData] = useState({});
+  const isFetchCalled = useRef(false);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -157,7 +159,10 @@ const Navbar = () => {
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
       }
-      fetchAccountData(accountonlineId);
+      if (!isFetchCalled.current) {
+        fetchAccountData(accountonlineId);
+        isFetchCalled.current = true;
+      }
     };
 
     fetchNotification();
@@ -203,31 +208,29 @@ const Navbar = () => {
   };
   const fetchAccountData = async (userId) => {
     try {
-      const response = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Account/${userId}`,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
-      const data = response.data;
+      const data = await getAccountData(userId);
+      if (data.roleId === 2) {
+        Cookies.set("UserRole", "Seller");
+      }
+      if (data.accountStatus === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "Tài khoản của bạn đã bị khóa",
+          text: "Vui lòng liên hệ với bên CSKH để biết thêm chi tiết",
+          confirmButtonText: "OK",
+        }).then(() => {
+          handleLogout();
+        });
+        return;
+      }
       setAccountData(data);
-      console.log("Account Data:", data); // Debug log
     } catch (error) {
       console.error(error);
     }
   };
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "https://rmrbdapi.somee.com/odata/Login/logout",
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Token: "123-abc",
-          },
-        }
-      );
+      await logout();
       setIsLoggedIn(false);
       Cookies.remove("UserRole");
       Cookies.remove("UserName");
@@ -376,7 +379,7 @@ const Navbar = () => {
             >
               <div onClick={toggleDropdown} className="flex items-center cursor-pointer">
                 <img
-                  src={accountData.avatar || "https://via.placeholder.com/50"}
+                  src={accountData.avatar || "/images/avatar.png"}
                   alt="User Avatar"
                   className="w-12 h-12 object-cover rounded-full"
                 />
@@ -387,7 +390,7 @@ const Navbar = () => {
                   </span>
                   {/* Coin */}
                   <span className="text-base font-bold text-white">
-                    {Intl.NumberFormat('de-DE').format(accountData.coin)} <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 inline-block"/>
+                    {Intl.NumberFormat('de-DE').format(accountData.coin)} <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 inline-block" />
                   </span>
                 </div>
               </div>
@@ -412,7 +415,7 @@ const Navbar = () => {
                   {userRole === "Customer" && (
                     <>
                       <NavLink
-                        to="/update-account"
+                        to="/update-to-seller"
                         className="block px-2 py-2 hover:bg-gray-200 rounded-md flex items-center"
                       >
                         {/* Icon for Customer */}
@@ -494,7 +497,7 @@ const Navbar = () => {
                   {userRole === "Seller" && (
                     <>
                       <NavLink
-                        to="/recipe-customer-list"
+                        to="/recipe-list-seller"
                         className="block px-2 py-2 hover:bg-gray-200 flex items-center"
                       >
                         {/* Icon for Seller Recipe */}

@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
-import ClockIcon from "/images/icon/iconclock.png"
-import SpoonIcon from "/images/icon/iconsspoon.png"
-import CheckMarkIcon from "/images/icon/iconscheckmark24.png"
-import CommentRecipes from '../CommentItem/CommentRecipes'
+import ClockIcon from "/images/icon/iconclock.png";
+import SpoonIcon from "/images/icon/iconsspoon.png";
+import CheckMarkIcon from "/images/icon/iconscheckmark24.png";
+import CommentRecipes from "../CommentItem/CommentRecipes";
+import Swal from "sweetalert2";
+import {
+  getRecipeById,
+  getAccountById,
+  getImagesByRecipeId,
+  getTags,
+} from "../services/SellerService/Api";
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
@@ -17,58 +23,22 @@ const RecipeDetail = () => {
     const fetchData = async () => {
       try {
         // Lấy chi tiết công thức
-        const recipeResult = await axios.get(
-          `https://rmrbdapi.somee.com/odata/Recipe/${recipeId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc", // Nếu bạn có Token cần dùng
-            },
-          }
-        );
-        const recipeData = recipeResult.data;
+        const recipeData = await getRecipeById(recipeId);
         setRecipe(recipeData);
 
         // Lấy thông tin tài khoản
         if (recipeData.createById) {
-          const accountResult = await axios.get(
-            `https://rmrbdapi.somee.com/odata/Account/${recipeData.createById}`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Token: "123-abc",
-              },
-            }
-          );
-          setAccountID(accountResult.data);
+          const accountData = getAccountById(recipeData.createById);
+          setAccountID(accountData);
         }
 
         // Lấy mảng hình ảnh của công thức
-        const imageResult = await axios.get(
-          `https://rmrbdapi.somee.com/odata/Image/Recipe/${recipeId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
-        setImages(imageResult.data);
-        setMainImage(imageResult.data[0].imageUrl);
+        const imagesData = await getImagesByRecipeId(recipeId);
+        setImages(imagesData);
+        setMainImage(imagesData[0]?.imageUrl);
 
         // Lấy tên tag từ API cho từng tagId
-        const tagResult = await axios.get(
-          `https://rmrbdapi.somee.com/odata/Tag`, // API để lấy tất cả tag
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
-        const tags = tagResult.data;
-
-        // Chuyển danh sách tag thành map { tagId: tagName }
+        const tags = await getTags();
         const tagMapData = tags.reduce((acc, tag) => {
           acc[tag.tagId] = tag.tagName;
           return acc;
@@ -76,10 +46,17 @@ const RecipeDetail = () => {
         setTagMap(tagMapData);
       } catch (error) {
         console.error("Error fetching data:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: "Đã xảy ra lỗi khi tải dữ liệu.",
+        });
       }
     };
 
-    fetchData();
+    if (recipeId) {
+      fetchData();
+    }
   }, [recipeId]); // Chỉ phụ thuộc vào recipeId
 
   if (!recipe || !accountID || images.length === 0) {
@@ -89,12 +66,12 @@ const RecipeDetail = () => {
   return (
     <section className="section-center">
       <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">{recipe?.recipeName || "N/A"}</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+          {recipe?.recipeName || "N/A"}
+        </h1>
 
         <div className="space-y-4">
-          <p className="text-lg">
-            {recipe?.description || "N/A"}
-          </p>
+          <p className="text-lg">{recipe?.description || "N/A"}</p>
           <p className="text-lg">
             <strong>Tạo bởi:</strong> {accountID?.userName || "N/A"}
           </p>
@@ -128,7 +105,11 @@ const RecipeDetail = () => {
             <div className="md:w-1/3 bg-gray-50 p-4 rounded-lg shadow-md relative">
               {/* Clock Icon */}
               {/* <ClockIcon className="w-6 h-6 text-gray-600 absolute top-2 right-2" /> */}
-              <img src={ClockIcon} alt="" className="w-6 h-6 text-gray-600 absolute top-2 right-2" />
+              <img
+                src={ClockIcon}
+                alt=""
+                className="w-6 h-6 text-gray-600 absolute top-2 right-2"
+              />
 
               {/* Recipe Details */}
               <p className="text-lg mb-2">
@@ -165,19 +146,22 @@ const RecipeDetail = () => {
             <strong>Hướng dẫn</strong>
             {recipe?.tutorial ? (
               <div className="whitespace-pre-line">
-                {recipe.tutorial.split('Bước ').map((step, index) => (
-                  step && (
-                    <div key={index} className="mb-4">
-                      <div className="flex items-center mb-1">
-                        <img src={CheckMarkIcon} alt="" className="w-5 h-5 mr-2" />
-                        <strong>Bước {index}</strong>
+                {recipe.tutorial.split("Bước ").map(
+                  (step, index) =>
+                    step && (
+                      <div key={index} className="mb-4">
+                        <div className="flex items-center mb-1">
+                          <img
+                            src={CheckMarkIcon}
+                            alt=""
+                            className="w-5 h-5 mr-2"
+                          />
+                          <strong>Bước {index}</strong>
+                        </div>
+                        <div className="ml-7">{step.trim()}</div>
                       </div>
-                      <div className="ml-7">
-                        {step.trim()}
-                      </div>
-                    </div>
-                  )
-                ))}
+                    )
+                )}
               </div>
             ) : (
               "N/A"
@@ -231,12 +215,12 @@ const RecipeDetail = () => {
           <p className="text-lg">
             <strong>Status: </strong>
             {recipe?.status === 1
-              ? "Censored"
+              ? "Đã xác nhận"
               : recipe?.status === -1
-                ? "Uncensored"
-                : recipe?.status === 0
-                  ? "Blocked"
-                  : "N/A"}
+              ? "Chưa xác nhận"
+              : recipe?.status === 0
+              ? "Bị khóa"
+              : "N/A"}
           </p>
           <div className="relative flex items-center mb-8">
             <hr className="flex-grow border-t border-black-300" />
@@ -251,7 +235,7 @@ const RecipeDetail = () => {
             className="mt-6 px-6 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition"
             onClick={() => window.history.back()}
           >
-            Back
+            Quay lại
           </button>
         </div>
       </div>

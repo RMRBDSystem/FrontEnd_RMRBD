@@ -12,29 +12,29 @@ const SinglePlacePage = () => {
   return (
     <section className="section">
       <div className="section-center">
-      <div className="relative -mx-4 top-0 pt-[17%] overflow-hidden">
-        <img
-          className="absolute inset-0 object-cover object-top w-full h-full filter blur"
-          src={imageSrc}
-          alt="page background"
-        />
-      </div>
-
-      <div className="mt-[-10%] w-1/2 mx-auto">
-        <div className="relative pt-[56.25%] overflow-hidden rounded-2xl">
+        <div className="relative -mx-4 top-0 pt-[17%] overflow-hidden">
           <img
-            className="w-full h-full absolute inset-0 object-cover"
+            className="absolute inset-0 object-cover object-top w-full h-full filter blur"
             src={imageSrc}
-            alt="page cover"
+            alt="page background"
           />
         </div>
-      </div>
+
+        <div className="mt-[-10%] w-1/2 mx-auto">
+          <div className="relative pt-[56.25%] overflow-hidden rounded-2xl">
+            <img
+              className="w-full h-full absolute inset-0 object-cover"
+              src={imageSrc}
+              alt="page cover"
+            />
+          </div>
+        </div>
         <article className="article-container">
           <h2 className="text-center text-3xl sm:text-4xl italic font-bold">
             {name}
           </h2>
           <h3 className="text-center text-xl sm:text-2xl mt-2">
-            Best places to visit in {name}
+            Những món ăn ngon với {name}
           </h3>
           {places.map((pl, index) => {
             const { id, name, description, images } = pl;

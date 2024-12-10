@@ -13,10 +13,11 @@ const IncomeManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterType, setFilterType] = useState('all');
   const [statistics, setStatistics] = useState({
-    totalBooks: 0,
-    totalEbooks: 0,
-    totalRecipes: 0,
-    totalIncome: 0
+    totalEarnings: 0,
+    totalExpenses: 0,
+    netProfit: 0,
+    totalTransactions: 0,
+    totalCoins: 0
   });
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b'];
@@ -29,46 +30,111 @@ const IncomeManagement = () => {
     try {
       setIsLoading(true);
       
-      // Mock data for demonstration
-      const mockData = [
-        { month: 'Jan', books: 2500000, ebooks: 1500000, recipes: 1000000 },
-        { month: 'Feb', books: 3000000, ebooks: 2000000, recipes: 1200000 },
-        { month: 'Mar', books: 2800000, ebooks: 1800000, recipes: 900000 },
-      ];
+      const response = await axios.get('https://rmrbdapi.somee.com/odata/Cointransaction', {
+        headers: {
+          'Token': '123-abc',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.data) {
+        console.error('No data received from API');
+        setIsLoading(false);
+        return;
+      }
 
-      setIncomeData(mockData);
+      console.log('API Response:', response.data);
       
-      // Calculate statistics
-      const totalBooks = mockData.reduce((acc, curr) => acc + curr.books, 0);
-      const totalEbooks = mockData.reduce((acc, curr) => acc + curr.ebooks, 0);
-      const totalRecipes = mockData.reduce((acc, curr) => acc + curr.recipes, 0);
-      
+      const transactions = response.data;
+
+      if (transactions.length === 0) {
+        setStatistics({
+          totalEarnings: 0,
+          totalExpenses: 0,
+          netProfit: 0,
+          totalTransactions: 0,
+          totalCoins: 0
+        });
+        setIncomeData([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const totalEarnings = transactions
+        .filter(t => t && t.moneyFluctuations && t.moneyFluctuations > 0)
+        .reduce((sum, t) => sum + t.moneyFluctuations, 0);
+
+      const totalExpenses = transactions
+        .filter(t => t && t.moneyFluctuations && t.moneyFluctuations < 0)
+        .reduce((sum, t) => sum + t.moneyFluctuations, 0);
+
+      const totalCoins = transactions
+        .filter(t => t && t.coinFluctuations != null)
+        .reduce((sum, t) => sum + Math.abs(t.coinFluctuations), 0);
+
       setStatistics({
-        totalBooks,
-        totalEbooks,
-        totalRecipes,
-        totalIncome: totalBooks + totalEbooks + totalRecipes
+        totalEarnings,
+        totalExpenses,
+        netProfit: totalEarnings + totalExpenses,
+        totalTransactions: transactions.length,
+        totalCoins
       });
 
+      const monthlyData = transactions.reduce((acc, transaction) => {
+        if (!transaction || !transaction.date) return acc;
+        
+        const month = new Date(transaction.date).toLocaleString('default', { month: 'short' });
+        if (!acc[month]) {
+          acc[month] = {
+            month,
+            earnings: 0,
+            expenses: 0,
+            coins: 0
+          };
+        }
+        
+        if (transaction.moneyFluctuations) {
+          if (transaction.moneyFluctuations > 0) {
+            acc[month].earnings += transaction.moneyFluctuations;
+          } else {
+            acc[month].expenses += Math.abs(transaction.moneyFluctuations);
+          }
+        }
+        
+        if (transaction.coinFluctuations != null) {
+          acc[month].coins += Math.abs(transaction.coinFluctuations);
+        }
+        
+        return acc;
+      }, {});
+
+      setIncomeData(Object.values(monthlyData));
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching income data:', error);
+      setStatistics({
+        totalEarnings: 0,
+        totalExpenses: 0,
+        netProfit: 0,
+        totalTransactions: 0,
+        totalCoins: 0
+      });
+      setIncomeData([]);
       setIsLoading(false);
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, color }) => (
-    <div className="bg-white rounded-lg shadow-md p-6">
+  const StatCard = ({ title, value, color, isCurrency = true }) => (
+    <div className="bg-white rounded-lg shadow-md p-4">
+      <h3 className="text-gray-600 text-sm mb-2">{title}</h3>
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 text-sm font-medium">{title}</p>
-          <h3 className="text-2xl font-bold mt-2">
-            {value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-          </h3>
-        </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="text-white text-xl" />
-        </div>
+        <span className={`text-xl font-semibold ${color}`}>
+          {typeof value === 'number' 
+            ? (isCurrency 
+                ? value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+                : value.toLocaleString())
+            : value}
+        </span>
       </div>
     </div>
   );
@@ -121,31 +187,33 @@ const IncomeManagement = () => {
           </button>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Updated Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <StatCard
             title="Tổng Thu Nhập"
-            value={statistics.totalIncome}
-            icon={FaMoneyBill}
-            color="bg-orange-500"
+            value={statistics.totalEarnings}
+            color="text-green-600"
           />
           <StatCard
-            title="Thu Nhập Từ Sách"
-            value={statistics.totalBooks}
-            icon={FaBook}
-            color="bg-blue-500"
+            title="Tổng Chi Phí"
+            value={statistics.totalExpenses}
+            color="text-red-600"
           />
           <StatCard
-            title="Thu Nhập Từ E-book"
-            value={statistics.totalEbooks}
-            icon={FaTablet}
-            color="bg-green-500"
+            title="Lợi Nhuận"
+            value={statistics.netProfit}
+            color="text-green-600"
           />
           <StatCard
-            title="Thu Nhập Từ Công Thức"
-            value={statistics.totalRecipes}
-            icon={FaUtensils}
-            color="bg-yellow-500"
+            title="Tổng Giao Dịch"
+            value={statistics.totalTransactions}
+            color="text-gray-800"
+            isCurrency={false}
+          />
+          <StatCard
+            title="Tổng Coin"
+            value={`${statistics.totalCoins.toLocaleString()} Coin`}
+            color="text-yellow-600"
           />
         </div>
 
@@ -162,9 +230,9 @@ const IncomeManagement = () => {
                   <YAxis />
                   <Tooltip formatter={(value) => value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} />
                   <Legend />
-                  <Bar dataKey="books" name="Sách" fill="#3b82f6" />
-                  <Bar dataKey="ebooks" name="E-book" fill="#10b981" />
-                  <Bar dataKey="recipes" name="Công Thức" fill="#f59e0b" />
+                  <Bar dataKey="earnings" name="Thu Nhập" fill="#3b82f6" />
+                  <Bar dataKey="expenses" name="Chi Phí" fill="#10b981" />
+                  <Bar dataKey="coins" name="Coin" fill="#f59e0b" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -178,9 +246,9 @@ const IncomeManagement = () => {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'Sách', value: statistics.totalBooks },
-                      { name: 'E-book', value: statistics.totalEbooks },
-                      { name: 'Công Thức', value: statistics.totalRecipes }
+                      { name: 'Thu Nhập', value: statistics.totalEarnings },
+                      { name: 'Chi Phí', value: statistics.totalExpenses },
+                      { name: 'Coin', value: statistics.totalCoins }
                     ]}
                     cx="50%"
                     cy="50%"
@@ -211,9 +279,9 @@ const IncomeManagement = () => {
                 <thead>
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tháng</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sách</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">E-book</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Công Thức</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thu Nhập</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chi Phí</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coin</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng</th>
                   </tr>
                 </thead>
@@ -222,16 +290,16 @@ const IncomeManagement = () => {
                     <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.month}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.books.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        {item.earnings.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.ebooks.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        {item.expenses.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.recipes.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        {item.coins.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {(item.books + item.ebooks + item.recipes).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        {(item.earnings + item.expenses + item.coins).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                       </td>
                     </tr>
                   ))}

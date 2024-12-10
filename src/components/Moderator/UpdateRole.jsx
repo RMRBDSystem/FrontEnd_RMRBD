@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import  { useState, useEffect } from "react";
 import {
   FaBan,
   FaCheckCircle,
@@ -10,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { listAccountProfile } from "../services/ModeratorService/Api";
 
 const AccountProfile = () => {
   const [data, setData] = useState([]);
@@ -23,14 +23,9 @@ const AccountProfile = () => {
   }, []);
 
   const getData = async () => {
-    const headers = { "Content-Type": "application/json", token: "123-abc" };
-
     try {
-      const result = await axios.get(
-        "https://rmrbdapi.somee.com/odata/AccountProfile",
-        { headers }
-      );
-      setData(result.data);
+      const result = await listAccountProfile();
+      setData(result);
     } catch (error) {
       console.error("Error fetching account data:", error);
     }
@@ -53,33 +48,27 @@ const AccountProfile = () => {
 
   const columns = [
     {
-      name: "#",
+      name: "STT",
       selector: (row, index) => index + 1,
       sortable: true,
-      width: "50px",
-      style: {
-        textAlign: "center",
-        fontSize: "1.125rem", // Font lớn hơn (18px)
-      },
+      width: "80px", // Reduced width for smaller display
     },
     {
       name: "Tên người dùng",
       selector: (row) => row.account?.userName || "Không có tên",
       sortable: true,
-      style: {
-        textAlign: "left",
-        fontSize: "1.125rem", // Font lớn hơn (18px)
-      },
+      width: "250px", // Adjusted width
+      style: { fontSize: "14px" }, // Reduced font size for smaller text
     },
     {
       name: "Ngày sinh",
       selector: (row) => row.dateOfBirth.split("T")[0], // Display only the date
       sortable: true,
-      width: "200px", // Adjusted width for smaller display
+      width: "120px", // Adjusted width for smaller display
       style: { fontSize: "14px" }, // Reduced font size for smaller text
     },
     {
-      name: "Hình ảnh CCCD",
+      name: "Ảnh CMND mặt trước",
       cell: (row) =>
         row.frontIdcard ? (
           <img
@@ -90,7 +79,7 @@ const AccountProfile = () => {
         ) : (
           "Không có"
         ),
-      width: "200px", // Adjusted width
+      width: "250px", // Adjusted width
       height: "150px", // Adjusted height
     },
     {
@@ -104,7 +93,7 @@ const AccountProfile = () => {
       name: "Trạng thái",
       cell: (row) =>
         row.status === 0 ? (
-          <FaBan style={{ color: "red", fontSize: "18px" }} title="Bị khóa" /> // Reduced icon size
+          <FaBan style={{ color: "red", fontSize: "18px" }} title="Từ chối" /> 
         ) : row.status === 1 ? (
           <FaCheckCircle
             style={{ color: "green", fontSize: "18px" }}
@@ -127,7 +116,7 @@ const AccountProfile = () => {
           onClick={() => handleDetails(row.accountId)}
         >
           <FaInfoCircle
-            style={{ color: "#007bff", fontSize: "18px" }} // Reduced icon size
+            style={{ color: "#007bff", fontSize: "18px" }} 
             title="Chi tiết"
           />
         </button>
@@ -138,7 +127,7 @@ const AccountProfile = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-5xl">
+      <div className="w-full max-w-7xl bg-white shadow-lg rounded-lg p-5">
         {/* Filter Button */}
         <div className="mb-4 flex items-center justify-between">
           <button
@@ -166,8 +155,8 @@ const AccountProfile = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="">Tất cả trạng thái</option>
+              <option value="0">Từ chối</option>
               <option value="-1">Chờ xác nhận</option>
-              <option value="0">Bị khóa</option>
               <option value="1">Đã xác nhận</option>
             </select>
             <button
@@ -184,35 +173,28 @@ const AccountProfile = () => {
 
         {/* DataTable */}
         <DataTable
-          title="Cập nhật vai trò người dùng"
+          title="Danh sách tài khoản"
           columns={columns}
           data={filteredData}
           pagination
           highlightOnHover
           striped
           customStyles={{
-            table: {
-              style: {
-                fontSize: '16px', // Apply font size to table
-                padding: '10px',
-              },
-            },
             rows: {
               style: {
-                fontSize: '14px', // Font size for rows
+                fontSize: "14px",
+                padding: "12px",
               },
             },
             headCells: {
               style: {
-                fontSize: '16px', // Font size for header cells
-                padding: '10px', // Adjust padding for header cells
-                fontWeight: 'bold', // Make header text bold
+                fontSize: "16px",
+                padding: "10px",
               },
             },
             cells: {
               style: {
-                fontSize: '14px', // Font size for cell content
-                padding: '8px', // Padding for individual cells
+                padding: "10px",
               },
             },
           }}

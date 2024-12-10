@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import Swal from "sweetalert2"; // Import SweetAlert2
 import { FaSave, FaArrowLeft } from "react-icons/fa";
 import Cookies from "js-cookie";
-import { useSocket } from "../../../App"
-import { createNotification } from "../../services/NotificationService"
+import { useSocket } from "../../../App";
+import { createNotification } from "../../services/NotificationService";
+import {
+  getAccountData,
+  getAccountProfile,
+} from "../../services/CustomerService/api";
+
+import {
+  updateAccountProfile,
+  updateAccount,
+} from "../../services/ModeratorService/Api";
 const AccountDetails = () => {
   const { accountId } = useParams();
   const navigate = useNavigate();
@@ -29,16 +37,12 @@ const AccountDetails = () => {
 
   const fetchAccountDetails = async () => {
     setLoading(true);
-    const headers = { "Content-Type": "application/json", token: "123-abc" };
 
     try {
-      const result = await axios.get(
-        `https://rmrbdapi.somee.com/odata/AccountProfile/${accountId}`,
-        { headers }
-      );
-      setAccountDetails(result.data);
-      setNewStatus(result.data.status);
-      setCensorNote(result.data.censorNote);
+      const result = await getAccountProfile(accountId);
+      setAccountDetails(result);
+      setNewStatus(result.status);
+      setCensorNote(result.censorNote);
     } catch (error) {
       console.error("Error fetching account details:", error);
     } finally {
@@ -47,14 +51,10 @@ const AccountDetails = () => {
   };
   const fetchAccount = async () => {
     setLoading(true);
-    const headers = { "Content-Type": "application/json", token: "123-abc" };
 
     try {
-      const result = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Account/${accountId}`,
-        { headers }
-      );
-      setAccountData(result.data);
+      const result = await getAccountData(accountId);
+      setAccountData(result);
     } catch (error) {
       console.error("Error fetching account details:", error);
     } finally {
@@ -63,83 +63,74 @@ const AccountDetails = () => {
   };
 
   const updateStatus = async (accountId) => {
-      try {
-        // Hiển thị hộp thoại xác nhận với SweetAlert2
-        const result = await Swal.fire({
-          title: "Bạn có chắc chắn muốn thay đổi trạng thái?",
-          text: "Điều này sẽ cập nhật trạng thái tài khoản!",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Đồng ý",
-          cancelButtonText: "Hủy",
-        });
+    try {
+      // Hiển thị hộp thoại xác nhận với SweetAlert2
+      const result = await Swal.fire({
+        title: "Bạn có chắc chắn muốn thay đổi trạng thái?",
+        text: "Điều này sẽ cập nhật trạng thái tài khoản!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+      });
 
-        // Nếu người dùng xác nhận
-        if (result.isConfirmed) {
-          setLoading(true);
+      // Nếu người dùng xác nhận
+      if (result.isConfirmed) {
+        setLoading(true);
 
-          const headers = {
-            "Content-Type": "application/json",
-            token: "123-abc",
+        const updatePromises = [];
+        // Tạo dữ liệu cập nhật cho AccountProfile
+        const updatedAccountProfile = {
+          ...accountDetails,
+          status: newStatus,
+          censorId: censorID,
+          censorNote: censorNote,
+        };
+        // Tạo promise cho việc cập nhật AccountProfile
+        const accountProfileUpdatePromise = updateAccountProfile(
+          accountId,
+          updatedAccountProfile
+        );
+
+        updatePromises.push(accountProfileUpdatePromise);
+
+        // Nếu trạng thái mới là 1, cập nhật thêm roleId trong bảng Account
+        if (newStatus === 1) {
+          const updatedAccount = {
+            ...dataAccount,
+            roleId: 2,
           };
-          const updatePromises = [];
-          // Tạo dữ liệu cập nhật cho AccountProfile
-          const updatedAccountProfile = {
-            ...accountDetails,
-            status: newStatus,
-            censorId: censorID,
-            censorNote: censorNote,
-          };
-          // Tạo promise cho việc cập nhật AccountProfile
-          const accountProfileUpdatePromise = axios.put(
-            `https://rmrbdapi.somee.com/odata/AccountProfile/Censor/${accountId}`,
-            updatedAccountProfile,
-            { headers }
-          );
 
-          updatePromises.push(accountProfileUpdatePromise);
+          const accountUpdatePromise = updateAccount(accountId, updatedAccount);
 
-          // Nếu trạng thái mới là 1, cập nhật thêm roleId trong bảng Account
-          if (newStatus === 1) {
-            const updatedAccount = {
-              ...dataAccount,
-              roleId: 2,
-            };
-
-            const accountUpdatePromise = axios.put(
-              `https://rmrbdapi.somee.com/odata/Account/Info/${accountId}`,
-              updatedAccount,
-              { headers }
-            );
-
-            updatePromises.push(accountUpdatePromise);
-          }
-
-          // Thực thi các promise
-          await Promise.all(updatePromises);
-
-          // Refresh dữ liệu sau khi cập nhật
-          fetchAccount();
-          fetchAccountDetails();
-
-          // Đặt lại trạng thái chỉnh sửa
-          setStatusEditing(false);
-
-          // Hiển thị thông báo thành công
-          Swal.fire(
-            "Thành công!",
-            "Trạng thái tài khoản đã được cập nhật.",
-            "success"
-          );
+          updatePromises.push(accountUpdatePromise);
         }
-      } catch (error) {
-        console.error("Error updating status:", error);
 
-        // Hiển thị thông báo lỗi
-        Swal.fire("Lỗi", "Có lỗi xảy ra khi cập nhật trạng thái.", "error");
-      } finally {
-        setLoading(false);
+        // Thực thi các promise
+        await Promise.all(updatePromises);
+
+        // Refresh dữ liệu sau khi cập nhật
+        fetchAccount();
+        fetchAccountDetails();
+
+        // Đặt lại trạng thái chỉnh sửa
+        setStatusEditing(false);
+
+        // Hiển thị thông báo thành công
+        Swal.fire(
+          "Thành công!",
+          "Trạng thái tài khoản đã được cập nhật.",
+          "success"
+        );
       }
+    } catch (error) {
+      console.error("Error updating status:", error);
+
+      // Hiển thị thông báo lỗi
+      Swal.fire("Lỗi", "Có lỗi xảy ra khi cập nhật trạng thái.", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -196,8 +187,8 @@ const AccountDetails = () => {
             <span className="font-medium">Ngày sinh:</span>{" "}
             {accountDetails.dateOfBirth
               ? format(new Date(accountDetails.dateOfBirth), "dd/MM/yyyy", {
-                locale: vi,
-              })
+                  locale: vi,
+                })
               : "Không có"}
           </p>
           <p className="mb-4 text-lg">
@@ -265,9 +256,9 @@ const AccountDetails = () => {
             onChange={(e) => setNewStatus(parseInt(e.target.value))}
             className="w-full px-4 py-2 border rounded-lg"
           >
+            <option value={-1}>Chờ xác nhận</option>
             <option value={1}>Xác nhận</option>
-            <option value={0}>Khóa</option>
-            <option value={-2}>Từ chối</option>
+            <option value={0}>Từ chối</option>
           </select>
         </div>
         <div>
@@ -294,11 +285,15 @@ const AccountDetails = () => {
                 content = censorNote;
               }
               if (content) {
-                handleNotification(`${content} Mod ${accountOnline} đã ${statusText} thông tin làm người bán hàng của bạn`);
+                handleNotification(
+                  `${content} Mod ${accountOnline} đã ${statusText} thông tin làm người bán hàng của bạn`
+                );
               } else {
-                handleNotification(`Mod ${accountOnline} đã ${statusText} thông tin làm người bán hàng của bạn`);
-              }         
-              updateStatus(accountId)
+                handleNotification(
+                  `Mod ${accountOnline} đã ${statusText} thông tin làm người bán hàng của bạn`
+                );
+              }
+              updateStatus(accountId);
             }}
             className="flex items-center justify-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform duration-300 hover:scale-105"
           >

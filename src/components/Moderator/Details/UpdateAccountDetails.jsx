@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { FaSave, FaArrowLeft } from "react-icons/fa";
+import { getAccountData } from "../../services/CustomerService/api";
+import { updateAccount } from "../../services/ModeratorService/Api";
 
 const AccountDetail = () => {
   const { accountId } = useParams(); // Lấy ID từ URL
@@ -13,13 +14,7 @@ const AccountDetail = () => {
   // Hàm lấy chi tiết tài khoản
   const fetchAccountDetail = async () => {
     try {
-      const response = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Account/${accountId}`,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
-      const accountData = response.data;
+      const accountData = await getAccountData(accountId);
       if (accountData.roleId === 1 || accountData.roleId === 2) {
         setAccount(accountData);
         setStatus(accountData.accountStatus);
@@ -59,13 +54,7 @@ const AccountDetail = () => {
           ...account,
           accountStatus: status,
         };
-        await axios.put(
-          `https://rmrbdapi.somee.com/odata/Account/info/${accountId}`,
-          updatedAccount,
-          {
-            headers: { "Content-Type": "application/json", Token: "123-abc" },
-          }
-        );
+        await updateAccount(accountId, updatedAccount);
         Swal.fire("Thành công!", "Tài khoản đã được cập nhật.", "success");
       } catch (error) {
         console.error("Error updating account:", error);
@@ -92,7 +81,7 @@ const AccountDetail = () => {
         {/* Image Section */}
         <div className="flex-1">
           <img
-            src={mainImage || "https://via.placeholder.com/400"}
+            src={mainImage || "/images/avatar.png"}
             alt="Account"
             className="rounded-lg shadow-md object-cover w-full h-64 lg:h-full"
           />
@@ -121,7 +110,7 @@ const AccountDetail = () => {
               onChange={(e) => setStatus(parseInt(e.target.value))}
               className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
             >
-              <option value={1}>Xác nhận</option>
+              <option value={1}>Mở khóa</option>
               <option value={0}>Khóa</option>
             </select>
           </div>

@@ -7,16 +7,16 @@ const PlacesToGo = () => {
         <>
             <section className="section bg-white" id="places">
                 <div className="section-title">
-                    <h2 className="text-gray-600 font-expletus">Những món ăn đặc sắc</h2>
+                    <h2 className="text-gray-600 font-expletus">Khám Phá</h2>
                     <div className={`underline bg-gray-800`}></div>
                 </div>
                 <div className="section-center ">
                     <div className="flex flex-wrap w-full mb-20 ">
                         <h1 className="capitalize sm:text-3xl text-2xl font-medium title-font text-gray-900 lg:w-1/3 lg:mb-0 mb-4">
-                        Khám phá những món ăn tuyệt vời nhất tại Việt Nam
+                        Những món ăn tuyệt vời nhất tại Việt Nam
                         </h1>
                         <p className="lg:pl-6 lg:w-2/3 mx-auto leading-relaxed text-base">
-                        Hãy chọn những món ăn đặc sắc nhất tại Việt Nam để trải nghiệm. Điều tuyệt vời nhất là, nếu bạn đã tiêm phòng đầy đủ, bạn sẽ không cần phải lo lắng về các hạn chế. Bạn có thể tự do thưởng thức những hương vị phong phú ngay khi đến nơi. Hãy để bản thân đắm chìm trong những món ăn mới lạ, những hương vị độc đáo và sự đa dạng ẩm thực mà Việt Nam mang lại. Những trải nghiệm ẩm thực thật sự đáng nhớ đang chờ đón bạn. Sống trọn vẹn với những món ăn tuyệt vời tại Việt Nam.
+                        Bạn có thể tự do thưởng thức những hương vị phong phú ngay khi đến nơi. Hãy để bản thân đắm chìm trong những món ăn mới lạ, những hương vị độc đáo và sự đa dạng ẩm thực mà Việt Nam mang lại. Những trải nghiệm ẩm thực thật sự đáng nhớ đang chờ đón bạn. Sống trọn vẹn với những món ăn tuyệt vời tại Việt Nam.
                         </p>
                     </div>
 

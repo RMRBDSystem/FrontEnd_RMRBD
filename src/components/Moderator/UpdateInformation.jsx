@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import Cookies from "js-cookie";
-import { ToastContainer } from "react-toastify";
+import {
+  getAccountData,
+  updateInformation,
+} from "../services/CustomerService/api";
 
-const UpdateAccount = () => {
+const UpdateInformation = () => {
   const [accountID, setAccountID] = useState(null);
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [accountData, setAccountData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const userId = Cookies.get("UserId");
     setAccountID(userId);
@@ -21,27 +24,29 @@ const UpdateAccount = () => {
 
   const fetchAccountData = async (userId) => {
     try {
-      const response = await axios.get(
-        //`https://localhost:7220/odata/Account/${userId}`,
-        `https://rmrbdapi.somee.com/odata/Account/${userId}`,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
-      const data = response.data;
+      const data = await getAccountData(userId);
       setAccountData(data);
       setUserName(data.userName);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to fetch account data.");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: "Không thể tải thông tin tài khoản.",
+      });
     }
   };
-
+// Gọi tới api put Account để cập nhật thônng tin
   const handleUpdate = async () => {
     if (!userName) {
-      toast.error("UserName cannot be empty.");
+      Swal.fire({
+        icon: "warning",
+        title: "Cảnh báo!",
+        text: "Tên người dùng không được để trống.",
+      });
       return;
     }
+
     const formData = new FormData();
     formData.append("userName", userName);
     formData.append("googleId", accountData.googleId);
@@ -54,35 +59,43 @@ const UpdateAccount = () => {
     } else {
       formData.append("image", accountData.avatar);
     }
+
     try {
       setIsLoading(true);
 
-      await axios.put(
-       // `https://localhost:7220/odata/Account/${accountID}`,
-       `https://rmrbdapi.somee.com/odata/Account/${accountID}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data", Token: "123-abc" },
-        }
-      );
-      toast.success("Account updated successfully!");
+      await updateInformation(accountID, formData);
+
+      Swal.fire({
+        icon: "success",
+        title: "Thành công!",
+        text: "Tài khoản đã được cập nhật thành công.",
+      });
 
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update account.");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: "Không thể cập nhật tài khoản.",
+      });
     } finally {
-      setIsLoading(false); // Kết thúc gửi request, trạng thái nút trở lại bình thường
+      setIsLoading(false);
     }
   };
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Kiểm tra xem loại tệp có phải là ảnh hay không
       if (!file.type.startsWith("image/")) {
-        toast.error("Please upload a valid image.");
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi!",
+          text: "Vui lòng tải lên một tệp ảnh hợp lệ.",
+        });
         return;
       }
       setAvatar(file);
@@ -91,11 +104,10 @@ const UpdateAccount = () => {
   };
 
   return (
-    <>
-      <ToastContainer />
-      <div className="flex flex-col md:flex-row justify-center  items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
-        {/* Update Form */}
-        <div className="flex-1 bg-white shadow-lg max-w-xl w-full p-4">
+    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
+     
+      <section className="flex flex-col">
+        <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col text-xl">
           <form
             className="space-y-4"
             onSubmit={(e) => {
@@ -124,12 +136,15 @@ const UpdateAccount = () => {
             <div className="mt-4 text-xs text-gray-500 border-b border-gray-300 pb-2 opacity-50">
               <p>
                 Chức năng "Cập nhật tài khoản" cho phép bạn thay đổi thông tin
-                cá nhân như tên người dùng và ảnh đại diện. Bạn có thể cập nhật
-                những thông tin này và nhấn "Cập nhật" để lưu thay đổi. Lưu ý,
-                bạn không thể thay đổi địa chỉ email vì nó là thông tin xác thực
-                của tài khoản.
+                cá nhân như tên người dùng và ảnh đại diện.
+                <p>
+                  Bạn có thể cập nhật những thông tin này và nhấn "Cập nhật" để
+                  lưu thay đổi. Lưu ý, bạn không thể thay đổi địa chỉ email vì
+                  nó là thông tin xác thực của tài khoản.
+                </p>
               </p>
             </div>
+
             {/* Email Field */}
             <div className="border-b border-gray-300 pb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -139,7 +154,7 @@ const UpdateAccount = () => {
                 type="text"
                 value={accountData.email || ""}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700"
+                className="mx-auto px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700"
               />
             </div>
 
@@ -153,7 +168,7 @@ const UpdateAccount = () => {
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-4 py-2 border border-gray-300 text-gray-700 focus:ring-2 focus:ring-indigo-500"
+                className="mx-auto px-4 py-2 border border-gray-300 text-gray-700 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
@@ -198,9 +213,9 @@ const UpdateAccount = () => {
             </div>
           </form>
         </div>
-      </div>
-    </>
+      </section>
+    </div>
   );
 };
 
-export default UpdateAccount;
+export default UpdateInformation;

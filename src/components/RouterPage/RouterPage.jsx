@@ -1,8 +1,7 @@
-import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
-import Layout from '../../Layout';
-import LayoutModerator from '../../LayoutModerator';
+import Layout from "../../Layout";
+import LayoutModerator from "../../LayoutModerator";
 import { AuthProvider } from "./AuthContext";
 //Page
 import Login from "../LoginPage/LoginPage";
@@ -13,46 +12,48 @@ import WithdrawResponse from "../Pages/Withdraw/WithdrawResponse";
 import WithDrawRequest from "../Pages/Withdraw/WithdrawRequest";
 import WithdrawList from "../Pages/Withdraw/WithdrawList";
 import Product from "../HomePage/Products";
-import SinglePlacePage from '../HomePage/SinglePlacePage'
+import SinglePlacePage from "../HomePage/SinglePlacePage";
 //Customer
-import AddRecipePageForCustomer from "../AddRecipe/RecipeCustomer";
-import Book from '../Pages/Book/Book';
-import BookDetail from '../Pages/Book/BookDetail';
-import Ebook from '../Pages/Ebook/Ebook';
-import EbookDetail from '../Pages/Ebook/EbookDetail';
-import EbookReader from '../Pages/Ebook/EbookReader';
-import Cart from '../Cart/ShoppingCart';
+import Book from "../Pages/Book/Book";
+import BookDetail from "../Pages/Book/BookDetail";
+import Ebook from "../Pages/Ebook/Ebook";
+import EbookDetail from "../Pages/Ebook/EbookDetail";
+import EbookReader from "../Pages/Ebook/EbookReader";
+import Cart from "../Cart/ShoppingCart";
 import Checkout from "../Cart/Checkout";
 import Orders from "../Cart/Orders/Orders";
-import OrderFullDetails from '../Cart/Orders/OrderFullDetails';
-import DetailsBookCustomer from '../CustomerBook/DetailBookCustomer';
-import ListEbookCustomer from '../CustomerEbook/ListEbookCustomer';
-import AddBookCustomer from '../CustomerBook/AddBookCustomer';
-import AddEBookCustomer from '../CustomerEbook/AddEbookCustomer';
-import DetailSavedRecipe from '../Pages/Recipe/DetailSavedRecipe';
-import EditRoleUpdate from '../AccountProfile/EditRoleUpdate';
+import OrderFullDetails from "../Cart/Orders/OrderFullDetails";
+import DetailsBookCustomer from "../CustomerBook/DetailBookCustomer";
+import ListEbookCustomer from "../CustomerEbook/ListEbookCustomer";
+import AddBookCustomer from "../CustomerBook/AddBookCustomer";
+import AddEBookCustomer from "../CustomerEbook/AddEbookCustomer";
+import DetailSavedRecipe from "../Pages/Recipe/DetailSavedRecipe";
 import Address from "../AddressPage/Address";
-import SavedEbook from '../AccountProfile/SavedEbooks';
+import SavedEbook from '../Customer/SavedEbooks';
+// --Customer--
+import EditRoleUpdated from "../Customer/EditRoleUpdated";
+import UpdateToSeller from "../Customer/UpdateToSeller";
+import UpdateAccount from "../Customer/UpdateInformation";
+import UpdateToSellerInfo from "../Customer/UpdateToSellerInfo";
+
 //import Addbook from '../Pages/Add Items/AddBook';
 import Recipe from "../Pages/Recipe/Recipe";
 import RecipeDetail from "../Pages/Recipe/RecipeDetail";
-import UpdateProfile from '../AccountProfile/AccountProfile';
-import UpdateAccount from '../AccountProfile/UpdateAccount';
-import ViewRoleUpdateSubmit from '../AccountProfile/ViewRoleUpdateSubmit';
+
 import EditRecipeForCustomer from "../Pages/Recipe/EditSavedRecipe";
 import SellerOrders from "../Cart/Orders/SellerOrders";
 //Recharge
-import RechargePage from '../Pages/Recharge/Recharge';
+import RechargePage from "../Pages/Recharge/Recharge";
 import CoinTransaction from "../Pages/Recharge/CoinTransaction";
-import TermsOfPurchase from '../Pages/Recharge/TermsOfPurchase';
-import PaymentSuccess from '../Pages/Recharge/PaymentSuccess'
-import PaymentFailed from '../Pages/Recharge/PaymentFailed'
-//Seller
-import EditRecipe from '../AddRecipe/EditRecipe';
-import RecipeCustomer from "../AddRecipe/RecipeCustomer";
-import RecipeCustomerDetail from "../AddRecipe/RecipeCustomerDetail";
-import RecipeListCustomer from "../AddRecipe/RecipeListCustomer";
-import BookListCustomer from '../CustomerBook/ListBookCustomer'
+import TermsOfPurchase from "../Pages/Recharge/TermsOfPurchase";
+import PaymentSuccess from "../Pages/Recharge/PaymentSuccess";
+import PaymentFailed from "../Pages/Recharge/PaymentFailed";
+// -- Seller --
+import EditRecipe from "../Seller/EditRecipe";
+import RecipeCreateSeller from "../Seller/RecipeCreateSeller";
+import RecipeSellerDetail from "../Seller/RecipeDetailSeller";
+import RecipeListSeller from "../Seller/RecipeListSeller";
+import BookListCustomer from "../CustomerBook/ListBookCustomer";
 //Moderator
 import Report from "../Pages/Report/Report";
 import ListReport from "../Pages/Report/ListReport";
@@ -70,46 +71,61 @@ import UpdateAccountDetails from "../Moderator/Details/UpdateAccountDetails";
 import UpdateAccountMod from "../Moderator/UpdateAccount";
 //Admin
 // import RecipeDetails from "../Admin/Recipemanagement/RecipeDetail";
-import AdminDashboard from "../Admin/Dashboard";
-import AccountManagement from '../Admin/AccountManagement';
-import IncomeManagement from '../Admin/IncomeManagement';
-import CategoryManagement from '../Admin/CategoryManagement';
-import RecipeManagement from '../Admin/Recipe';
-import Feedback from '../Admin/Feedback';
+import AdminDashboard from "../Admin/Dashboard/index";
+// import AccountManagement from '../Admin/AccountManagement';
+import IncomeManagement from '../Admin/IncomeManagement/index';
+import CategoryManagement from '../Admin/CategoryManagement/index';
+// import RecipeManagement from '../Admin/Recipe';
 import GetListSaveRecipe from "../Pages/Recipe/GetListSavedRecipe";
 
 //API TEST
 import AdminRecipe from "../Admin/Recipemanagement/ShowRecipe";
 import AdminCreateRecipe from "../Admin/Recipemanagement/CreateRecipe";
 import UpdateRole from "../Moderator/UpdateRole";
-import PDFProtect from '../API Test/PDFProtect';
-import Unauthorized from '../Pages/Unauthorized'
+import Unauthorized from "../Pages/Unauthorized";
 export default function RouterPage() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/admin/account-management" element={<AccountManagement />} />
-          <Route path="/admin/income-management" element={<IncomeManagement />} />
-          <Route path="/admin/category-management" element={<CategoryManagement />} />
-          <Route path="/admin/recipemanagement" element={<RecipeManagement />} />
           <Route path="/adminrecipe" element={<AdminRecipe />} />
 
           <Route path="/admincreaterecipe" element={<AdminCreateRecipe />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
-          <Route path="/admin/feedback" element={<Feedback />} />
-          <Route path="/pdf-protect" element={<PDFProtect />} />
           <Route
-            path="/admin-dashboard"
+            path="/admin/dashboard"
             element={
               <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             }
           />
-
+          {/* <Route
+            path="/admin/account-manamagement"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
+                <AccountManagement />
+              </ProtectedRoute>
+            }
+          /> */}
+          <Route
+            path="/admin/income-management"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
+                <IncomeManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/category-management"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
+                <CategoryManagement />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/edit-recipe/:id"
@@ -122,14 +138,29 @@ export default function RouterPage() {
           <Route path="/ebook/:ebookId/read" element={<EbookReader />} />
           <Route element={<Layout />}>
             <Route path="places/:id" element={<SinglePlacePage />}></Route>
-            <Route path="/edit-profile/:accountID" element={<EditRoleUpdate />} />
-            <Route path="/recipecustomer-detail/:recipeId" element={<DetailSavedRecipe />} />
+            <Route
+              path="/edit-profile/:accountID"
+              element={<EditRoleUpdated />}
+            />
+            <Route
+              path="/recipecustomer-detail/:recipeId"
+              element={<DetailSavedRecipe />}
+            />
             <Route path="/add-ebook-customer" element={<AddEBookCustomer />} />
             <Route path="/add-book-customer" element={<AddBookCustomer />} />
-            <Route path="/list-ebook-customer" element={<ListEbookCustomer />} />
-            <Route path="/book-list-customer/:bookId" element={<DetailsBookCustomer />} />
-            <Route path="/recipe-customer-detail/:recipeId" element={<RecipeCustomerDetail />} />
-            <Route path="/update-account" element={<UpdateProfile />} />
+            <Route
+              path="/list-ebook-customer"
+              element={<ListEbookCustomer />}
+            />
+            <Route
+              path="/book-list-customer/:bookId"
+              element={<DetailsBookCustomer />}
+            />
+            <Route
+              path="/recipe-seller-detail/:recipeId"
+              element={<RecipeSellerDetail />}
+            />
+            <Route path="/update-to-seller" element={<UpdateToSeller />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/recipe/:searchString?" element={<Recipe />} />
@@ -141,32 +172,36 @@ export default function RouterPage() {
             <Route path="/coinTransaction" element={<CoinTransaction />} />
             <Route path="/termsofpurchase" element={<TermsOfPurchase />} />
             <Route path="/edit-recipe" element={<EditRecipe />} />
-            <Route path="/recipe-customer" element={<RecipeCustomer />} />
-            <Route path="/recipe-customer-detail" element={<RecipeCustomerDetail />} />
-            <Route path="/recipe-list-customer" element={<RecipeListCustomer />} />
-            <Route path="/editrecipecustomer-recipe/:recipeId" element={<EditRecipeForCustomer />} />
+            <Route path="/create-recipe-seller" element={<RecipeCreateSeller />} />
+            <Route
+              path="/recipe-seller-detail"
+              element={<RecipeSellerDetail />}
+            />
+            <Route path="/recipe-list-seller" element={<RecipeListSeller />} />
+            <Route
+              path="/editrecipecustomer-recipe/:recipeId"
+              element={<EditRecipeForCustomer />}
+            />
             <Route path="/listreport" element={<ListReport />} />
             <Route path="/reportdetail/:reportId" element={<ReportDetail />} />
             <Route path="/reportmod" element={<ReportMod />} />
-            <Route path="/reportresponse/:reportId" element={<ReportResponse />} />
+            <Route
+              path="/reportresponse/:reportId"
+              element={<ReportResponse />}
+            />
             <Route path="/report" element={<Report />} />
             <Route path="/withdrawrequest" element={<WithDrawRequest />} />
             <Route path="/withdrawlist" element={<WithdrawList />} />
             <Route path="/withdrawmod" element={<WithDrawMod />} />
-            <Route path="/withdrawresponse/:coinTransactionId" element={<WithdrawResponse />} />
+            <Route
+              path="/withdrawresponse/:coinTransactionId"
+              element={<WithdrawResponse />}
+            />
             <Route path="/update-information" element={<UpdateAccount />} />
-            <Route path="/form-updated-role" element={<ViewRoleUpdateSubmit />} />
+            <Route path="/form-updated-role" element={<UpdateToSellerInfo />} />
             <Route path="/product/:searchString?" element={<Product />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
-            <Route
-              path="/recipecustomer-list"
-              element={
-                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <RecipeListCustomer />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/list-saved-recipe"
               element={
@@ -220,22 +255,6 @@ export default function RouterPage() {
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
                   <OrderFullDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/add-recipe"
-              element={
-                <ProtectedRoute allowedRoles={["Admin", "Moderator", "Customer", "Seller"]}>
-                  <AddRecipePageForCustomer />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/recipe-customer-list"
-              element={
-                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
-                  <RecipeListCustomer />
                 </ProtectedRoute>
               }
             />
@@ -306,5 +325,5 @@ export default function RouterPage() {
         </Routes>
       </Router>
     </AuthProvider>
-  )
+  );
 }

@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import Sidebar from '../AccountProfile/Sidebar';
+import Sidebar from '../Customer/Sidebar';
 import {FaCheckCircle,FaBan,FaRegClock} from 'react-icons/fa'
 const EditEbookCustomer = () => {
   const navigate = useNavigate();

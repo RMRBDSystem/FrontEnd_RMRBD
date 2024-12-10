@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, onMouseEnter, onMouseLeave }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="p-4 flex justify-center overflow-hidden">
+      {/* <div className="p-4 flex justify-center overflow-hidden">
         <img 
           src="/images/Logo.png" 
           alt="Logo" 
@@ -50,7 +50,7 @@ const Sidebar = ({ isOpen, onMouseEnter, onMouseLeave }) => {
             opacity: 1
           }}
         />
-      </div>
+      </div> */}
 
       <nav className="mt-8 flex-1">
         {menuItems.map((item, index) => {

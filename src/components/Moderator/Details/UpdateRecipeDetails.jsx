@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import ClockIcon from "/images/icon/iconclock.png";
 import SpoonIcon from "/images/icon/iconsspoon.png";
 import CheckMarkIcon from "/images/icon/iconscheckmark24.png";
 import Cookies from "js-cookie";
 import Swal from "sweetalert2"; // Import SweetAlert2
 import { FaSave, FaArrowLeft } from "react-icons/fa";
-import { useSocket } from "../../../App"
-import { createNotification } from "../../services/NotificationService"
+import { useSocket } from "../../../App";
+import { createNotification } from "../../services/NotificationService";
+import {
+  getRecipeById,
+  getImagesByRecipeId,
+  fetchActiveTags,
+  updateRecipe,
+} from "../../services/SellerService/Api";
+import { getAccountData } from "../../services/CustomerService/api";
+
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
@@ -21,14 +28,7 @@ const RecipeDetail = () => {
   const { socket, accountOnline } = useSocket();
   // Hàm lấy chi tiết công thức
   const fetchRecipeDetail = async (id) => {
-    const response = await axios.get(
-      //`https://rmrbdapi.somee.com/odata/Recipe/${id}`,
-      `https://rmrbdapi.somee.com/odata/Recipe/${id}`,
-      {
-        headers: { "Content-Type": "application/json", Token: "123-abc" },
-      }
-    );
-    const recipeData = response.data;
+    const recipeData = await getRecipeById(id);
     setRecipe(recipeData);
     setStatus(recipeData.status);
     setCensorNote(recipeData.censorNote || "");
@@ -37,33 +37,25 @@ const RecipeDetail = () => {
 
   // Hàm lấy thông tin tài khoản
   const fetchAccount = async (createById) => {
-    const response = await axios.get(
-      `https://rmrbdapi.somee.com/odata/Account/${createById}`,
-      {
-        headers: { "Content-Type": "application/json", Token: "123-abc" },
-      }
-    );
-    setAccountID(response.data);
+    const response = await getAccountData(createById);
+    setAccountID(response);
   };
 
   // Hàm lấy mảng hình ảnh
   const fetchImages = async (id) => {
-    const response = await axios.get(
-      `https://rmrbdapi.somee.com/odata/Image/Recipe/${id}`,
-      {
-        headers: { "Content-Type": "application/json", Token: "123-abc" },
-      }
-    );
-    setImages(response.data);
-    setMainImage(response.data[0]?.imageUrl || null);
+    try {
+      const data = await getImagesByRecipeId(id);
+      setImages(data);
+      setMainImage(data[0]?.imageUrl || null);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    }
   };
 
   // Hàm lấy tên tag
   const fetchTags = async () => {
-    const response = await axios.get(`https://rmrbdapi.somee.com/odata/Tag`, {
-      headers: { "Content-Type": "application/json", Token: "123-abc" },
-    });
-    const tagMapData = response.data.reduce((acc, tag) => {
+    const data = await fetchActiveTags();
+    const tagMapData = data.reduce((acc, tag) => {
       acc[tag.tagId] = tag.tagName;
       return acc;
     }, {});
@@ -103,15 +95,7 @@ const RecipeDetail = () => {
           censorNote,
           censorId,
         };
-        console.log(updatedRecipe);
-        await axios.put(
-          `https://rmrbdapi.somee.com/odata/Recipe/${recipeId}`,
-          //`https://localhost:7220/odata/Recipe/${recipeId}`,
-          updatedRecipe,
-          {
-            headers: { "Content-Type": "application/json", Token: "123-abc" },
-          }
-        );
+        await updateRecipe(recipeId, updatedRecipe);
         Swal.fire({
           icon: "success",
           title: "Thành công!",
@@ -128,7 +112,6 @@ const RecipeDetail = () => {
         });
       }
     }
-
   };
 
   useEffect(() => {
@@ -328,7 +311,9 @@ const RecipeDetail = () => {
             <button
               onClick={() => {
                 const statusText = status === 1 ? "Xác nhận" : "Khóa";
-                handleNotification(`Mod ${accountOnline} đã ${statusText} công thức ${recipe.recipeName} của bạn`);
+                handleNotification(
+                  `Mod ${accountOnline} đã ${statusText} công thức ${recipe.recipeName} của bạn`
+                );
                 handleSave();
               }}
               className="flex items-center justify-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform duration-300 hover:scale-105"

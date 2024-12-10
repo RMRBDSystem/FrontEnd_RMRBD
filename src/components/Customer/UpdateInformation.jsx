@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
-import Sidebar from './Sidebar';
+import Sidebar from "./Sidebar";
+import {
+  getAccountData,
+  updateInformation,
+} from "../services/CustomerService/api";
 
-const UpdateAccount = () => {
+const UpdateInformation = () => {
   const [accountID, setAccountID] = useState(null);
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState(null);
@@ -22,13 +25,7 @@ const UpdateAccount = () => {
 
   const fetchAccountData = async (userId) => {
     try {
-      const response = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Account/${userId}`,
-        {
-          headers: { "Content-Type": "application/json", Token: "123-abc" },
-        }
-      );
-      const data = response.data;
+      const data = await getAccountData(userId);
       setAccountData(data);
       setUserName(data.userName);
     } catch (error) {
@@ -40,7 +37,7 @@ const UpdateAccount = () => {
       });
     }
   };
-
+// Gọi tới api put Account để cập nhật thônng tin
   const handleUpdate = async () => {
     if (!userName) {
       Swal.fire({
@@ -67,13 +64,7 @@ const UpdateAccount = () => {
     try {
       setIsLoading(true);
 
-      await axios.put(
-        `https://rmrbdapi.somee.com/odata/Account/${accountID}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data", Token: "123-abc" },
-        }
-      );
+      await updateInformation(accountID, formData);
 
       Swal.fire({
         icon: "success",
@@ -99,6 +90,7 @@ const UpdateAccount = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Kiểm tra xem loại tệp có phải là ảnh hay không
       if (!file.type.startsWith("image/")) {
         Swal.fire({
           icon: "error",
@@ -133,10 +125,11 @@ const UpdateAccount = () => {
 
               <button
                 type="submit"
-                className={`px-6 py-2 font-medium text-white rounded-lg shadow-md transition duration-300 ${isLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500"
-                  }`}
+                className={`px-6 py-2 font-medium text-white rounded-lg shadow-md transition duration-300 ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500"
+                }`}
                 disabled={isLoading}
               >
                 {isLoading ? "Đang cập nhật..." : "Cập nhật"}
@@ -147,10 +140,11 @@ const UpdateAccount = () => {
               <p>
                 Chức năng "Cập nhật tài khoản" cho phép bạn thay đổi thông tin
                 cá nhân như tên người dùng và ảnh đại diện.
-                <p>Bạn có thể cập nhật
-                  những thông tin này và nhấn "Cập nhật" để lưu thay đổi. Lưu ý,
-                  bạn không thể thay đổi địa chỉ email vì nó là thông tin xác thực
-                  của tài khoản.</p>
+                <p>
+                  Bạn có thể cập nhật những thông tin này và nhấn "Cập nhật" để
+                  lưu thay đổi. Lưu ý, bạn không thể thay đổi địa chỉ email vì
+                  nó là thông tin xác thực của tài khoản.
+                </p>
               </p>
             </div>
 
@@ -227,4 +221,4 @@ const UpdateAccount = () => {
   );
 };
 
-export default UpdateAccount;
+export default UpdateInformation;

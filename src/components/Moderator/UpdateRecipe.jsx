@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import {
@@ -9,6 +8,7 @@ import {
   FaFilter,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { listRecipe } from "../services/ModeratorService/Api";
 
 const RecipeList = () => {
   const [recipes, setRecipes] = useState([]);
@@ -20,14 +20,9 @@ const RecipeList = () => {
 
   const fetchRecipes = async () => {
     try {
-      const response = await axios.get(
-        "https://rmrbdapi.somee.com/odata/Recipe",
-        {
-          headers: { "Content-Type": "application/json", token: "123-abc" },
-        }
-      );
-      setRecipes(response.data);
-      setFilteredRecipes(response.data);
+      const response = await listRecipe();
+      setRecipes(response);
+      setFilteredRecipes(response);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách công thức:", error);
     }

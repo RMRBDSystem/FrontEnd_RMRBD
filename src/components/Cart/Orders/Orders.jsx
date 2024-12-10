@@ -7,7 +7,7 @@ import { cancelOrder } from '../../services/OrderService';
 import LoadingOverlay from '../../shared/LoadingOverlay';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../../AccountProfile/Sidebar';
+import Sidebar from '../../Customer/Sidebar';
 
 const formatAmount = (amount, paymentType) => {
   if (paymentType === 1) { // COINS payment

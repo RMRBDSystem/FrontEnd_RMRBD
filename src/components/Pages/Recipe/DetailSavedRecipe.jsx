@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import ClockIcon from "/images/icon/iconclock.png";
 import SpoonIcon from "/images/icon/iconsspoon.png";
 import CheckMarkIcon from "/images/icon/iconscheckmark24.png";
 import Cookies from "js-cookie";
-const RecipeDetail = () => {
+import {
+  getRecipeById,
+  getAccountById,
+  getImagesByRecipeId,
+  fetchActiveTags,
+} from "../../services/SellerService/Api";
+import { fetchRecipeData } from "../../services/CustomerService/api";
+const DetailSavedRecipe = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
   const [personalRecipe, setPersonalRecipe] = useState({});
@@ -19,56 +25,23 @@ const RecipeDetail = () => {
       try {
         setAccountId(Cookies.get("UserId"));
         // Lấy chi tiết công thức
-        const recipeResult = await axios.get(
-          `https://rmrbdapi.somee.com/odata/Recipe/${recipeId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc", // Nếu bạn có Token cần dùng
-            },
-          }
-        );
-        const recipeData = recipeResult.data;
-        setRecipe(recipeData);
+        const recipeResult = await getRecipeById(recipeId);
+        setRecipe(recipeResult);
 
-        // Lấy thông tin tài khoản
-        if (recipeData.createById) {
-          const accountResult = await axios.get(
-            `https://rmrbdapi.somee.com/odata/Account/${recipeData.createById}`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Token: "123-abc",
-              },
-            }
-          );
-          setAccountID(accountResult.data);
+        // Lấy thông tin tài khoản của người tạo công thức
+        if (recipeResult.createById) {
+          const accountResult = await getAccountById(recipeResult.createById);
+          setAccountID(accountResult);
         }
 
         // Lấy mảng hình ảnh của công thức
-        const imageResult = await axios.get(
-          `https://rmrbdapi.somee.com/odata/Image/Recipe/${recipeId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
-        setImages(imageResult.data);
-        setMainImage(imageResult.data[0].imageUrl);
+        const imageResult = await getImagesByRecipeId(recipeId);
+        setImages(imageResult);
+        setMainImage(imageResult[0]?.imageUrl || []);
 
         // Lấy tên tag từ API cho từng tagId
-        const tagResult = await axios.get(
-          `https://rmrbdapi.somee.com/odata/Tag`, // API để lấy tất cả tag
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc",
-            },
-          }
-        );
-        const tags = tagResult.data;
+        const tagResult = await fetchActiveTags();
+        const tags = tagResult;
 
         // Chuyển danh sách tag thành map { tagId: tagName }
         const tagMapData = tags.reduce((acc, tag) => {
@@ -87,16 +60,8 @@ const RecipeDetail = () => {
   useEffect(() => {
     if (accountId) {
       const fetchPersonalRecipe = async () => {
-        const personalRecipeResult = await axios.get(
-          `https://rmrbdapi.somee.com/odata/PersonalRecipe/${accountId}/${recipeId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Token: "123-abc", // Nếu bạn có Token cần dùng
-            },
-          }
-        );
-        setPersonalRecipe(personalRecipeResult.data);
+        const personalRecipeResult = await fetchRecipeData(accountId, recipeId);
+        setPersonalRecipe(personalRecipeResult);
       };
       fetchPersonalRecipe();
     }
@@ -276,4 +241,4 @@ const RecipeDetail = () => {
   );
 };
 
-export default RecipeDetail;
+export default DetailSavedRecipe;

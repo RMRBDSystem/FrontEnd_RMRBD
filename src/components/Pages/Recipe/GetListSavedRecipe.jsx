@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,useRef } from "react";
 import Cookies from "js-cookie";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -13,49 +12,42 @@ import {
   CircularProgress,
   Link,
 } from "@mui/material";
-import Sidebar from "../../AccountProfile/Sidebar";
+import Sidebar from "../../Customer/Sidebar";
+import {fetchPersonalRecipes} from "../../services/CustomerService/api"
 const GetListSaveRecipe = () => {
-  const [data, setData] = useState([]); // State to store Recipe data
-  const [accountId, setAccountID] = useState(null); // State to store UserId
-  const [loading, setLoading] = useState(true); // State for loading status
+  const [data, setData] = useState([]); 
+  const [accountId, setAccountID] = useState(null); 
+  const [loading, setLoading] = useState(true); 
   const navigate = useNavigate();
-
+  const isFetchCalled = useRef(false);
   useEffect(() => {
-    const storedUserId = Cookies.get("UserId");
-    if (storedUserId) {
-      setAccountID(storedUserId);
+    if (!isFetchCalled.current) {
+      isFetchCalled.current = true; 
+      const storedUserId = Cookies.get("UserId");
+      if (storedUserId) {
+        setAccountID(storedUserId);
+      }
+      getData();
     }
-    getData();
   }, []);
 
   const getData = async () => {
     try {
-      setLoading(true); // Set loading to true before the request
+      setLoading(true); 
       const accountId = Cookies.get("UserId");
-      const result = await axios.get(
-        `https://rmrbdapi.somee.com/odata/Recipe?$filter=personalRecipes/any(p: p/customerId eq ${accountId})`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Token: "123-abc",
-          },
-        }
-      );
-      setData(result.data);
-      console.log("Data", result.data);
+      const fetchedData = await fetchPersonalRecipes(accountId);
+      setData(fetchedData);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
-      setLoading(false); // Set loading to false once the request is complete
+      setLoading(false);
     }
   };
 
   const handleEdit = (recipeId) => {
-    // Navigate to the edit page
     navigate(`/editrecipecustomer-recipe/${recipeId}`);
   };
   const handleDetails = (recipeId) => {
-    // Navigate to the edit page
     navigate(`/recipecustomer-detail/${recipeId}`);
   };
   return (
@@ -63,21 +55,20 @@ const GetListSaveRecipe = () => {
       <Sidebar />
       <div className="flex flex-col">
         <Container
-          className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col"
+          className="section-center w-[1000px] bg-white p-4 rounded-lg shadow-md flex flex-col"
         >
           <h2 className="text-2xl font-bold text-gray-800 pb-10">
             Công thức nấu ăn đã lưu
           </h2>
 
-          {/* Show loading indicator when data is being fetched */}
           {loading ? (
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                height: "50vh", // Center the loading spinner in the middle of the screen
-                width: "150vh"
+                height: "50vh",
+                width: "100vh"
               }}
             >
               <CircularProgress />
@@ -96,15 +87,15 @@ const GetListSaveRecipe = () => {
                   key={recipe.recipeId}
                   sx={{
                     display: "flex",
-                    flexDirection: "column", // Ensures the content is stacked vertically
-                    maxWidth: 250,
-                    width: "100%", // Ensures it spans full width on small screens
-                    flex: "1 1 calc(33.333% - 16px)", // 3 cards per row with 16px gap
+                    flexDirection: "column", 
+                    maxWidth: 350,
+                    width: "100%",
+                    flex: "1 1 calc(33.333% - 16px)", 
                     "@media (max-width: 900px)": {
-                      flex: "1 1 calc(50% - 16px)", // 2 cards per row on medium screens
+                      flex: "1 1 calc(50% - 16px)", 
                     },
                     "@media (max-width: 600px)": {
-                      flex: "1 1 100%", // 1 card per row on small screens
+                      flex: "1 1 100%", 
                     },
                   }}
                 >
@@ -136,10 +127,10 @@ const GetListSaveRecipe = () => {
                   <CardContent
                     sx={{
                       display: "flex",
-                      flexDirection: "column", // Ensures the content is stacked vertically
-                      justifyContent: "space-between", // Ensures spacing between elements
-                      minHeight: 200, // Ensures enough space for content and button
-                      flexGrow: 1, // Ensures the content area grows to fill available space
+                      flexDirection: "column", 
+                      justifyContent: "space-between",
+                      minHeight: 200, 
+                      flexGrow: 1, 
                     }}
                   >
                     <Typography variant="h6" gutterBottom>
@@ -161,13 +152,13 @@ const GetListSaveRecipe = () => {
                         variant="contained"
                         onClick={() => handleEdit(recipe.recipeId)}
                         sx={{
-                          background: "linear-gradient(45deg, #FF6F00, #FF8F00)", // Gradient from dark to light orange
-                          color: "white", // White text color for contrast
+                          background: "linear-gradient(45deg, #FF6F00, #FF8F00)",
+                          color: "white", 
                           "&:hover": {
-                            background: "linear-gradient(45deg, #FF8F00, #FF6F00)", // Reverse the gradient on hover for effect
+                            background: "linear-gradient(45deg, #FF8F00, #FF6F00)", 
                           },
-                          boxShadow: 2, // Optional shadow for the button to give it a floating effect
-                          flex: 1, // Makes the button flexible within the container
+                          boxShadow: 2, 
+                          flex: 1, 
                         }}
                       >
                         Chỉnh sửa
@@ -177,13 +168,13 @@ const GetListSaveRecipe = () => {
                         variant="contained"
                         onClick={() => handleDetails(recipe.recipeId)}
                         sx={{
-                          background: "linear-gradient(45deg, #FF6F00, #FF8F00)", // Gradient from dark to light orange
-                          color: "white", // White text color for contrast
+                          background: "linear-gradient(45deg, #FF6F00, #FF8F00)",
+                          color: "white",
                           "&:hover": {
-                            background: "linear-gradient(45deg, #FF8F00, #FF6F00)", // Reverse the gradient on hover for effect
+                            background: "linear-gradient(45deg, #FF8F00, #FF6F00)", 
                           },
-                          boxShadow: 2, // Optional shadow for the button to give it a floating effect
-                          flex: 1, // Makes the button flexible within the container
+                          boxShadow: 2, 
+                          flex: 1, 
                         }}
                       >
                         Chi tiết

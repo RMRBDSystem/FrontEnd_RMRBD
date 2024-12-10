@@ -30,7 +30,7 @@ const Hero = () => {
               href="#featured"
               className={`text-xs bg-white text-gray-800 py-2.5 px-7 mt-2.5 uppercase tracking-wider hover:tracking-widest transition duration-200 ease-in-out`}
             >
-              KHÁM PHÁ NGAY
+              KHÁM PHÁ
             </a>
           </div>
         </section>

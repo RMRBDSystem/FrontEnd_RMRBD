@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import {
   FaBan,
@@ -10,14 +9,15 @@ import {
 import Cookies from "js-cookie";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
+import { listBook } from "../services/ModeratorService/Api";
 
 const BookList = () => {
   const [Books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [censorID, setcensorID] = useState();
   const [showFilter, setShowFilter] = useState(false);
-  const [nameFilter, setNameFilter] = useState(""); // State for name filter
-  const [statusFilter, setStatusFilter] = useState(""); // State for status filter
+  const [nameFilter, setNameFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,13 +26,8 @@ const BookList = () => {
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get(
-        "https://rmrbdapi.somee.com/odata/Book",
-        {
-          headers: { "Content-Type": "application/json", token: "123-abc" },
-        }
-      );
-      setBooks(response.data);
+      const response = await listBook();
+      setBooks(response);
     } catch (error) {
       console.error("Error fetching Books:", error);
     } finally {
@@ -134,7 +129,6 @@ const BookList = () => {
       (statusFilter === "" || book.status.toString() === statusFilter)
     );
   });
-
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-5xl">

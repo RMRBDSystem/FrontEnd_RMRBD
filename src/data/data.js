@@ -139,7 +139,7 @@ export const services = [
 export const placesToGo = [
   {
     id: 1,
-    name: "Thịt Bò",
+    name: "Bò",
     imageSrc: placesBo,
     description: [
       "Thịt Bò là một món ăn nổi tiếng, được yêu thích tại nhiều khu vực ở Việt Nam. Thành phố này nổi bật với sự kết hợp hài hòa giữa các món ăn đậm đà và các gia vị đặc trưng. Mỗi món thịt bò được chế biến theo phong cách riêng, mang lại những trải nghiệm đặc sắc cho người thưởng thức.",
@@ -287,7 +287,7 @@ export const placesToGo = [
   },
   {
     id: 4,
-    name: "Heo",
+    name: "Thịt Heo",
     imageSrc: placesHeo,
     description: [
       "Heo là một nguyên liệu quen thuộc trong các món ăn Việt Nam, từ thịt heo nướng, kho, xào đến các món đặc sản như bún thịt nướng hay thịt heo cuốn lá sen. Thịt heo có thể chế biến thành vô vàn món ăn hấp dẫn và được yêu thích tại nhiều vùng miền.",
