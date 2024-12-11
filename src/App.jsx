@@ -14,7 +14,6 @@ export const SocketContext = createContext();
 export const useSocket = () => useContext(SocketContext);
 
 const App = () => {
-  const accountOnlineId = Cookies.get("UserId");
   const [accountOnline, setAccountOnline] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [socket, setSocket] = useState(null);
@@ -33,21 +32,34 @@ const App = () => {
     };
   }, []);
 
-  // Fetch accounts from API
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const account = await getAccountById(accountOnlineId); // Await data fetching
+  // Function to fetch account based on UserId from cookies
+  const fetchAccount = async () => {
+    try {
+      const accountOnlineId = Cookies.get("UserId");
+      if (accountOnlineId) {
+        const account = await getAccountById(accountOnlineId);
         setAccountOnline(account.userName);
-      } catch (err) {
-        console.error("Error fetching accounts:", err);
       }
-    };
-
-    if (accountOnlineId) {
-      fetchAccounts();
+    } catch (err) {
+      console.error("Error fetching account:", err);
     }
-  }, [accountOnlineId]);
+  };
+
+  // Use useEffect to watch for changes in cookies and fetch account
+  useEffect(() => {
+    fetchAccount(); // Initial fetch
+
+    // Set up an interval to periodically check for changes in cookies
+    const interval = setInterval(() => {
+      const accountOnlineId = Cookies.get("UserId");
+      if (accountOnlineId) {
+        fetchAccount();
+      }
+    }, 1000); // Check every second for changes in the cookie
+
+    // Clean up interval on unmount
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array ensures this only runs once on mount
 
   // Emit 'newUser' event when socket and accountList are available
   useEffect(() => {

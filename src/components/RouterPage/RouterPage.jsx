@@ -13,6 +13,7 @@ import WithDrawRequest from "../Pages/Withdraw/WithdrawRequest";
 import WithdrawList from "../Pages/Withdraw/WithdrawList";
 import Product from "../HomePage/Products";
 import SinglePlacePage from "../HomePage/SinglePlacePage";
+import ErrorPage from "../Pages/ErrorPage"
 //Customer
 import Book from "../Pages/Book/Book";
 import BookDetail from "../Pages/Book/BookDetail";
@@ -138,6 +139,7 @@ export default function RouterPage() {
           />
           <Route path="/ebook/:ebookId/read" element={<EbookReader />} />
           <Route element={<Layout />}>
+            <Route path="*" element={<ErrorPage />}></Route>
             <Route path="places/:id" element={<SinglePlacePage />}></Route>
             <Route
               path="/edit-profile/:accountID"

@@ -233,14 +233,23 @@ const EbookCustomer = () => {
       return;
     }
 
+    // Log the price before appending
+    console.log("Price before appending:", newEbook.Price);
+
     // Prepare FormData to send the file along with other fields
     const ebookData = new FormData();
 
-    // Append form fields (ensure you're using the exact field names expected by the API)
+    // Append form fields
     ebookData.append("ebookName", newEbook.EbookName);
     ebookData.append("description", newEbook.Description);
-    ebookData.append("price", newEbook.Price ? parseInt(newEbook.Price, 10) : 0);
-    ebookData.append("categoryId", newEbook.categoryId); // Append the selected category
+
+    // Ensure the price is correctly parsed
+    const priceValue = newEbook.Price ? parseFloat(newEbook.Price.replace(/,/g, '')) : 0;
+    console.log("Parsed price value:", priceValue);
+    ebookData.append("price", priceValue);
+
+    // Append the selected category
+    ebookData.append("categoryId", newEbook.categoryId);
 
     // Append UserId as createById
     ebookData.append("createById", UserId); // Use UserId, not userName
