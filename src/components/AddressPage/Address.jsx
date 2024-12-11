@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Button, Form } from 'react-bootstrap';
+import { Container, Button, Form } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
+import Sidebar from '../Customer/Sidebar';
+import { useNavigate } from 'react-router-dom';
 
 const Address = () => {
   const userId = Cookies.get('UserId');
@@ -28,6 +30,7 @@ const Address = () => {
   const [otpTimer, setOtpTimer] = useState(0);
   const [isPhoneChecking, setIsPhoneChecking] = useState(false);
   const [isPhoneAvailable, setIsPhoneAvailable] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -345,183 +348,197 @@ const handleSendOtp = async () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
-      <Container className="px-4 max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6"
-        >
-          <h2 className="text-2xl font-semibold mb-6 text-gray-800">Thêm Địa Chỉ Mới</h2>
-          
-          <Form onSubmit={handleSubmit} className="space-y-6">
-            {/* Phone Number Input */}
-            <div className="flex gap-4">
-              <div className="flex-grow">
-                <Form.Control
-                  type="tel"
-                  placeholder="Nhập số điện thoại"
-                  value={displayPhoneNumber(address.phoneNumber)}
-                  onChange={handlephoneNumberChange}
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  required
-                />
-              </div>
-              <div className="flex-shrink-0">
-                {isPhoneChecking ? (
-                  <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Đang tải...</span>
-                  </div>
-                ) : isPhoneAvailable ? (
-                  <Button 
-                    variant="secondary" 
-                    onClick={handleSubmit} 
-                    disabled={!otpVerified}
-                    className="px-6 py-2 rounded-lg"
-                  >
-                    {otpVerified ? 'Lưu' : 'Xác Thực OTP Để Lưu'}
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="secondary" 
-                    onClick={handleSendOtp} 
-                    disabled={otpSent || isPhoneChecking}
-                    className="px-6 py-2 rounded-lg"
-                  >
-                    {otpSent ? 'Gửi Lại OTP' : 'Gửi OTP'}
-                  </Button>
-                )}
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+      <Sidebar />
+      
+      <div className="flex-1 p-4">
+        <Container className="px-4 max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Button
+                  onClick={() => navigate('/manage-addresses')}
+                  className="mr-4 text-orange-500 hover:text-orange-600 bg-transparent border border-orange-500 hover:border-orange-600 px-4 py-2 rounded-lg transition-colors"
+                >
+                  ← Quay lại
+                </Button>
+                <h2 className="text-2xl font-semibold text-gray-800">Thêm Địa Chỉ Mới</h2>
               </div>
             </div>
-
-            {/* OTP Section */}
-            <AnimatePresence>
-              {otpSent && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-4"
-                >
-                  <div className="flex gap-4">
-                    <Form.Control
-                      type="text"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="Nhập mã OTP"
-                      maxLength={6}
-                      className="flex-grow px-4 py-3 rounded-lg border-2"
-                    />
-                    <Button
-                      variant="success"
-                      onClick={handleVerifyOtp}
+            
+            <Form onSubmit={handleSubmit} className="space-y-6">
+              {/* Phone Number Input */}
+              <div className="flex gap-4">
+                <div className="flex-grow">
+                  <Form.Control
+                    type="tel"
+                    placeholder="Nhập số điện thoại"
+                    value={displayPhoneNumber(address.phoneNumber)}
+                    onChange={handlephoneNumberChange}
+                    className="w-full px-4 py-3 rounded-lg border-2"
+                    required
+                  />
+                </div>
+                <div className="flex-shrink-0">
+                  {isPhoneChecking ? (
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Đang tải...</span>
+                    </div>
+                  ) : isPhoneAvailable ? (
+                    <Button 
+                      variant="secondary" 
+                      onClick={handleSubmit} 
+                      disabled={!otpVerified}
                       className="px-6 py-2 rounded-lg"
                     >
-                      Xác Thực OTP
+                      {otpVerified ? 'Lưu' : 'Xác Thực OTP Để Lưu'}
                     </Button>
-                  </div>
-                  {otpTimer > 0 && (
-                    <div className="text-sm text-gray-500">
-                      Mã OTP hết hạn trong {Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, '0')}
-                    </div>
+                  ) : (
+                    <Button 
+                      variant="secondary" 
+                      onClick={handleSendOtp} 
+                      disabled={otpSent || isPhoneChecking}
+                      className="px-6 py-2 rounded-lg"
+                    >
+                      {otpSent ? 'Gửi Lại OTP' : 'Gửi OTP'}
+                    </Button>
                   )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+              </div>
 
-            {/* Location Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Form.Group>
-                <Form.Label>Tỉnh/Thành Phố</Form.Label>
-                <Form.Select
-                  name="provinceCode"
-                  value={address.provinceCode}
-                  onChange={(e) => {
-                    handleInputChange(e);
-                    fetchDistricts(e.target.value);
-                  }}
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  required
-                >
-                  <option value="">Chọn Tỉnh/Thành Phố</option>
-                  {provinces.map((province) => (
-                    <option key={province.ProvinceID} value={province.ProvinceID}>
-                      {province.ProvinceName}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+              {/* OTP Section */}
+              <AnimatePresence>
+                {otpSent && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex gap-4">
+                      <Form.Control
+                        type="text"
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value)}
+                        placeholder="Nhập mã OTP"
+                        maxLength={6}
+                        className="flex-grow px-4 py-3 rounded-lg border-2"
+                      />
+                      <Button
+                        variant="success"
+                        onClick={handleVerifyOtp}
+                        className="px-6 py-2 rounded-lg"
+                      >
+                        Xác Thực OTP
+                      </Button>
+                    </div>
+                    {otpTimer > 0 && (
+                      <div className="text-sm text-gray-500">
+                        Mã OTP hết hạn trong {Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, '0')}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-              <Form.Group>
-                <Form.Label>Quận/Huyện</Form.Label>
-                <Form.Select
-                  name="districtCode"
-                  value={address.districtCode}
-                  onChange={(e) => {
-                    handleInputChange(e);
-                    fetchWards(e.target.value);
-                  }}
-                  className="w-full px-4 py-3 rounded-lg border-2"
-                  required
-                >
-                  <option value="">Chọn Quận/Huyện</option>
-                  {districts.map((district) => (
-                    <option key={district.DistrictID} value={district.DistrictID}>
-                      {district.DistrictName}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+              {/* Location Selection */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Group>
+                  <Form.Label>Tỉnh/Thành Phố</Form.Label>
+                  <Form.Select
+                    name="provinceCode"
+                    value={address.provinceCode}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      fetchDistricts(e.target.value);
+                    }}
+                    className="w-full px-4 py-3 rounded-lg border-2"
+                    required
+                  >
+                    <option value="">Chọn Tỉnh/Thành Phố</option>
+                    {provinces.map((province) => (
+                      <option key={province.ProvinceID} value={province.ProvinceID}>
+                        {province.ProvinceName}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
 
+                <Form.Group>
+                  <Form.Label>Quận/Huyện</Form.Label>
+                  <Form.Select
+                    name="districtCode"
+                    value={address.districtCode}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      fetchWards(e.target.value);
+                    }}
+                    className="w-full px-4 py-3 rounded-lg border-2"
+                    required
+                  >
+                    <option value="">Chọn Quận/Huyện</option>
+                    {districts.map((district) => (
+                      <option key={district.DistrictID} value={district.DistrictID}>
+                        {district.DistrictName}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group>
+                  <Form.Label>Phường/Xã</Form.Label>
+                  <Form.Select
+                    name="wardCode"
+                    value={address.wardCode}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-lg border-2"
+                    required
+                  >
+                    <option value="">Chọn Phường/Xã</option>
+                    {wards.map((ward) => (
+                      <option key={ward.WardCode} value={ward.WardCode}>
+                        {ward.WardName}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+
+              {/* Address Detail */}
               <Form.Group>
-                <Form.Label>Phường/Xã</Form.Label>
-                <Form.Select
-                  name="wardCode"
-                  value={address.wardCode}
+                <Form.Label>Chi Tiết Địa Chỉ</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  name="AddressDetail"
+                  value={address.AddressDetail}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 rounded-lg border-2"
+                  rows={3}
                   required
-                >
-                  <option value="">Chọn Phường/Xã</option>
-                  {wards.map((ward) => (
-                    <option key={ward.WardCode} value={ward.WardCode}>
-                      {ward.WardName}
-                    </option>
-                  ))}
-                </Form.Select>
+                />
               </Form.Group>
-            </div>
 
-            {/* Address Detail */}
-            <Form.Group>
-              <Form.Label>Chi Tiết Địa Chỉ</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="AddressDetail"
-                value={address.AddressDetail}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-lg border-2"
-                rows={3}
-                required
-              />
-            </Form.Group>
-
-            {/* Submit Button */}
-            <div className="flex justify-end">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                type="submit"
-                className="px-6 py-2 bg-orange-500 text-white rounded-lg 
-                          hover:bg-orange-600 transition-colors"
-              >
-                Lưu Địa Chỉ
-              </motion.button>
-            </div>
-          </Form>
-        </motion.div>
-      </Container>
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  className="px-6 py-2 bg-orange-500 text-white rounded-lg 
+                            hover:bg-orange-600 transition-colors"
+                >
+                  Lưu Địa Chỉ
+                </motion.button>
+              </div>
+            </Form>
+          </motion.div>
+        </Container>
+      </div>
     </div>
   );
 };

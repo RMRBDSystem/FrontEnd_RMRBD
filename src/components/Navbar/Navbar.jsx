@@ -399,7 +399,7 @@ const Navbar = () => {
                   {userRole === "Admin" && (
                     <>
                       <NavLink
-                        to="/admin-dashboard" // Change to your admin page
+                        to="/admin/dashboard" // Change to your admin page
                         className="block px-4 py-2 hover:bg-gray-200 rounded-md flex items-center"
                       >
                         {/* Icon for Admin */}

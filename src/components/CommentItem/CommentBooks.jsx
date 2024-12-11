@@ -139,10 +139,9 @@ const Comments = ({ bookId, createById, roleaccountonline }) => {
         <>
             <ToastContainer />
             <div className="comments">
-                <h3 className="comments-title">Comments</h3>
-                <div className="comment-form-title">Write comment</div>
+                <h3 className="comments-title">Bình luận</h3>
                 <CommentForm
-                    submitLabel="Write"
+                    submitLabel="Gửi"
                     handleSubmit={handleWriteClick}
                     onClick={() => handleNotification(`${accountOnline} đã bình luận về sách ${book.bookName} của bạn`)}
                 />

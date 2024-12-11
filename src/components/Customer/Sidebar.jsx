@@ -9,6 +9,7 @@ import {
   FiBook,
   FiFileText,
   FiBookmark,
+  FiMapPin
 } from "react-icons/fi";
 import { getAccountData } from "../services/CustomerService/CustomerService";
 const Sidebar = () => {
@@ -82,6 +83,12 @@ const Sidebar = () => {
       path: "/orders",
       label: "Lịch sử đơn hàng của sách",
       icon: <FiBook className="text-orange-500" />,
+      visibleFor: ["Customer", "Seller"],
+    },
+    {
+      path: "/manage-addresses",
+      label: "Quản lý địa chỉ",
+      icon: <FiMapPin className="text-orange-500" />,
       visibleFor: ["Customer", "Seller"],
     },
   ];

@@ -1,24 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Button, Form, Modal } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
 import { motion } from 'framer-motion';
-import { FaEdit, FaMapMarkerAlt, FaPhone } from 'react-icons/fa';
+import { FaEdit, FaMapMarkerAlt, FaPhone, FaPlus, FaMapMarked } from 'react-icons/fa';
+import Sidebar from '../Customer/Sidebar';
+import { useNavigate } from 'react-router-dom';
+
+const formatPhoneNumber = (number) => {
+  // Remove any non-digit characters
+  let cleaned = number.replace(/\D/g, '');
+  
+  // Remove '84' prefix if it exists
+  if (cleaned.startsWith('84')) {
+    cleaned = cleaned.slice(2);
+  }
+  
+  // Remove leading '0' if it exists
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.slice(1);
+  }
+  
+  // Ensure the number doesn't exceed 9 digits (after removing prefix)
+  cleaned = cleaned.slice(0, 9);
+  
+  // Add '84' prefix for API submission
+  return cleaned ? `84${cleaned}` : '';
+};
+
+const displayPhoneNumber = (number) => {
+  if (!number) return '';
+  // Convert 84xxx to 0xxx for display
+  if (number.startsWith('84')) {
+    return '0' + number.slice(2);
+  }
+  return number;
+};
 
 const AddressEdit = () => {
+  const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [isPhoneAvailable, setIsPhoneAvailable] = useState(null);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
   const userId = Cookies.get('UserId');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAddressesWithDetails = async () => {
@@ -50,40 +75,13 @@ const AddressEdit = () => {
       } catch (error) {
         console.error('Error fetching addresses:', error);
         showErrorAlert('Failed to load addresses.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchAddressesWithDetails();
   }, [userId]);
-
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-          headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' }
-        });
-        setProvinces(response.data.data || []);
-      } catch (error) {
-        console.error('Error fetching provinces:', error);
-        showErrorAlert('Failed to load provinces.');
-      }
-    };
-
-    fetchProvinces();
-  }, []);
-
-  useEffect(() => {
-    // Reset district and ward when province changes
-    if (selectedAddress?.provinceCode) {
-      setSelectedAddress(prev => ({
-        ...prev,
-        districtCode: '',
-        wardCode: ''
-      }));
-
-      fetchDistricts(selectedAddress.provinceCode);
-    }
-  }, [selectedAddress?.provinceCode]);
 
   const getProvinceName = async (provinceCode) => {
     try {
@@ -128,57 +126,27 @@ const AddressEdit = () => {
     }
   };
 
-  const fetchDistricts = async (provinceCode) => {
-    try {
-      const response = await axios.post(
-        'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district',
-        { province_id: Number(provinceCode) },
-        { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
-      );
-      setDistricts(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching districts:', error);
-      showErrorAlert('Failed to load districts.');
-    }
-  };
-
-  useEffect(() => {
-    // Fetch wards when district changes
-    if (selectedAddress?.districtCode) {
-      fetchWards(selectedAddress.districtCode);
-    }
-  }, [selectedAddress?.districtCode]);
-
-  const fetchWards = async (districtCode) => {
-    try {
-      const response = await axios.post(
-        'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward',
-        { district_id: Number(districtCode) },
-        { headers: { 'Token': '780e97f0-7ffa-11ef-8e53-0a00184fe694' } }
-      );
-      setWards(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching wards:', error);
-      showErrorAlert('Failed to load wards.');
-    }
-  };
-
   const handleEditAddress = (address) => {
-    setSelectedAddress(address);
-    fetchDistricts(address.provinceCode);  // Fetch districts for province first
-    fetchWards(address.districtCode);      // Fetch wards for district second
-    setShowModal(true);
-    setOtpSent(false);
-    setOtpVerified(false);
-    setIsPhoneAvailable(null);
+    // No need to fetch districts and wards here since the modal is removed
+    // The component will redirect to /address when the "Thêm địa chỉ mới" button is clicked
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSelectedAddress((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    if (name === 'phoneNumber') {
+      // Format phone number when it's being input
+      const formattedNumber = formatPhoneNumber(value);
+      setSelectedAddress((prev) => ({
+        ...prev,
+        [name]: formattedNumber,
+      }));
+    } else {
+      setSelectedAddress((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const showSuccessAlert = (message) => {
@@ -377,233 +345,90 @@ const AddressEdit = () => {
   };
 
   return (
-    <div className="min-h-screen py-4 bg-gray-50">
-      <Container className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-            <FaMapMarkerAlt className="mr-2 text-orange-500" />
-            Địa chỉ của tôi
-          </h2>
-
-          <div className="grid gap-4">
-            {addresses.map((address) => (
-              <motion.div
-                key={address.addressId}
-                data-address-id={address.addressId}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <div className="flex items-center text-gray-700">
-                      <FaMapMarkerAlt className="mr-2 text-orange-500" />
-                      <span className="font-medium">{address.addressDetail}</span>
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <FaPhone className="mr-2 text-green-500" />
-                      <span>{address.phoneNumber}</span>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {address.provinceName} • {address.districtName} • {address.WardName}
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => handleEditAddress(address)}
-                    className="flex items-center px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
-                  >
-                    <FaEdit className="mr-2" />
-                    Edit
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Enhanced Modal Design */}
-        <Modal 
-          show={showModal} 
-          onHide={() => setShowModal(false)}
-          className="fade"
-          centered
-        >
-          <Modal.Header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <Modal.Title className="flex items-center">
-              <FaMapMarkerAlt className="mr-2" />
-              Edit Address
-            </Modal.Title>
-            <button
-              className="text-white opacity-70 hover:opacity-100 text-xl font-semibold"
-              onClick={() => setShowModal(false)}
-            >
-              ×
-            </button>
-          </Modal.Header>
-          <Modal.Body className="p-6">
-            <Form onSubmit={saveAddress} className="space-y-4">
-              {/* Address Detail */}
-              <div className="relative">
-                <Form.Control
-                  type="text"
-                  name="addressDetail"
-                  value={selectedAddress?.addressDetail || ''}
-                  onChange={handleInputChange}
-                  className="peer w-full px-4 py-2 rounded-lg border-2 border-gray-200 
-                            focus:border-orange-500 focus:ring-2 focus:ring-orange-200 
-                            transition-all duration-200 outline-none"
-                  placeholder="Enter address detail"
-                />
-                <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
-                  Address Detail
-                </Form.Label>
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+      <Sidebar />
+      
+      <div className="flex-1 p-4">
+        <Container className="py-4">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <div className="flex items-center space-x-3">
+                <FaMapMarked className="text-2xl text-orange-500" />
+                <h2 className="text-2xl font-bold text-gray-800">Quản lý địa chỉ</h2>
               </div>
-
-              {/* Phone Number Section */}
-              <div className="space-y-2">
-                <div className="relative">
-                  <Form.Control
-                    type="text"
-                    name="phoneNumber"
-                    value={selectedAddress?.phoneNumber || ''}
-                    onChange={handleInputChange}
-                    onBlur={checkPhoneNumberExists}
-                    className="peer w-full px-4 py-2 rounded-lg border-2 border-gray-200 
-                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                    placeholder="Enter phone number"
-                  />
-                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
-                    Phone Number
-                  </Form.Label>
+              {!loading && addresses.length > 0 && (
+                <Button
+                  onClick={() => navigate('/address')}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg"
+                >
+                  <FaPlus className="text-sm" />
+                  <span>Thêm địa chỉ mới</span>
+                </Button>
+              )}
+            </div>
+            
+            <div className="grid gap-4">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center h-[400px] bg-gray-50 rounded-xl">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+                  <p className="text-gray-500 font-medium">Đang tải địa chỉ...</p>
                 </div>
-
-                {isPhoneAvailable === false && (
+              ) : addresses.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[400px] bg-gray-50 rounded-xl p-8">
+                  <FaMapMarkerAlt className="text-6xl text-gray-300 mb-4" />
+                  <p className="text-2xl text-gray-400 font-bold mb-2">Chưa có địa chỉ nào</p>
+                  <p className="text-gray-400 mb-6">Thêm địa chỉ mới để quản lý đơn hàng dễ dàng hơn</p>
                   <Button
-                    variant="primary"
-                    onClick={handleSendOtp}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition-colors"
+                    onClick={() => navigate('/address')}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg"
                   >
-                    Send OTP
+                    <FaPlus className="text-sm" />
+                    <span>Thêm địa chỉ mới</span>
                   </Button>
-                )}
-
-                {otpSent && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="space-y-2"
-                  >
-                    <Form.Control
-                      type="text"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-gray-200"
-                      placeholder="Enter OTP"
-                    />
-                    <Button
-                      variant="success"
-                      onClick={handleVerifyOtp}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg"
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {addresses.map((address) => (
+                    <motion.div
+                      key={address.addressId}
+                      data-address-id={address.addressId}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-200"
                     >
-                      Verify OTP
-                    </Button>
-                  </motion.div>
-                )}
-
-                {otpVerified && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-green-500 text-center font-medium"
-                  >
-                    ✓ OTP Verified Successfully
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Location Selects */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="relative">
-                  <Form.Select
-                    name="provinceCode"
-                    value={selectedAddress?.provinceCode || ''}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 
-                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                  >
-                    <option value="">Select Province</option>
-                    {provinces.map((province) => (
-                      <option key={province.ProvinceID} value={province.ProvinceID}>
-                        {province.ProvinceName}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
-                    Province
-                  </Form.Label>
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-3">
+                          <div className="flex items-center text-gray-700">
+                            <FaMapMarkerAlt className="mr-3 text-lg text-orange-500" />
+                            <span className="font-medium text-lg">{address.addressDetail}</span>
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <FaPhone className="mr-3 text-lg text-green-500" />
+                            <span className="font-medium">{displayPhoneNumber(address.phoneNumber)}</span>
+                          </div>
+                          <div className="flex items-center text-gray-500 ml-1">
+                            <span className="text-sm">
+                              {address.provinceName} • {address.districtName} • {address.WardName}
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline-primary"
+                          onClick={() => handleEditAddress(address)}
+                          className="flex items-center px-4 py-2 text-orange-500 border-2 border-orange-500 rounded-lg hover:bg-orange-50 transition-all duration-200 font-medium"
+                        >
+                          <FaEdit className="mr-2" />
+                          Chỉnh sửa
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-
-                <div className="relative">
-                  <Form.Select
-                    name="districtCode"
-                    value={selectedAddress?.districtCode || ''}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 
-                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                  >
-                    <option value="">Select District</option>
-                    {districts.map((district) => (
-                      <option key={district.DistrictID} value={district.DistrictID}>
-                        {district.DistrictName}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
-                    District
-                  </Form.Label>
-                </div>
-
-                <div className="relative">
-                  <Form.Select
-                    name="wardCode"
-                    value={selectedAddress?.wardCode || ''}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 
-                              focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                  >
-                    <option value="">Select Ward</option>
-                    {wards.map((ward) => (
-                      <option key={ward.WardCode} value={ward.WardCode}>
-                        {ward.WardName}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Label className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-2">
-                    Ward
-                  </Form.Label>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 mt-6">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowModal(false)}
-                  className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </Form>
-          </Modal.Body>
-        </Modal>
-      </Container>
+              )}
+            </div>
+          </div>
+        </Container>
+      </div>
     </div>
   );
 };

@@ -8,7 +8,7 @@ import {
   getCountRecipeRateByRecipeId,
   checkRated,
 } from "../../services/RecipeRateService";
-
+import { getImagesByRecipeId, } from "../../services/SellerService/Api";
 import {
   getAccountData,
   fetchPurchasedRecipes,
@@ -30,7 +30,7 @@ const RecipeDetail = () => {
   const accountId = Cookies.get("UserId");
   const { recipeId } = useParams();
   const [recipe, setRecipe] = useState(null);
-  const [imageUrl, setImageUrl] = useState([]);
+  const [images, setImages] = useState([]); // Thay đổi thành mảng hình ảnh
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -49,6 +49,7 @@ const RecipeDetail = () => {
   const [hover, setHover] = useState(null);
   const [checkRatedStatus, setcheckRated] = useState("");
   const [roleaccountonline, setRoleaccountonline] = useState("");
+  const [mainImage, setMainImage] = useState(null);
   const handleOpenModal = () => {
     setShowModal(true);
   };
@@ -94,7 +95,7 @@ const RecipeDetail = () => {
       const purchasedIds = await fetchPurchasedRecipes(storedUserId); // Gọi hàm từ file api/recipeApi.js
       setPurchasedRecipes(purchasedIds);
     } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu:", error);
+      console.error("Lỗi khi lấy dữ liệu:", error);
     } finally {
       setLoading(false);
     }
@@ -138,6 +139,7 @@ const RecipeDetail = () => {
           checkrateddata,
           createbyName,
           infoacconline,
+          imagesData,
         ] = await Promise.all([
           getRecipeById(recipeId),
           getRecipeRatePoint(recipeId),
@@ -145,6 +147,7 @@ const RecipeDetail = () => {
           checkRated(recipeId, accountId),
           getAccountById((await getRecipeById(recipeId)).createById), // Lưu ý: có thể cần kiểm tra cách gọi này
           getAccountById(accountId),
+          getImagesByRecipeId(recipeId),
         ]);
         setcheckRated(checkrateddata?.ratePoint);
         //console.log('Đã rated: ', checkRatedStatus);
@@ -155,7 +158,8 @@ const RecipeDetail = () => {
         setRoleaccountonline(infoacconline.roleId);
         //console.log('Đã rated: ', data);
         setAccountName(createbyName.userName);
-        setImageUrl(data.images);
+        setImages(imagesData);
+        setMainImage(imagesData[0]?.imageUrl);
       } catch (err) {
         console.error(err);
       } finally {
@@ -164,7 +168,6 @@ const RecipeDetail = () => {
     };
     fetchRecipeData();
   }, [recipeId, accountId]);
-
   // Calculate how many stars are filled based on averageRate
   let roundedAverageRate = 0;
   if (averageRate > 0) {
@@ -195,14 +198,32 @@ const RecipeDetail = () => {
 
         {/* Phần hình ảnh */}
         <div className="mb-4 z-10 flex flex-wrap gap-4">
-          {imageUrl.map((image, index) => (
+          {/* Recipe Image Section */}
+          <div className="relative w-full md:w-2/3 flex-1">
+            {/* Main Recipe Image */}
             <img
-              key={index}
-              src={image.imageUrl || "https://via.placeholder.com/150"}
-              alt={recipe.recipeName}
-              className="w-full rounded-lg shadow-lg"
+              src={mainImage}
+              alt="Main Recipe"
+              className="w-full rounded-lg object-cover shadow-md"
             />
-          ))}
+
+            {/* Thumbnail Images */}
+            <div className="mt-4 flex gap-4 overflow-x-auto">
+              {images && images.length > 0 ? (
+                images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image.imageUrl || ""}
+                    alt={`Recipe image ${index + 1}`}
+                    className="w-20 h-20 rounded-lg object-cover shadow-md cursor-pointer hover:opacity-75"
+                    onClick={() => setMainImage(image.imageUrl)}
+                  />
+                ))
+              ) : (
+                <p className="text-lg text-gray-500">No images available</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Các nút */}
@@ -396,7 +417,7 @@ const RecipeDetail = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
               <h2 className="text-2xl font-bold mb-4 text-center">
-                Let us know how you liked this recipe
+                Hãy cho chúng tôi biết đánh giá của bạn về công thức này
               </h2>
               <div className="text-center">
                 {[...Array(5)].map((star, index) => {
@@ -425,7 +446,7 @@ const RecipeDetail = () => {
                   );
                 })}
                 {!checkRatedStatus ? (
-                  <p>Your star rating is {ratepoint}</p>
+                  <p>Đánh giá của bạn là {ratepoint}</p>
                 ) : (
                   <>
                     <p
@@ -435,13 +456,13 @@ const RecipeDetail = () => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      Your last star rating was {checkRatedStatus}{" "}
+                      Đánh giá trước của bạn là {checkRatedStatus}{" "}
                       <FaStar
                         color="#ffc107"
                         style={{ marginLeft: "2px", marginBottom: "1.5px" }}
                       />
                     </p>
-                    <p>Your star rating this time is {ratepoint}</p>
+                    <p>Đánh giá hiện tại {ratepoint}</p>
                   </>
                 )}
               </div>
@@ -450,7 +471,7 @@ const RecipeDetail = () => {
                   className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
                   onClick={() => setShowModal(false)}
                 >
-                  Cancel
+                  Huỷ
                 </button>
                 <button
                   className="bg-custom-orange hover:bg-orange-500 text-white font-bold py-2 px-4 rounded"
@@ -463,7 +484,7 @@ const RecipeDetail = () => {
                       : handleSaveRecipeRate();
                   }}
                 >
-                  {checkRatedStatus ? "Update Ratepoint" : "Save Ratepoint"}
+                  {checkRatedStatus ? "Thay đổi" : "Lưu"}
                 </button>
               </div>
             </div>
@@ -487,7 +508,7 @@ const RecipeDetail = () => {
           <span role="img" aria-label="star">
             ✨
           </span>{" "}
-          Give your stars for this recipe
+          Đánh giá công thức này
         </button>
 
         {/* Nút "Mua công thức này" chỉ hiển thị khi chưa mua */}

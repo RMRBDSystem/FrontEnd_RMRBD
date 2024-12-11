@@ -464,7 +464,7 @@ const BookDetail = () => {
                     {showModal && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                                <h2 className="text-2xl font-bold mb-4 text-center">Let us know how you liked this recipe</h2>
+                                <h2 className="text-2xl font-bold mb-4 text-center">Hãy cho chúng tôi biết đánh giá của bạn về cuốn sách này</h2>
                                 <div className="text-center">
 
                                     {[...Array(5)].map((star, index) => {
@@ -488,13 +488,13 @@ const BookDetail = () => {
                                         );
                                     })}
                                     {!checkRatedStatus ? (
-                                        <p>Your star rating is {ratepoint}</p>
+                                        <p>Đánh giá của bạn {ratepoint}</p>
                                     ) : (
                                         <>
                                             <p style={{ display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
-                                                Your last star rating was {checkRatedStatus} <FaStar color="#ffc107" style={{ marginLeft: '2px', marginBottom: '1.5px' }} />
+                                                Đánh giá trước của bạn {checkRatedStatus} <FaStar color="#ffc107" style={{ marginLeft: '2px', marginBottom: '1.5px' }} />
                                             </p>
-                                            <p>Your star rating this time is {ratepoint}</p>
+                                            <p>Đánh giá bây giờ của bạn là {ratepoint}</p>
                                         </>
                                     )}
 
@@ -504,7 +504,7 @@ const BookDetail = () => {
                                         className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
                                         onClick={() => setShowModal(false)}
                                     >
-                                        Cancel
+                                        Huỷ
                                     </button>
                                     <button
                                         className="bg-custom-orange hover:bg-orange-500 text-white font-bold py-2 px-4 rounded"
@@ -513,7 +513,7 @@ const BookDetail = () => {
                                             checkRatedStatus ? handleUpdateRecipeRate() : handleSaveRecipeRate();
                                           }}
                                     >
-                                        {checkRatedStatus ? "Update Ratepoint" : "Save Ratepoint"}
+                                        {checkRatedStatus ? "Thay đổi" : "Lưu"}
                                     </button>
                                 </div>
                             </div>
@@ -522,7 +522,7 @@ const BookDetail = () => {
                 </div>
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <button className="write-review-button" style={{ width: " 100%", height: "70px" }} onClick={handleOpenModal}>
-                        <span role="img" aria-label="write">✏️</span> Give your stars for this recipe
+                        <span role="img" aria-label="write">✏️</span> Đánh giá cuốn sách này
                     </button>
                 </div>
                 <div className="max-w-10xl mx-auto p-6 bg-white shadow-md rounded-lg flex justify-center" style={{width:"205%"}}>

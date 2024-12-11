@@ -83,7 +83,7 @@ const Comment = ({
 
                             }}
                         >
-                            Reply
+                            Trả lời
                         </div>
 
                     )}
@@ -92,7 +92,7 @@ const Comment = ({
                             className="comment-action"
                             onClick={() => setActiveComment({ id: comment.commentId, type: "editing" })}
                         >
-                            Edit
+                            Sửa
                         </div>
                     )}
                     {canDelete && (
@@ -100,7 +100,7 @@ const Comment = ({
                             className="comment-action"
                             onClick={() => deleteComment(comment.commentId)}
                         >
-                            Delete
+                            Xoá
                         </div>
                     )}
                 </div>

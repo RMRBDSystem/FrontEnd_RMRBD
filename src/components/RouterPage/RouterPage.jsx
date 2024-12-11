@@ -29,6 +29,7 @@ import AddBookCustomer from "../CustomerBook/AddBookCustomer";
 import AddEBookCustomer from "../CustomerEbook/AddEbookCustomer";
 import DetailSavedRecipe from "../Pages/Recipe/DetailSavedRecipe";
 import Address from "../AddressPage/Address";
+import AddressEdit from "../AddressPage/AddressEdit"
 import SavedEbook from '../Customer/SavedEbooks';
 // --Customer--
 import EditRoleUpdated from "../Customer/EditRoleUpdated";
@@ -279,6 +280,14 @@ export default function RouterPage() {
               element={
                 <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
                   <SavedEbook />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manage-addresses"
+              element={
+                <ProtectedRoute allowedRoles={["Seller", "Customer"]}>
+                  <AddressEdit />
                 </ProtectedRoute>
               }
             />
