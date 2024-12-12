@@ -3,30 +3,35 @@ import "../../assets/styles/Components/LoginPage.css";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import CryptoJS from "crypto-js";
 import { useAuth } from "../RouterPage/AuthContext";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2";
+import { decryptData } from "../Encrypt/encryptionUtils";
+const secretKey = "your-secret-key"; // Thay thế bằng một khóa bí mật mạnh
+
+const encryptData = (data) => {
+  return CryptoJS.AES.encrypt(JSON.stringify(data), secretKey).toString();
+};
 
 const Login = () => {
   const navigate = useNavigate();
   const { setIsLoggedIn } = useAuth();
-
   useEffect(() => {
-    // Kiểm tra cookie UserRole để xác định trạng thái đăng nhập
-    const userRole = Cookies.get("UserRole");
-    if (userRole) {
-      // Nếu đã đăng nhập, điều hướng đến trang tương ứng
+    const encryptedRole = Cookies.get("UserRole");
+    if (encryptedRole) {
+      const userRole = decryptData(encryptedRole);
       setIsLoggedIn(true);
       navigate(getDashboardPath(userRole));
     }
 
-    // Lắng nghe sự kiện storage để đồng bộ giữa các tab
     const handleStorageChange = (event) => {
       if (event.key === "UserRole") {
-        const newUserRole = event.newValue;
-        if (newUserRole) {
+        const newEncryptedRole = event.newValue;
+        if (newEncryptedRole) {
+          const newUserRole = decryptData(newEncryptedRole);
           navigate(getDashboardPath(newUserRole));
         }
       }
@@ -42,7 +47,7 @@ const Login = () => {
   const getDashboardPath = (role) => {
     switch (role) {
       default:
-        return "/home";
+        return "/";
     }
   };
 
@@ -50,7 +55,6 @@ const Login = () => {
     const { sub: googleId, email, name: userName } = jwtDecode(credential);
     const data = { googleId, userName, email };
 
-    // const url = `https://localhost:7220/odata/Login`; // test localhost
     const url = `https://rmrbdapi.somee.com/odata/Login`;
     try {
       const response = await axios.post(url, data, {
@@ -59,58 +63,59 @@ const Login = () => {
           Token: "123-abc",
         },
       });
-      const { userRole, userId, coin } = response.data;
+
+      const { userRole, userId } = response.data;
+
       console.log("role", response.data);
-      // Nếu người dùng đã có một vai trò, không cho phép đăng nhập với vai trò khác
+
       const existingRole = Cookies.get("UserRole");
-      if (existingRole && existingRole !== userRole) {
-        // Thay thế alert bằng SweetAlert2
+      if (existingRole && decryptData(existingRole) !== userRole) {
         Swal.fire({
-          icon: "error",
-          title: "Role Mismatch",
-          text: "Bạn đã đăng nhập với vai trò khác. Vui lòng đăng xuất trước khi đăng nhập lại.",
+          icon: "warning",
+          title: "Bạn đã đăng nhập với vai trò khác!",
+          text: "Vui lòng đăng xuất trước khi đăng nhập lại.",
+          confirmButtonText: "OK",
         });
-        return; // Ngăn không cho tiếp tục đăng nhập
+        return;
       }
 
-      // Lưu vai trò và tên người dùng vào cookie và localStorage
-      Cookies.set("UserRole", userRole, { expires: 1 });
-      Cookies.set("UserName", userName, { expires: 1 });
-      Cookies.set("UserId", userId, { expires: 1 });
-      Cookies.set("Coin", coin, { expires: 1 });
+      // Mã hóa và lưu dữ liệu vào cookie
+      Cookies.set("UserRole", encryptData(userRole), { expires: 1 });
+      Cookies.set("UserId", encryptData(userId), { expires: 1 });
 
       setIsLoggedIn(true);
       navigate(getDashboardPath(userRole));
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
-      // Hiển thị lỗi khi đăng nhập không thành công
       Swal.fire({
         icon: "error",
-        title: "Login Failed",
-        text: "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.",
+        title: "Đăng nhập thất bại",
+        text:
+          error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại.",
+        confirmButtonText: "OK",
       });
     }
   };
 
   return (
-    <div className="wrapper">
-      <div className="container d-flex justify-content-center align-items-center min-vh-100">
-        <div className="login-box p-4">
-          <div className="logo">
+    <div className="wrapper bg-transparent min-h-screen flex justify-center items-center">
+      <div className="container flex justify-center items-center">
+        <div className="login-box p-6 bg-white/70 shadow-lg rounded-lg backdrop-blur-lg ">
+          <div className="logo mb-6">
             <img
               src="/images/LogoA.png"
-              className="img-fluid "
+              className="w-20 h-20 mx-auto"
               alt="RecipeCook LogoA"
             />
           </div>
           <div>
-            <h2 className="text-center mb-3">Log in</h2>
-            <p className="text-center mb-4">
-              Log in to save and review your favorite recipes.
+            <h2 className="text-center text-2xl font-bold mb-3">Đăng nhập</h2>
+            <p className="text-center text-gray-600 mb-4">
+              Đăng nhập để lưu và xem lại các công thức yêu thích của bạn.
             </p>
           </div>
           <div className="google-login text-center mb-4">
-            <div className="d-flex align-items-center justify-content-center w-100">
+            <div className="flex items-center justify-center w-full">
               <GoogleLogin
                 onSuccess={handleLogin}
                 onError={() => {
@@ -118,11 +123,6 @@ const Login = () => {
                 }}
               />
             </div>
-          </div>
-          <div className="register text-center">
-            <p>
-              Don’t have an account? <a href="#">Join now</a>
-            </p>
           </div>
         </div>
       </div>
