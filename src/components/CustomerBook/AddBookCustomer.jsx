@@ -36,6 +36,9 @@ const AddBook = () => {
   const [isBookFormVisible, setIsBookFormVisible] = useState(true);
   const [previewImages, setPreviewImages] = useState([]);
   const navigate = useNavigate();
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
 
   // Fetch categories and addresses on component mount
   useEffect(() => {
@@ -492,7 +495,7 @@ const AddBook = () => {
                 title: 'Tải lên thất bại',
                 text: 'Không thể tải lên bất kỳ hình ảnh nào'
               });
-              // Tùy chọn xử lý trường hợp không có hình ảnh nào được tải ln
+              // Tùy chọn xử lý trường hợp kh��ng có hình ảnh nào được tải ln
             }
 
           } catch (uploadError) {
