@@ -14,7 +14,7 @@ import {
   uploadImageApi,
 } from "../services/SellerService/Api";
 import Swal from "sweetalert2";
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const RecipeCustomer = () => {
   const [recipeName, setRecipeName] = useState("");
   const [numberOfService, setNumberOfService] = useState("");
@@ -40,7 +40,7 @@ const RecipeCustomer = () => {
   const { socket, accountOnline } = useSocket();
   const [listModer, setListModer] = useState([]);
   useEffect(() => {
-    const storedUserId = Cookies.get("UserId");
+    const storedUserId = decryptData(Cookies.get("UserId"));
     console.log("Stored UserId:", storedUserId);
     if (storedUserId) {
       setcreateById(storedUserId);

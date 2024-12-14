@@ -13,12 +13,12 @@ import { motion } from 'framer-motion';
 import LoadingOverlay from '../shared/LoadingOverlay';
 import Swal from 'sweetalert2';
 import { useCart } from './components/CartContext';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const ShoppingCart = () => {
   const [orders, setOrders] = useState([]);
   const [books, setBooks] = useState({});
   const [addresses, setAddresses] = useState([]); // Holds all user addresses
-  const [userId, setUserId] = useState(Cookies.get('UserId'));
+  const [userId, setUserId] = useState(decryptData(Cookies.get("UserId")));
   const [selectedOrders, setSelectedOrders] = useState(new Set());
   const [addressDetails, setAddressDetails] = useState({}); // Store address details for each order
   const [totalPrice, setTotalPrice] = useState(0);

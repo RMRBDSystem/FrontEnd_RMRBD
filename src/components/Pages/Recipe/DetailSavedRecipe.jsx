@@ -11,6 +11,7 @@ import {
   fetchActiveTags,
 } from "../../services/SellerService/Api";
 import { fetchRecipeData } from "../../services/CustomerService/CustomerService";
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const DetailSavedRecipe = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
   const [recipe, setRecipe] = useState(null);
@@ -23,7 +24,7 @@ const DetailSavedRecipe = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setAccountId(Cookies.get("UserId"));
+        setAccountId(decryptData(Cookies.get("UserId")));
         // Lấy chi tiết công thức
         const recipeResult = await getRecipeById(recipeId);
         setRecipe(recipeResult);

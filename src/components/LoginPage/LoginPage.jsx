@@ -6,22 +6,32 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import CryptoJS from "crypto-js";
 import { useAuth } from "../RouterPage/AuthContext";
 import Swal from "sweetalert2";
+import { decryptData } from "../Encrypt/encryptionUtils";
+const secretKey = "your-secret-key"; 
+
+const encryptData = (data) => {
+  return CryptoJS.AES.encrypt(JSON.stringify(data), secretKey).toString();
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const { setIsLoggedIn } = useAuth();
   useEffect(() => {
-    const userRole = Cookies.get("UserRole");
-    if (userRole) {
+    const encryptedRole = Cookies.get("UserRole");
+    if (encryptedRole) {
+      const userRole = decryptData(encryptedRole);
       setIsLoggedIn(true);
       navigate(getDashboardPath(userRole));
     }
 
     const handleStorageChange = (event) => {
       if (event.key === "UserRole") {
-        const newUserRole = event.newValue;
-        if (newUserRole) {
+        const newEncryptedRole = event.newValue;
+        if (newEncryptedRole) {
+          const newUserRole = decryptData(newEncryptedRole);
           navigate(getDashboardPath(newUserRole));
         }
       }
@@ -44,7 +54,7 @@ const Login = () => {
   const handleLogin = async ({ credential }) => {
     const { sub: googleId, email, name: userName } = jwtDecode(credential);
     const data = { googleId, userName, email };
-    //https://rmrbdapi.somee.com/odata/Login
+
     const url = `https://rmrbdapi.somee.com/odata/Login`;
     try {
       const response = await axios.post(url, data, {
@@ -54,12 +64,12 @@ const Login = () => {
         },
       });
 
-      const { userRole, userId, coin } = response.data;
+      const { userRole, userId } = response.data;
 
       console.log("role", response.data);
 
       const existingRole = Cookies.get("UserRole");
-      if (existingRole && existingRole !== userRole) {
+      if (existingRole && decryptData(existingRole) !== userRole) {
         Swal.fire({
           icon: "warning",
           title: "Bạn đã đăng nhập với vai trò khác!",
@@ -69,10 +79,9 @@ const Login = () => {
         return;
       }
 
-      Cookies.set("UserRole", userRole, { expires: 1 });
-      Cookies.set("UserName", userName, { expires: 1 });
-      Cookies.set("UserId", userId, { expires: 1 });
-      Cookies.set("Coin", coin, { expires: 1 });
+      // Mã hóa và lưu dữ liệu vào cookie
+      Cookies.set("UserRole", encryptData(userRole), { expires: 1 });
+      Cookies.set("UserId", encryptData(userId), { expires: 1 });
 
       setIsLoggedIn(true);
       navigate(getDashboardPath(userRole));
@@ -100,7 +109,7 @@ const Login = () => {
             />
           </div>
           <div>
-            <h2 className="text-center text-2xl font-bold mb-3">Log in</h2>
+            <h2 className="text-center text-2xl font-bold mb-3">Đăng nhập</h2>
             <p className="text-center text-gray-600 mb-4">
               Đăng nhập để lưu và xem lại các công thức yêu thích của bạn.
             </p>

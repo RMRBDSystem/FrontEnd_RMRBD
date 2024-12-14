@@ -10,6 +10,7 @@ import { useSocket } from "../../../App";
 import { createNotification } from "../../services/NotificationService";
 import { getBook, updateBook } from "../../services/ModeratorService/Api";
 import { getAccountData } from "../../services/CustomerService/CustomerService";
+import { decryptData } from "../../Encrypt/encryptionUtils";
 
 const BookDetail = () => {
   const { bookId } = useParams(); // Lấy ID từ URL
@@ -58,7 +59,7 @@ const BookDetail = () => {
       confirmButtonText: "Đồng ý",
       cancelButtonText: "Hủy",
     });
-    const censorId = Cookies.get("UserId");
+    const censorId = decryptData(Cookies.get("UserId"));
     try {
       const updatedBook = {
         ...book,

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';  // Import useNavigate hook
 import { useSocket } from '../../../App'
 import { getAccountByRoleId} from '../../services/AccountService'
 import { createNotification } from '../../services/NotificationService'
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const ReportPage = () => {
     const imageInput = useRef(null);
     const [title, setTitle] = useState('');
@@ -28,7 +29,7 @@ const ReportPage = () => {
     useEffect(() => {
         const fetchReport = async () => {
             try {
-                const storedUserId = Cookies.get('UserId');
+                const storedUserId = decryptData(Cookies.get("UserId"));
                 if (storedUserId) {
                     setUserId(storedUserId);
                 }

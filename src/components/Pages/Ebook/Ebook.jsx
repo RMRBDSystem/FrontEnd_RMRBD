@@ -3,7 +3,7 @@ import { getEbooks, checkEbookOwnership } from "../../services/EbookService";
 import EbookSidebar from "./EbookSidebar";
 import EbookCard from './EbookCard';
 import Cookies from 'js-cookie';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 function Ebook() {
   const [ebooks, setEbooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ function Ebook() {
       }
 
       // Get ownership status for all ebooks if user is logged in
-      const customerId = Cookies.get('UserId');
+      const customerId = decryptData(Cookies.get("UserId"));
       let ebooksWithOwnership = data;
 
       if (customerId) {

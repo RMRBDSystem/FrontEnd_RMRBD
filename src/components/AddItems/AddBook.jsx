@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../Navbar/Navbar";
 import Footer from '../Footer/Footer';
 import Cookies from 'js-cookie';
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const AddBook = () => {
   const [book, setBook] = useState({
@@ -35,7 +36,7 @@ const AddBook = () => {
   const [createdBookId, setCreatedBookId] = useState(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -141,7 +142,7 @@ const AddBook = () => {
     const bookData = {
       ...book,
       price: rawPrice === 0 ? 'Free' : rawPrice, // Send price as raw number or 'Free'
-      createById: Cookies.get('UserId') || '',
+      createById: decryptData(Cookies.get("UserId")) || '',
       status: "-1",
       createDate: new Date().toISOString(),
       bookOrders: [],

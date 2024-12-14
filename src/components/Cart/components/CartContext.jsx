@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
 
   const updateCartItems = (items) => {
     setCartItems(items);

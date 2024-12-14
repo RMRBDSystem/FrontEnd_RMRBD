@@ -67,7 +67,7 @@ const Comment = ({
                 {!isEditing && <div className="comment-text" style={{ color: '#333' }}>{comment.content}</div>}
                 {isEditing && (
                     <CommentForm
-                        submitLabel="Update"
+                        submitLabel="Sửa"
                         hasCancelButton
                         initialText={comment.content}
                         handleSubmit={(text) => updateComment(text, comment.commentId, comment.rootCommentId)}

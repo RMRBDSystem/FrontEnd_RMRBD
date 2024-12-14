@@ -4,13 +4,13 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { FiBookOpen } from 'react-icons/fi';
 import Sidebar from './Sidebar';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const SavedEbooks = () => {
     const [ebooks, setEbooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const userId = Cookies.get('UserId');
+    const userId = decryptData(Cookies.get("UserId"));
 
     useEffect(() => {
         if (!userId) {

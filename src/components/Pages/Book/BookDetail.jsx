@@ -17,7 +17,7 @@ import { useSocket } from "../../../App"
 import {createNotification} from "../../services/NotificationService"
 import Swal from 'sweetalert2';
 import { useCart } from '../../Cart/components/CartContext';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const BookDetail = () => {
     const { bookId } = useParams();
     const [book, setBook] = useState(null);
@@ -34,7 +34,7 @@ const BookDetail = () => {
     const maxStars = 5;
 
     const [createById, setCreateById] = useState(null);
-    const accountId = Cookies.get("UserId");
+    const accountId = decryptData(Cookies.get("UserId"));
     //rating
     const [showModal, setShowModal] = useState(false);
     const [ratepoint, setRatepoint] = useState("");
@@ -140,7 +140,7 @@ const BookDetail = () => {
 
     const addToCart = async () => {
         try {
-            const customerId = Cookies.get('UserId');
+            const customerId = decryptData(Cookies.get("UserId"));
             if (!customerId) {
                 toast.error('Vui lòng đăng nhập để thêm vào giỏ hàng!');
                 return;

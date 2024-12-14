@@ -12,6 +12,7 @@ const CommentForm = ({ handleSubmit , submitLabel,onClick, hasCancelButton = fal
         <form onSubmit={onSubmit}>
             <textarea
                 className="comment-form-textarea"
+                style={{color: "black"}}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
             />
@@ -24,7 +25,7 @@ const CommentForm = ({ handleSubmit , submitLabel,onClick, hasCancelButton = fal
                     className="comment-form-button comment-form-cancel-button"
                     onClick={handleCancel}
                 >
-                    Cancel
+                    Huỷ
                 </button>
             )}
         </form>

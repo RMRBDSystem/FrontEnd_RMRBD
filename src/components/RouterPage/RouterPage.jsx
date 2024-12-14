@@ -99,7 +99,7 @@ export default function RouterPage() {
           <Route
             path="/admin/dashboard"
             element={
-              <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
+              <ProtectedRoute allowedRoles={["Admin"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -115,7 +115,7 @@ export default function RouterPage() {
           <Route
             path="/admin/income-management"
             element={
-              <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
+              <ProtectedRoute allowedRoles={["Admin"]}>
                 <IncomeManagement />
               </ProtectedRoute>
             }
@@ -123,7 +123,7 @@ export default function RouterPage() {
           <Route
             path="/admin/category-management"
             element={
-              <ProtectedRoute allowedRoles={["Admin", "Customer"]}>
+              <ProtectedRoute allowedRoles={["Admin"]}>
                 <CategoryManagement />
               </ProtectedRoute>
             }

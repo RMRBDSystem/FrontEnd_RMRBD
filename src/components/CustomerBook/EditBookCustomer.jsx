@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 import { BookForm } from './BookForm';
 import { getBooks, updateBook } from '../services/BookService';
 import axios from 'axios';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const BookList = () => {
   const [books, setBooks] = useState([]);
   const [addresses, setAddresses] = useState([]);
@@ -25,7 +25,7 @@ const BookList = () => {
   const [height, setHeight] = useState('');
   const [requiredNote, setRequiredNote] = useState('');
   const [author, setAuthor] = useState('');
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -55,7 +55,7 @@ const BookList = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const currentUserId = parseInt(Cookies.get('UserId'));
+      const currentUserId = parseInt(decryptData(Cookies.get("UserId")));
       const response = await axios.get('https://rmrbdapi.somee.com/odata/book', {
         headers: { 'Token': '123-abc' }
       });

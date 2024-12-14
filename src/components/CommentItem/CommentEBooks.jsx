@@ -11,9 +11,10 @@ import {createNotification} from "../services/NotificationService"
 import {getAccountById} from "../services/AccountService"
 import {getEbookById} from "../services/EbookService"
 import Swal from 'sweetalert2';
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const Comments = ({ebookId,createById,roleaccountonline}) => {
-    const accountId = Cookies.get("UserId");
+    const accountId = decryptData(Cookies.get("UserId"));
     const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
     const [activeComment, setActiveComment] = useState(null); //  Tracks active comment for editing

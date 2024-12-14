@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import { getWithdrawCoinTransactionByAccountId } from '../../services/Transaction';
 import { Button } from '@mui/material';
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const WithdrawList = () => {
 
     const [withdrawList, setWithdrawList] = useState([]);
@@ -13,7 +14,7 @@ const WithdrawList = () => {
       };
     useEffect(() => {
         const fetchData = async () => {
-            const storedUserId = Cookies.get('UserId');
+            const storedUserId = decryptData(Cookies.get("UserId"));
             if (storedUserId) {
                 setUserId(storedUserId);
                 const withdraws = await getWithdrawCoinTransactionByAccountId(storedUserId);

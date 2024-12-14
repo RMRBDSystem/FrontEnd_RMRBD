@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 import {getAccountById } from "../src/components/services/AccountService.js";
 import Cookies from 'js-cookie';
 import { CartProvider } from './components/Cart/components/CartContext';
+import { decryptData } from "./components/Encrypt/encryptionUtils.js";
 
 // Context for socket
 export const SocketContext = createContext();
@@ -35,7 +36,7 @@ const App = () => {
   // Function to fetch account based on UserId from cookies
   const fetchAccount = async () => {
     try {
-      const accountOnlineId = Cookies.get("UserId");
+      const accountOnlineId = decryptData(Cookies.get("UserId"));
       if (accountOnlineId) {
         const account = await getAccountById(accountOnlineId);
         setAccountOnline(account.userName);
@@ -51,7 +52,7 @@ const App = () => {
 
     // Set up an interval to periodically check for changes in cookies
     const interval = setInterval(() => {
-      const accountOnlineId = Cookies.get("UserId");
+      const accountOnlineId = decryptData(Cookies.get("UserId"));
       if (accountOnlineId) {
         fetchAccount();
       }

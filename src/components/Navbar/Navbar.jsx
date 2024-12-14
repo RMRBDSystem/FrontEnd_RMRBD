@@ -16,6 +16,7 @@ import { getNotificationbyAccountId } from "../services/NotificationService"
 import CartDropdown from './CartDropDown'
 import Swal from "sweetalert2";
 import { getAccountData, logout } from "../services/CustomerService/CustomerService";
+import { decryptData, encryptData } from "../Encrypt/encryptionUtils";
 const categoriesContent = {
   "Công Thức Nấu Ăn": (
     <div className="grid grid-cols-3 gap-6 text-gray-700">
@@ -131,8 +132,8 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeCategory, setActiveCategory] = useState("Sách Dạy Nấu Ăn");
   const navigate = useNavigate();
-  const userRole = Cookies.get("UserRole");
-  const accountonlineId = Cookies.get("UserId");
+  const userRole = decryptData(Cookies.get("UserRole"));
+  const accountonlineId = decryptData(Cookies.get("UserId"));
   const [accountData, setAccountData] = useState({});
   const isFetchCalled = useRef(false);
 
@@ -210,7 +211,7 @@ const Navbar = () => {
     try {
       const data = await getAccountData(userId);
       if (data.roleId === 2) {
-        Cookies.set("UserRole", "Seller");
+        Cookies.set("UserRole", encryptData("Seller"));
       }
       if (data.accountStatus === 0) {
         Swal.fire({
@@ -400,15 +401,23 @@ const Navbar = () => {
                     <>
                       <NavLink
                         to="/admin/dashboard" // Change to your admin page
-                        className="block px-4 py-2 hover:bg-gray-200 rounded-md flex items-center"
+                        className="block px-2 py-2 hover:bg-gray-200 rounded-md flex items-center"
                       >
                         {/* Icon for Admin */}
                         <img
-                          src="/images/icon/ADMIN.svg"
-                          alt="Quản trị viên"
+                          src="/images/icon/SELLERRECIPE.svg"
+                          alt="Account Administrator"
                           className="h-5 w-5 mr-2"
                         />
                         Quản trị viên
+                      </NavLink>
+
+                      <NavLink
+                        to="/update-information"
+                        className="block px-2 py-2 hover:bg-gray-200 rounded-md flex items-center"
+                      >
+                        <img src="/images/icon/edit-profile.svg" alt="Update Information" className="h-5 w-5 mr-2" />
+                        Cập nhật tài khoản
                       </NavLink>
                     </>
                   )}

@@ -16,6 +16,8 @@ import {
   updateAccountProfile,
   updateAccount,
 } from "../../services/ModeratorService/Api";
+import { decryptData } from "../../Encrypt/encryptionUtils";
+
 const AccountDetails = () => {
   const { accountId } = useParams();
   const navigate = useNavigate();
@@ -28,7 +30,7 @@ const AccountDetails = () => {
   const { socket, accountOnline } = useSocket();
   const [dataAccount, setAccountData] = useState(null);
   useEffect(() => {
-    setCensorID(Cookies.get("UserId"));
+    setCensorID(decryptData(Cookies.get("UserId")));
   }, []);
   useEffect(() => {
     fetchAccountDetails();

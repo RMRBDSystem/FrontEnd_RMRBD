@@ -15,6 +15,7 @@ import {
   updateRecipe,
 } from "../../services/SellerService/Api";
 import { getAccountData } from "../../services/CustomerService/CustomerService";
+import { decryptData } from "../../Encrypt/encryptionUtils";
 
 const RecipeDetail = () => {
   const { recipeId } = useParams(); // Lấy ID từ URL
@@ -87,7 +88,7 @@ const RecipeDetail = () => {
       cancelButtonText: "Hủy",
     });
     if (result.isConfirmed) {
-      const censorId = Cookies.get("UserId");
+      const censorId = decryptData(Cookies.get("UserId"));
       try {
         const updatedRecipe = {
           ...recipe,

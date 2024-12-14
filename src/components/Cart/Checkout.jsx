@@ -13,7 +13,7 @@ import LoadingOverlay from '../shared/LoadingOverlay';
 import { updateBookStock } from '../services/BookService';
 import { createBookTransaction } from '../services/Transaction';
 import { createOrderStatus } from '../services/OrderStatusService';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const getAccountById = async (accountId) => {
   try {
     const response = await axios.get(`https://rmrbdapi.somee.com/odata/Account/${accountId}`, {
@@ -32,7 +32,7 @@ const getAccountById = async (accountId) => {
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
   
   // Add this check at the beginning of your component
   useEffect(() => {

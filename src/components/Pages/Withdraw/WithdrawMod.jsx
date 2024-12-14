@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import Cookies from 'js-cookie';
 import { getWithdraw } from '../../services/Transaction';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const WithdrawMod = () => {
     const [withdrawList, setWithdrawList] = useState([]);
     const [UserId, setUserId] = useState('');
     useEffect(() => {
         const fetchData = async () => {
-            const storedUserId = Cookies.get('UserId');
+            const storedUserId = decryptData(Cookies.get("UserId"));
             if (storedUserId) {
                 setUserId(storedUserId);
                 const withdraws = await getWithdraw();

@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../Navbar/Navbar";  
 import Footer from '../Footer/Footer';
 import Cookies from 'js-cookie'; 
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const EbookCustomer = () => {
   const [newEbook, setNewEbook] = useState({
@@ -42,8 +43,7 @@ const EbookCustomer = () => {
   }, []);
 
   // Retrieve the logged-in user data from cookies
-  const userName = Cookies.get('UserName');  // Get userName from cookies
-  const UserId = Cookies.get('UserId');  // Get UserId from cookies (after login)
+  const UserId = decryptData(Cookies.get("UserId"));  // Get UserId from cookies (after login)
 
   // Handle image selection
   const handleimageChange = (e) => {
@@ -82,7 +82,7 @@ const EbookCustomer = () => {
     if (!newEbook.CategoryId) missingFields.push('Category');  // Check if category is selected
     
     // Ensure the user is logged in and UserId is available
-    if (!userName || !UserId) {
+    if (  !UserId) {
       missingFields.push("User not logged in or missing UserId");
     }
   
@@ -101,7 +101,7 @@ const EbookCustomer = () => {
     ebookData.append('categoryId', newEbook.CategoryId);  // Append the selected category
     
     // Append UserId as createById
-    ebookData.append('createById', UserId);  // Use UserId, not userName
+    ebookData.append('createById', UserId);  // Use UserId
     
     // Append the status, if required
     ebookData.append('status', newEbook.Status || 1);

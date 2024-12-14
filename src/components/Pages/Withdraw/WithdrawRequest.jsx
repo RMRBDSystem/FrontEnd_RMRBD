@@ -7,7 +7,7 @@ import { addCoinTransaction } from '../../services/Transaction';
 import { updateAccount } from "../../services/AccountService";
 
 import Swal from 'sweetalert2';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const WithDrawRequest = () => {
 
     const [UserId, setUserId] = useState('');
@@ -22,12 +22,12 @@ const WithDrawRequest = () => {
     };
     useEffect(() => {
         const fetchData = async () => {
-            const storedUserId = Cookies.get('UserId');
+            const storedUserId = decryptData(Cookies.get("UserId"));
 
             if (storedUserId) {
                 setUserId(storedUserId);
 
-                const response = await getAccountById(Cookies.get('UserId'));
+                const response = await getAccountById(decryptData(Cookies.get("UserId")));
 
                 setAccount(response);
                 setBankAccountQR(response.accountProfile.bankAccountQR);

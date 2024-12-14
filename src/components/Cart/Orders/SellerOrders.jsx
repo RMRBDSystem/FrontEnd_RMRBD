@@ -8,7 +8,7 @@ import LoadingOverlay from '../../shared/LoadingOverlay';
 import { cancelOrder } from '../../services/OrderService';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const formatAmount = (amount, paymentType) => {
   if (paymentType === 1) {
     return `${amount.toLocaleString('vi-VN')} xu`;
@@ -26,7 +26,7 @@ const SellerOrders = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState({});
-  const sellerId = Cookies.get('UserId');
+  const sellerId = decryptData(Cookies.get("UserId"));
   const [orderStatuses, setOrderStatuses] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [customerDetails, setCustomerDetails] = useState({});

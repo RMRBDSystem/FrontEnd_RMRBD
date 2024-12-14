@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const EditEbookCustomer = () => {
   const navigate = useNavigate();
   
@@ -25,7 +25,7 @@ const EditEbookCustomer = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedEbookId, setSelectedEbookId] = useState(null);
-  const currentUserId = parseInt(Cookies.get('UserId')) || null;
+  const currentUserId = parseInt(decryptData(Cookies.get("UserId"))) || null;
   console.log('Current User ID:', currentUserId);
 
   useEffect(() => {

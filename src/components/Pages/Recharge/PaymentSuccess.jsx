@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { updateAccountCoin } from '../../services/PaymentSuccess.js';
+import { decryptData } from "../../Encrypt/encryptionUtils";
+
 
 const Success = () => {
   const [userId, setUserId] = useState('');
@@ -9,9 +11,10 @@ const Success = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('UserId');
+    const storedUserId = decryptData(Cookies.get("UserId"));
     if (storedUserId) {
       setUserId(storedUserId);
+      console.log("data: ", storedUserId);
     }
 
     const storedCoin = localStorage.getItem('Coin');

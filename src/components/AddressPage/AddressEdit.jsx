@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { FaEdit, FaMapMarkerAlt, FaPhone, FaPlus, FaMapMarked } from 'react-icons/fa';
 import Sidebar from '../Customer/Sidebar';
 import { useNavigate } from 'react-router-dom';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const formatPhoneNumber = (number) => {
   // Remove any non-digit characters
   let cleaned = number.replace(/\D/g, '');
@@ -42,7 +42,7 @@ const displayPhoneNumber = (number) => {
 const AddressEdit = () => {
   const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

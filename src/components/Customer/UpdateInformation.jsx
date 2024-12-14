@@ -6,6 +6,7 @@ import {
   getAccountData,
   updateInformation,
 } from "../services/CustomerService/CustomerService";
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const UpdateInformation = () => {
   const [accountID, setAccountID] = useState(null);
@@ -16,7 +17,7 @@ const UpdateInformation = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const userId = Cookies.get("UserId");
+    const userId = decryptData(Cookies.get("UserId"));
     setAccountID(userId);
     if (userId) {
       fetchAccountData(userId);

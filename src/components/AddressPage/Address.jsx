@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import Sidebar from '../Customer/Sidebar';
 import { useNavigate } from 'react-router-dom';
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const Address = () => {
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
   const [address, setAddress] = useState({
     AddressID: '',
     AccountID: userId,

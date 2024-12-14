@@ -8,7 +8,7 @@ import "../../../assets/styles/Components/BookCard.css";
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
 import { useCart } from '../../Cart/components/CartContext';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 function BookCard({ book }) {
   const navigate = useNavigate();
   const maxStars = 5;
@@ -22,7 +22,7 @@ function BookCard({ book }) {
 
   const checkIfBookInCart = async () => {
     try {
-      const customerId = Cookies.get('UserId');
+      const customerId = decryptData(Cookies.get("UserId"));
       if (!customerId) return;
 
       const existingOrderResponse = await fetch(`https://rmrbdapi.somee.com/odata/BookOrder`, {
@@ -70,7 +70,7 @@ function BookCard({ book }) {
 
   const handleAddToCart = async () => {
     try {
-      const customerId = Cookies.get('UserId');
+      const customerId = decryptData(Cookies.get("UserId"));
       if (!customerId) {
         Swal.fire({
           icon: 'error',
@@ -241,7 +241,7 @@ function BookCard({ book }) {
 
   const handleDeleteFromCart = async () => {
     try {
-      const customerId = Cookies.get('UserId');
+      const customerId = decryptData(Cookies.get("UserId"));
       if (!customerId) {
         Swal.fire({
           icon: 'error',

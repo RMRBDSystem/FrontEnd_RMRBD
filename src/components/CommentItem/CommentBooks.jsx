@@ -11,8 +11,10 @@ import { createNotification } from "../services/NotificationService"
 import { getAccountById } from "../services/AccountService"
 import { getBookById } from "../services/BookService"
 import Swal from 'sweetalert2';
+import { decryptData } from "../Encrypt/encryptionUtils";
+
 const Comments = ({ bookId, createById, roleaccountonline }) => {
-    const accountId = Cookies.get("UserId");
+    const accountId = decryptData(Cookies.get("UserId"));
     const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
     const [activeComment, setActiveComment] = useState(null); //  Tracks active comment for editing
@@ -110,7 +112,6 @@ const Comments = ({ bookId, createById, roleaccountonline }) => {
                 setBook(bookdata)
                 setCreatebyName(receiverName.userName);
                 setBackendComments(data);
-                console.log("reole",roleaccountonline);
             } catch (err) {
                 console.error(err);
             }

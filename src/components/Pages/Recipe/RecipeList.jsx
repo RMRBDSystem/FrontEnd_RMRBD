@@ -1,7 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState, useEffect } from "react";
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const RecipeComponent = () => {
   const [data, setData] = useState([]);
   const [dataAccount, setDataAccount] = useState([]);
@@ -9,7 +9,7 @@ const RecipeComponent = () => {
   const [coin, setCoin] = useState("");
   const [purchasedRecipes, setPurchasedRecipes] = useState(new Set());
   useEffect(() => {
-    const storedUserId = Cookies.get("UserId");
+    const storedUserId = decryptData(Cookies.get("UserId"));
     if (storedUserId) {
       setAccountId(storedUserId);
     }
@@ -38,7 +38,7 @@ const RecipeComponent = () => {
   };
   
   const getAccountInfo = async () => {
-    const accountId = Cookies.get("UserId");
+    const accountId = decryptData(Cookies.get("UserId"));
     try {
       const result = await axios.get(
         `https://localhost:7220/odata/Account/${accountId}`,

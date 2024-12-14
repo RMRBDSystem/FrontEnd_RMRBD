@@ -10,6 +10,7 @@ import { useSocket } from "../../App";
 import { getAccountByRoleId } from "../services/AccountService";
 import { createNotification } from "../services/NotificationService";
 import { updateToSeller } from "../services/CustomerService/CustomerService"
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const UpdateToSeller = () => {
   const [accountID, setAccountID] = useState();
@@ -39,7 +40,7 @@ const UpdateToSeller = () => {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const storedUserId = Cookies.get("UserId");
+        const storedUserId = decryptData(Cookies.get("UserId"));
         if (storedUserId) {
           setAccountID(storedUserId);
         }

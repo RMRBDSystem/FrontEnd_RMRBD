@@ -1,18 +1,15 @@
-// src/components/HandleBuy.js
 import Swal from "sweetalert2";
 import axios from "axios";
-import Cookies from "js-cookie";
+import { getAccountData } from "../../services/CustomerService/CustomerService";
 
 const HandleBuy = async (
   recipe,
   accountId,
-  coin,
   purchasedRecipes,
   getAccountInfo,
   getPurchasedRecipes,
-  setCoin,
   dataAccount,
-  navigate // Thêm navigate như một tham số
+  navigate
 ) => {
   if (!accountId) {
     Swal.fire({
@@ -45,7 +42,7 @@ const HandleBuy = async (
     }).then((result) => {
       if (result.isConfirmed) {
         // Điều hướng tới trang chi tiết công thức
-        navigate(`/recipe-list-seller/${recipe.recipeId}`);
+        navigate(`/recipe-seller-detail/${recipe.recipeId}`);
       }
       // Nếu nhấn "Hủy", không làm gì cả, ở lại trang
     });
@@ -76,28 +73,31 @@ const HandleBuy = async (
   });
 
   try {
-    // Fetch seller information
-    const sellerResponse = await axios.get(
-      `https://rmrbdapi.somee.com/odata/Account/${recipe.createById}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Token: "123-abc",
-        },
-      }
-    );
-    const sellerData = sellerResponse.data;
+    // Gọi tới API để lấy thông tin của seller
+    const sellerResponse = await getAccountData(recipe.createById);
+    const sellerData = sellerResponse;
 
-    const newCoin = coin - recipe.price;
+    const newCoin = dataAccount.coin - recipe.price;
     if (newCoin < 0) {
-      Swal.fire(
-        "Thông báo",
-        "Bạn không đủ tiền để thực hiện giao dịch này.",
-        "error"
-      );
-      loadingToast.close(); // Close the loading toast
+      Swal.fire({
+        title: "Thông báo",
+        text: "Bạn không đủ tiền để thực hiện giao dịch này.",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Nạp tiền",
+        cancelButtonText: "Quay lại",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Điều hướng tới trang chi tiết công thức
+          navigate(`/recharge`);
+        }
+        // Nếu nhấn "Hủy", không làm gì cả, ở lại trang
+      });
+      loadingToast.close();
       return;
     }
+
+    // Dữ liệu của người mua (Dùng để trừ coin sau khi người mua thanh toán)
 
     const data = {
       coin: newCoin,
@@ -107,6 +107,8 @@ const HandleBuy = async (
       roleId: dataAccount.roleId,
       accountStatus: dataAccount.accountStatus,
     };
+
+    // Dữ liệu của người bán (Dùng để cộng coin sau khi người mua thanh toán)
     const dataSL = {
       coin: sellerData.coin + recipe.price,
       email: sellerData.email,
@@ -116,6 +118,7 @@ const HandleBuy = async (
       accountStatus: sellerData.accountStatus,
     };
 
+    // Dữ liệu của recipe sau khi người dùng mua
     const dataPR = {
       recipeId: recipe.recipeId,
       customerId: accountId,
@@ -127,7 +130,7 @@ const HandleBuy = async (
       status: -1,
     };
 
-    // Recipe transaction logs
+    // Dữ liệu RT của người mua
     const dataRT = {
       recipeId: recipe.recipeId,
       customerId: accountId,
@@ -136,6 +139,8 @@ const HandleBuy = async (
       status: 1,
       detail: "Buy recipe",
     };
+
+    // Dữ liệu RT của người bán
     const dataRTSeller = {
       recipeId: recipe.recipeId,
       customerId: sellerData.accountId,
@@ -144,7 +149,7 @@ const HandleBuy = async (
       status: 1,
       detail: "Sell recipe",
     };
-
+    // Đẩy dữ liệu của người mua (trừ coin)
     await axios.put(
       `https://rmrbdapi.somee.com/odata/Account/Info/${accountId}`,
       data,
@@ -155,6 +160,8 @@ const HandleBuy = async (
         },
       }
     );
+    // Đẩy dữ liệu của người bán (cộng coin)
+
     await axios.put(
       `https://rmrbdapi.somee.com/odata/Account/Info/${recipe.createById}`,
       dataSL,
@@ -165,6 +172,9 @@ const HandleBuy = async (
         },
       }
     );
+
+    // Lưu công thức cho người mua
+
     await axios.post(
       "https://rmrbdapi.somee.com/odata/PersonalRecipe",
       dataPR,
@@ -175,6 +185,8 @@ const HandleBuy = async (
         },
       }
     );
+
+    // Lưu recipe transaction của người mua
     await axios.post(
       "https://rmrbdapi.somee.com/odata/RecipeTransaction",
       dataRT,
@@ -185,6 +197,8 @@ const HandleBuy = async (
         },
       }
     );
+
+    // Lưu recipe transaction của người bán
     await axios.post(
       "https://rmrbdapi.somee.com/odata/RecipeTransaction",
       dataRTSeller,
@@ -200,9 +214,10 @@ const HandleBuy = async (
       "Thành công",
       "Giao dịch mua công thức đã được thực hiện thành công!",
       "success"
-    );
+    ).then(() => {
+      window.location.reload(); // Reload lại trang
+    });
     getPurchasedRecipes();
-    Cookies.set("Coin", newCoin);
   } catch (error) {
     Swal.fire(
       "Lỗi",

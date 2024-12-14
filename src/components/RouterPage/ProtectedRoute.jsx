@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
 import Cookies from "js-cookie";
-
+import {decryptData} from "../Encrypt/encryptionUtils"
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const userRole = Cookies.get('UserRole');
+  const userRole = decryptData(Cookies.get("UserRole"));
 
   // Nếu không đăng nhập, điều hướng về trang chủ
   if (!userRole) {

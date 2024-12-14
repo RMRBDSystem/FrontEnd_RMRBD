@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 import { Table, Button } from 'react-bootstrap';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css'; // Ensure you have the necessary styles
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const PDFProtect = () => {
   const [userEbooks, setUserEbooks] = useState([]);
   const [selectedpdfurl, setSelectedpdfurl] = useState(null);
@@ -18,7 +18,7 @@ const PDFProtect = () => {
   const [currentPage, setCurrentPage] = useState(1); // Track the current page number
 
   const getUserIdFromCookie = () => {
-    const userId = Cookies.get('UserId');
+    const userId = decryptData(Cookies.get("UserId"));
     return userId;
   };
 

@@ -9,6 +9,7 @@ import {
 import Cookies from "js-cookie";
 import DataTable from "react-data-table-component";
 import { listEbook } from "../services/ModeratorService/Api";
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const EbookList = () => {
   const [ebooks, setebooks] = useState([]);
@@ -19,7 +20,7 @@ const EbookList = () => {
   const [filterStatus, setFilterStatus] = useState(""); // For ebook status filter
 
   useEffect(() => {
-    setcensorID(Cookies.get("UserId"));
+    setcensorID(decryptData(Cookies.get("UserId")));
   }, []);
 
   const fetchebooks = async () => {

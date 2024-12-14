@@ -7,6 +7,7 @@ import EyeIcon from "/images/icon/eye.svg";
 import Sidebar from "../Customer/Sidebar";
 import {fetchRecipes} from "../services/SellerService/Api";
 import Swal from "sweetalert2";
+import { decryptData } from "../Encrypt/encryptionUtils";
 import {
   FaFilter,
   FaSearch,
@@ -20,7 +21,7 @@ const ShowRecipes = () => {
   const [accountId, setAccountID] = useState("");
 
   useEffect(() => {
-    const storedUserId = Cookies.get("UserId");
+    const storedUserId = decryptData(Cookies.get("UserId"));
     console.log("Stored UserId:", storedUserId);
 
     if (storedUserId) {

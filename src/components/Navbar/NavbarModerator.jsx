@@ -6,18 +6,18 @@ import axios from "axios";
 import { useAuth } from "../RouterPage/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const NavbarModerator = () => {
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [accountData, setAccountData] = useState({});
-  const userRole = Cookies.get("UserRole");
+  const userRole = decryptData(Cookies.get("UserRole"));
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userId = Cookies.get("UserId");
+    const userId = decryptData(Cookies.get("UserId"));
     if (userId) {
       fetchAccountData(userId);
     }

@@ -17,6 +17,7 @@ import {
 import BuildIcon from "@mui/icons-material/Build";
 import Swal from "sweetalert2";
 import { fetchRecipeData,saveRecipeData } from "../../services/CustomerService/CustomerService";
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const EditSavedRecipe = () => {
   const { recipeId } = useParams();
   const [recipeData, setRecipeData] = useState(null);
@@ -37,7 +38,7 @@ const EditSavedRecipe = () => {
   const getRecipeData = async (recipeId) => {
     setLoading(true);
     try {
-      const userId = Cookies.get("UserId");
+      const userId = decryptData(Cookies.get("UserId")) ;
       const data = await fetchRecipeData(userId, recipeId);
 
       setRecipeData(data);
@@ -100,7 +101,7 @@ const EditSavedRecipe = () => {
   const executeAction = async () => {
     if (confirmDialog.action === "save") {
       try {
-        const userId = Cookies.get("UserId");
+        const userId = decryptData(Cookies.get("UserId"));
         await saveRecipeData(userId, recipeId, editFields);
 
         Swal.fire({

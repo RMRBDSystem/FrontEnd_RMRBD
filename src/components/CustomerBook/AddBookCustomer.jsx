@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const AddBook = () => {
   const [book, setBook] = useState({
     createById: '',
@@ -32,7 +32,7 @@ const AddBook = () => {
   const [formattedAddresses, setFormattedAddresses] = useState([]);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
   const [isBookFormVisible, setIsBookFormVisible] = useState(true);
   const [previewImages, setPreviewImages] = useState([]);
   const navigate = useNavigate();

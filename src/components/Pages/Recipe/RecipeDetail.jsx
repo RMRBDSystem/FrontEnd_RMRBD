@@ -8,7 +8,7 @@ import {
   getCountRecipeRateByRecipeId,
   checkRated,
 } from "../../services/RecipeRateService";
-import { getImagesByRecipeId, } from "../../services/SellerService/Api";
+
 import {
   getAccountData,
   fetchPurchasedRecipes,
@@ -26,18 +26,19 @@ import "../../../assets/styles/Components/blurred.css";
 import { useNavigate } from "react-router-dom";
 import CheckMarkIcon from "/images/icon/iconscheckmark24.png";
 import Swal from "sweetalert2";
+import { decryptData } from "../../Encrypt/encryptionUtils";
+
 const RecipeDetail = () => {
-  const accountId = Cookies.get("UserId");
+  const accountId = decryptData(Cookies.get("UserId"));
   const { recipeId } = useParams();
   const [recipe, setRecipe] = useState(null);
-  const [images, setImages] = useState([]); // Thay đổi thành mảng hình ảnh
+  const [imageUrl, setImageUrl] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [accountName, setAccountName] = useState("");
   const [dataAccount, setDataAccount] = useState([]);
   const [purchasedRecipes, setPurchasedRecipes] = useState(new Set());
-  const [coin, setCoin] = useState("");
   const navigate = useNavigate();
   const maxStars = 5;
   //rating
@@ -49,21 +50,19 @@ const RecipeDetail = () => {
   const [hover, setHover] = useState(null);
   const [checkRatedStatus, setcheckRated] = useState("");
   const [roleaccountonline, setRoleaccountonline] = useState("");
-  const [mainImage, setMainImage] = useState(null);
   const handleOpenModal = () => {
     setShowModal(true);
   };
   useEffect(() => {
     const asyncEffect = async () => {
-      const storedCoin = Cookies.get("Coin");
-      if (storedCoin) {
-        setCoin(storedCoin);
-      }
       await getAccountInfo();
       await getPurchasedRecipes();
     };
     asyncEffect();
   }, [accountId]);
+  useEffect(() => {
+    console.log("Updated dataAccount Coin:", dataAccount.coin);
+  }, [dataAccount]);
   useEffect(() => {
     console.log("Updated purchased recipes:", purchasedRecipes);
   }, [purchasedRecipes]);
@@ -78,7 +77,7 @@ const RecipeDetail = () => {
   };
   // Lấy thông tin tài khoản
   const getAccountInfo = async () => {
-    const accountId = Cookies.get("UserId");
+    const accountId = decryptData(Cookies.get("UserId"));
     try {
       const result = await getAccountData(accountId);
       await setDataAccount(result);
@@ -88,7 +87,7 @@ const RecipeDetail = () => {
   };
   // Hàm gọi API để lấy các công thức đã mua
   const getPurchasedRecipes = async () => {
-    const storedUserId = Cookies.get("UserId");
+    const storedUserId = decryptData(Cookies.get("UserId"));
     setLoading(true);
 
     try {
@@ -96,6 +95,12 @@ const RecipeDetail = () => {
       setPurchasedRecipes(purchasedIds);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
+      Swal.fire({
+        title: "Lỗi",
+        text: "Không thể lấy danh sách công thức đã mua.",
+        icon: "error",
+        confirmButtonText: "Thử lại",
+      });
     } finally {
       setLoading(false);
     }
@@ -139,7 +144,6 @@ const RecipeDetail = () => {
           checkrateddata,
           createbyName,
           infoacconline,
-          imagesData,
         ] = await Promise.all([
           getRecipeById(recipeId),
           getRecipeRatePoint(recipeId),
@@ -147,7 +151,6 @@ const RecipeDetail = () => {
           checkRated(recipeId, accountId),
           getAccountById((await getRecipeById(recipeId)).createById), // Lưu ý: có thể cần kiểm tra cách gọi này
           getAccountById(accountId),
-          getImagesByRecipeId(recipeId),
         ]);
         setcheckRated(checkrateddata?.ratePoint);
         //console.log('Đã rated: ', checkRatedStatus);
@@ -158,8 +161,7 @@ const RecipeDetail = () => {
         setRoleaccountonline(infoacconline.roleId);
         //console.log('Đã rated: ', data);
         setAccountName(createbyName.userName);
-        setImages(imagesData);
-        setMainImage(imagesData[0]?.imageUrl);
+        setImageUrl(data.images);
       } catch (err) {
         console.error(err);
       } finally {
@@ -168,6 +170,7 @@ const RecipeDetail = () => {
     };
     fetchRecipeData();
   }, [recipeId, accountId]);
+
   // Calculate how many stars are filled based on averageRate
   let roundedAverageRate = 0;
   if (averageRate > 0) {
@@ -178,7 +181,7 @@ const RecipeDetail = () => {
 
   if (loading) return <p>Đang tải dữ liệu...</p>;
   if (error) return <p>{error}</p>;
-  if (!recipe) return;
+  if (!recipe) return ;
 
   const isLongDescription = recipe.description.length > 300;
   const displayDescription = showFullDescription
@@ -198,32 +201,14 @@ const RecipeDetail = () => {
 
         {/* Phần hình ảnh */}
         <div className="mb-4 z-10 flex flex-wrap gap-4">
-          {/* Recipe Image Section */}
-          <div className="relative w-full md:w-2/3 flex-1">
-            {/* Main Recipe Image */}
+          {imageUrl.map((image, index) => (
             <img
-              src={mainImage}
-              alt="Main Recipe"
-              className="w-full rounded-lg object-cover shadow-md"
+              key={index}
+              src={image.imageUrl || "https://via.placeholder.com/150"}
+              alt={recipe.recipeName}
+              className="w-full rounded-lg shadow-lg"
             />
-
-            {/* Thumbnail Images */}
-            <div className="mt-4 flex gap-4 overflow-x-auto">
-              {images && images.length > 0 ? (
-                images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image.imageUrl || ""}
-                    alt={`Recipe image ${index + 1}`}
-                    className="w-20 h-20 rounded-lg object-cover shadow-md cursor-pointer hover:opacity-75"
-                    onClick={() => setMainImage(image.imageUrl)}
-                  />
-                ))
-              ) : (
-                <p className="text-lg text-gray-500">No images available</p>
-              )}
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Các nút */}
@@ -417,7 +402,7 @@ const RecipeDetail = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
               <h2 className="text-2xl font-bold mb-4 text-center">
-                Hãy cho chúng tôi biết đánh giá của bạn về công thức này
+                Let us know how you liked this recipe
               </h2>
               <div className="text-center">
                 {[...Array(5)].map((star, index) => {
@@ -446,7 +431,7 @@ const RecipeDetail = () => {
                   );
                 })}
                 {!checkRatedStatus ? (
-                  <p>Đánh giá của bạn là {ratepoint}</p>
+                  <p>Your star rating is {ratepoint}</p>
                 ) : (
                   <>
                     <p
@@ -456,13 +441,13 @@ const RecipeDetail = () => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      Đánh giá trước của bạn là {checkRatedStatus}{" "}
+                      Your last star rating was {checkRatedStatus}{" "}
                       <FaStar
                         color="#ffc107"
                         style={{ marginLeft: "2px", marginBottom: "1.5px" }}
                       />
                     </p>
-                    <p>Đánh giá hiện tại {ratepoint}</p>
+                    <p>Your star rating this time is {ratepoint}</p>
                   </>
                 )}
               </div>
@@ -471,7 +456,7 @@ const RecipeDetail = () => {
                   className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
                   onClick={() => setShowModal(false)}
                 >
-                  Huỷ
+                  Cancel
                 </button>
                 <button
                   className="bg-custom-orange hover:bg-orange-500 text-white font-bold py-2 px-4 rounded"
@@ -484,7 +469,7 @@ const RecipeDetail = () => {
                       : handleSaveRecipeRate();
                   }}
                 >
-                  {checkRatedStatus ? "Thay đổi" : "Lưu"}
+                  {checkRatedStatus ? "Update Ratepoint" : "Save Ratepoint"}
                 </button>
               </div>
             </div>
@@ -508,7 +493,7 @@ const RecipeDetail = () => {
           <span role="img" aria-label="star">
             ✨
           </span>{" "}
-          Đánh giá công thức này
+          Give your stars for this recipe
         </button>
 
         {/* Nút "Mua công thức này" chỉ hiển thị khi chưa mua */}
@@ -521,11 +506,9 @@ const RecipeDetail = () => {
               HandleBuy(
                 recipe,
                 accountId,
-                coin,
                 purchasedRecipes,
                 getAccountInfo,
                 getPurchasedRecipes,
-                setCoin,
                 dataAccount,
                 navigate
               );

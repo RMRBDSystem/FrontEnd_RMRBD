@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getCoinTransactionByAccountId } from '../../services/Transaction';
 import { FaArrowLeft, FaCheckCircle, FaTimesCircle, FaCalendarAlt, FaExchangeAlt } from 'react-icons/fa';
 import Cookies from 'js-cookie';
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const CoinTransaction = () => {
   const [transactions, setTransactions] = useState([]);
   const handleGoBack = () => {
@@ -10,7 +11,7 @@ const CoinTransaction = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      const response = await getCoinTransactionByAccountId(Cookies.get('UserId'));
+      const response = await getCoinTransactionByAccountId(decryptData(Cookies.get("UserId")));
       if (response) {
         setTransactions(response);
       }

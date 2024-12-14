@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Sidebar from "../../Customer/Sidebar";
 import {fetchPersonalRecipes} from "../../services/CustomerService/CustomerService"
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const GetListSaveRecipe = () => {
   const [data, setData] = useState([]); 
   const [accountId, setAccountID] = useState(null); 
@@ -23,7 +24,7 @@ const GetListSaveRecipe = () => {
   useEffect(() => {
     if (!isFetchCalled.current) {
       isFetchCalled.current = true; 
-      const storedUserId = Cookies.get("UserId");
+      const storedUserId = decryptData(Cookies.get("UserId"));
       if (storedUserId) {
         setAccountID(storedUserId);
       }
@@ -34,7 +35,7 @@ const GetListSaveRecipe = () => {
   const getData = async () => {
     try {
       setLoading(true); 
-      const accountId = Cookies.get("UserId");
+      const accountId = decryptData(Cookies.get("UserId"));
       const fetchedData = await fetchPersonalRecipes(accountId);
       setData(fetchedData);
     } catch (error) {

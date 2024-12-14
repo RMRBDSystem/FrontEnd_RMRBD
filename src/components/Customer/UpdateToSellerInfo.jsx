@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Swal from "sweetalert2";
 import { getAccountProfile } from "../services/CustomerService/CustomerService";
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const UpdateToSellerInfo = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const UpdateToSellerInfo = () => {
   // // Biến kiểm tra
   const isFetchCalled = useRef(false);
   useEffect(() => {
-    const userId = Cookies.get("UserId");
+    const userId = decryptData(Cookies.get("UserId"));
     setAccountID(userId);
     if (userId && !isFetchCalled.current) {
       fetchAccountProfileData(userId);

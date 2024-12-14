@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from "../Navbar/Navbar";
 import Footer from '../Footer/Footer';
-
+import { decryptData } from "../Encrypt/encryptionUtils";
 const BookList = () => {
   const [books, setBooks] = useState([]);
   const [addresses, setAddresses] = useState([]);
@@ -26,7 +26,7 @@ const BookList = () => {
   const [height, setHeight] = useState('');
   const [requiredNote, setRequiredNote] = useState('');
   const [author, setAuthor] = useState('');
-  const userId = Cookies.get('UserId');
+  const userId = decryptData(Cookies.get("UserId"));
 
   useEffect(() => {
     const fetchBooks = async () => {

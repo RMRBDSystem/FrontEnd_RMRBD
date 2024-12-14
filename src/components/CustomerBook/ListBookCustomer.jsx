@@ -13,6 +13,7 @@ import Cookies from "js-cookie";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Customer/Sidebar";
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const BookList = () => {
   const [Books, setBooks] = useState([]);
@@ -24,7 +25,7 @@ const BookList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setAccountID(Cookies.get("UserId"));
+    setAccountID(decryptData(Cookies.get("UserId")));
   }, []);
   useEffect(() => {
     if (accountId) {

@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 import { listAccountSellerAndCustomer } from "../services/ModeratorService/Api";
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const AccountList = () => {
   const [accounts, setAccounts] = useState([]);
@@ -22,7 +23,7 @@ const AccountList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setcensorID(Cookies.get("UserId"));
+    setcensorID(decryptData(Cookies.get("UserId")));
   }, []);
 
   const fetchAccounts = async () => {

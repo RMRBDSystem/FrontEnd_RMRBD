@@ -12,10 +12,12 @@ import {getAccountById} from "../services/AccountService"
 import {getRecipeById} from "../services/RecipeService"
 import {createNotification} from "../services/NotificationService"
 import Swal from 'sweetalert2';
+import { decryptData } from "../Encrypt/encryptionUtils";
+
 //import PropTypes from "prop-types";
 import {useSocket} from "../../App"
 const Comments = ({ recipeId, createById,roleaccountonline}) => {
-    const accountId = Cookies.get("UserId");
+    const accountId = decryptData(Cookies.get("UserId"));
     const [backendComments, setBackendComments] = useState([]); // All comments
     const [visibleComments, setVisibleComments] = useState(3); // Number of comments to display initially
     const [activeComment, setActiveComment] = useState(null); //  Tracks active comment for editing

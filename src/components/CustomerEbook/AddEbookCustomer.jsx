@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
+import { decryptData } from "../Encrypt/encryptionUtils";
 
 const EbookCustomer = () => {
   const [newEbook, setNewEbook] = useState({
@@ -57,8 +58,7 @@ const EbookCustomer = () => {
   }, []);
 
   // Retrieve the logged-in user data from cookies
-  const userName = Cookies.get("UserName"); // Get userName from cookies
-  const UserId = Cookies.get("UserId"); // Get UserId from cookies (after login)
+  const UserId = decryptData(Cookies.get("UserId")); // Get UserId from cookies (after login)
 
   // Update image handling to use dropzone
   const handleImageDrop = useCallback((acceptedFiles) => {
@@ -218,7 +218,7 @@ const EbookCustomer = () => {
     if (!newEbook.Author) missingFields.push("Tác giả"); // Add this line
 
     // Ensure the user is logged in and UserId is available
-    if (!userName || !UserId) {
+    if (!UserId) {
       missingFields.push("Người dùng chưa đăng nhập hoặc thiếu UserId");
     }
 
@@ -252,7 +252,7 @@ const EbookCustomer = () => {
     ebookData.append("categoryId", newEbook.categoryId);
 
     // Append UserId as createById
-    ebookData.append("createById", UserId); // Use UserId, not userName
+    ebookData.append("createById", UserId); // Use UserId
 
     // Append the status, if required
     ebookData.append("status", newEbook.Status || 1);

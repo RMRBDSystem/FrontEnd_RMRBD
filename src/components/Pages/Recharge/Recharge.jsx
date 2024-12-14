@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { getAccountById } from '../../services/AccountService';
 //import { AddCoin } from '../../services/AddCoin.js';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 
 const RechargePage = () => {
   const conversionRate = 0.85;
@@ -66,17 +66,15 @@ const RechargePage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const storedUserId = Cookies.get('UserId');
+      const storedUserId = decryptData(Cookies.get("UserId"));
       if (storedUserId) {
         setUserId(storedUserId);
+        console.log("Data: ", storedUserId);
       }
-      const storedUserName = Cookies.get('UserName');
-      if (storedUserName) {
-        setUserName(storedUserName);
-      }
-      const storedCoin = await getAccountById(Cookies.get("UserId"));
+      const storedCoin = await getAccountById(decryptData(Cookies.get("UserId")));
       if (storedCoin) {
         setCoin(storedCoin.coin);
+        setUserName(storedCoin.userName);
       }
     };
     fetchUserData();

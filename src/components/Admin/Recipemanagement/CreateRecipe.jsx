@@ -6,6 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import { decryptData } from "../../Encrypt/encryptionUtils";
+
 const RecipeCustomer = () => {
   const [recipeName, setRecipeName] = useState("");
   const [numberOfService, setNumberOfService] = useState("");
@@ -26,7 +28,7 @@ const RecipeCustomer = () => {
   const [status, setStatus] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
-    const storedUserId = Cookies.get("UserId");
+    const storedUserId = decryptData(Cookies.get("UserId"));
     console.log("Stored UserId:", storedUserId);
     if (storedUserId) {
       setcreateById(storedUserId);

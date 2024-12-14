@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';  // Thêm useNavigate để đi�
 import { getReportByAccountId, deleteReport } from '../../services/ReportService';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import Swal from 'sweetalert2';
-
+import { decryptData } from "../../Encrypt/encryptionUtils";
 const ReportList = () => {
     const navigate = useNavigate();  // Khai báo useNavigate để điều hướng
     const [UserId, setUserId] = useState('');
@@ -12,7 +12,7 @@ const ReportList = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const storedUserId = Cookies.get('UserId');
+            const storedUserId = decryptData(Cookies.get("UserId"));
             if (storedUserId) {
                 setUserId(storedUserId);
                 const reports = await getReportByAccountId(storedUserId);
@@ -30,7 +30,7 @@ const ReportList = () => {
         try {
             const response = await deleteReport(id);
             if (response.status) {
-                const storedUserId = Cookies.get('UserId');
+                const storedUserId = decryptData(Cookies.get("UserId"));
                 if (storedUserId) {
                     setUserId(storedUserId);
                     const reports = await getReportByAccountId(storedUserId);

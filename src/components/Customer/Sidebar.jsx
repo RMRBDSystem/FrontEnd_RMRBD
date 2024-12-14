@@ -12,12 +12,14 @@ import {
   FiMapPin
 } from "react-icons/fi";
 import { getAccountData } from "../services/CustomerService/CustomerService";
+import { decryptData } from "../Encrypt/encryptionUtils";
+
 const Sidebar = () => {
   const [accountData, setAccountData] = useState({});
   const location = useLocation();
   const isFetchCalled = useRef(false);
   useEffect(() => {
-    const userId = Cookies.get("UserId");
+    const userId = decryptData(Cookies.get("UserId"));
     console.log("Gọi useEffect Sidebar");
     if (userId && !isFetchCalled.current) {
       fetchAccountData(userId);
