@@ -95,12 +95,6 @@ const RecipeDetail = () => {
       setPurchasedRecipes(purchasedIds);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
-      Swal.fire({
-        title: "Lỗi",
-        text: "Không thể lấy danh sách công thức đã mua.",
-        icon: "error",
-        confirmButtonText: "Thử lại",
-      });
     } finally {
       setLoading(false);
     }
@@ -181,7 +175,7 @@ const RecipeDetail = () => {
 
   if (loading) return <p>Đang tải dữ liệu...</p>;
   if (error) return <p>{error}</p>;
-  if (!recipe) return ;
+  if (!recipe) return <p>Không tải được công thức này.</p>;
 
   const isLongDescription = recipe.description.length > 300;
   const displayDescription = showFullDescription
