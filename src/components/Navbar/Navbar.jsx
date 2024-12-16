@@ -262,13 +262,13 @@ const Navbar = () => {
   }, []);
   return (
     <nav
-      className={`text-center z-50 w-full absolute ${stickyNavbar
+      className={` z-50 w-full absolute ${stickyNavbar
         ? 'font-expletus animate-fade-in-down sticky top-0 bg-gray-900 shadow-sm'
         : ''
         }`}
     >
       <div
-        className={`section-center flex items-center justify-between lg:justify-center lg:space-x-32 sticky text-center z-50 w-full ${stickyNavbar ? 'py-4' : ''
+        className={`section-center flex items-center justify-between lg:justify-center lg:space-x-32 sticky z-50 w-full ${stickyNavbar ? 'py-4' : ''
           }`}
       >
         <ul className="nav-links-container">
@@ -448,6 +448,13 @@ const Navbar = () => {
                         />
                         Công thức đã lưu
                       </NavLink>
+                      <NavLink
+                        to="/update-information"
+                        className="block px-2 py-2 hover:bg-gray-200 rounded-md flex items-center"
+                      >
+                        <img src="/images/icon/edit-profile.svg" alt="Update Information" className="h-5 w-5 mr-2" />
+                        Cập nhật tài khoản
+                      </NavLink>
 
                       <NavLink
                         to="/report"
@@ -540,6 +547,13 @@ const Navbar = () => {
                           className="h-5 w-5 mr-2"
                         />
                         Yêu cầu rút tiền
+                      </NavLink>
+                      <NavLink
+                        to="/update-information"
+                        className="block px-2 py-2 hover:bg-gray-200 rounded-md flex items-center"
+                      >
+                        <img src="/images/icon/edit-profile.svg" alt="Update Information" className="h-5 w-5 mr-2" />
+                        Cập nhật tài khoản
                       </NavLink>
                       <NavLink
                         to="/report"

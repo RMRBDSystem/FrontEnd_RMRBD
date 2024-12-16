@@ -153,9 +153,9 @@ function Book() {
                     <li key={index + 1}>
                       <button
                         onClick={() => handlePageChange(index + 1)}
-                        className={`w-9 h-9 flex items-center justify-center ${currentPage === index + 1
-                          ? "bg-gradient-to-br from-yellow-500 via-green-300 to-blue-500 text-black font-bold"
-                          : "border border-gray-800 text-gray-400 hover:text-yellow-300"
+                        className={`flex w-9 h-9 items-center justify-center ${currentPage === index + 1
+                          ? "bg-white text-black font-bold"
+                          : "text-gray-400 hover:text-red-500 border border-gray-800 font-bold"
                           }`}
                       >
                         {index + 1}

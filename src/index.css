@@ -103,3 +103,14 @@ body::-webkit-scrollbar-thumb {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration       : 300ms;
 }
+.book-border {
+  border-radius: 12px;
+  background: linear-gradient(90deg, 
+    rgba(2, 0, 36, 0.39), 
+    rgba(0, 0, 0, 0.5) 1.83%, 
+    hsla(0, 0%, 100%, 0.36) 3.21%, 
+    rgba(0, 0, 0, 0.33) 4.72%, 
+    rgba(247, 254, 255, 0.28) 9.84%, 
+    hsla(0, 0%, 100%, 0) 47.85%
+  );
+}

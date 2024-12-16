@@ -14,7 +14,7 @@ import { getAccountById } from "../../services/AccountService"
 import { getProvinceName, fetchDistrictName, fetchWardName } from '../../services/AddressService';
 import { ToastContainer, toast } from 'react-toastify';
 import { useSocket } from "../../../App"
-import {createNotification} from "../../services/NotificationService"
+import { createNotification } from "../../services/NotificationService"
 import Swal from 'sweetalert2';
 import { useCart } from '../../Cart/components/CartContext';
 import { decryptData } from "../../Encrypt/encryptionUtils";
@@ -43,7 +43,7 @@ const BookDetail = () => {
     const [hover, setHover] = useState(null);
     const [checkRatedStatus, setcheckRated] = useState("");
     const [accountName, setAccountName] = useState("")
-    const [roleaccountonline,setRoleaccountonline] = useState("");
+    const [roleaccountonline, setRoleaccountonline] = useState("");
     const handleOpenModal = () => {
         setShowModal(true);
     };
@@ -71,7 +71,7 @@ const BookDetail = () => {
         socket.emit("sendNotification", {
             senderName: accountOnline,
             receiverName: accountName,
-            content:text,
+            content: text,
         });
         const addNotification = () => {
             const newNotificationData = {
@@ -94,7 +94,7 @@ const BookDetail = () => {
                 const countrate = await getCountBookRateBybookId(bookId);
                 const checkrateddata = await checkRated(accountId, bookId);
                 const createbyName = await getAccountById(data.createById);
-                const infoacconline =await getAccountById(accountId);
+                const infoacconline = await getAccountById(accountId);
                 setcheckRated(checkrateddata?.ratePoint);
                 setCreateById(data.createById);
                 setAverageRate(rateData[0]?.AvgRatePoint);
@@ -166,8 +166,8 @@ const BookDetail = () => {
             }
 
             const allOrdersData = await existingOrderResponse.json();
-            const cartOrders = allOrdersData.filter(order => 
-                order.customerId === parseInt(customerId) && 
+            const cartOrders = allOrdersData.filter(order =>
+                order.customerId === parseInt(customerId) &&
                 order.orderCode === null
             );
 
@@ -270,9 +270,18 @@ const BookDetail = () => {
                     {/* Lớp nền */}
                     <div className="absolute inset-0 bg-gray-100 rounded-lg shadow-inner p-6 -z-10"></div>
 
-                    {/* Phần hình ảnh */}
-                    <div className="mb-4 z-10">
-                        <img src={imageUrl || 'https://via.placeholder.com/150'} alt={book.bookName} className="w-full rounded-lg shadow-lg" />
+                    {/* Lớp book-border nằm trên phần hình ảnh, chỉ phủ lên hình ảnh */}
+                    <div className='relative'>
+                        <div className="absolute top-0 left-0 right-0 bottom-0 book-border z-20"></div> {/* Book border overlay */}
+
+                        {/* Phần hình ảnh */}
+                        <div className="mb-4 relative z-10">
+                            <img
+                                src={imageUrl || 'https://via.placeholder.com/150'}
+                                alt={book.bookName}
+                                className="w-full rounded-lg shadow-lg"
+                            />
+                        </div>
                     </div>
 
                     {/* Các nút */}
@@ -304,7 +313,6 @@ const BookDetail = () => {
                         </Tooltip>
                     </div>
                 </div>
-
                 {/* Right Section */}
                 <div>
                     <h1 className="text-4xl font-bold text-gray-800">{book.bookName}</h1>
@@ -511,7 +519,7 @@ const BookDetail = () => {
                                         onClick={() => {
                                             handleNotification(`${accountOnline} đã đánh giá ${ratepoint} sao về sách ${book.recipeName} của bạn`);
                                             checkRatedStatus ? handleUpdateRecipeRate() : handleSaveRecipeRate();
-                                          }}
+                                        }}
                                     >
                                         {checkRatedStatus ? "Thay đổi" : "Lưu"}
                                     </button>
@@ -525,13 +533,13 @@ const BookDetail = () => {
                         <span role="img" aria-label="write">✏️</span> Đánh giá cuốn sách này
                     </button>
                 </div>
-                <div className="max-w-10xl mx-auto p-6 bg-white shadow-md rounded-lg flex justify-center" style={{width:"205%"}}>
+                <div className="max-w-10xl mx-auto p-6 bg-white shadow-md rounded-lg flex justify-center" style={{ width: "205%" }}>
                     <div className="w-full max-w-6xl">
-                    <CommentBooks bookId={bookId} createById={createById} roleaccountonline={roleaccountonline} />
+                        <CommentBooks bookId={bookId} createById={createById} roleaccountonline={roleaccountonline} />
                     </div>
                 </div>
             </div>
-            
+
             <ToastContainer />
         </>
 

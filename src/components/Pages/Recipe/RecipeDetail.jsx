@@ -307,7 +307,7 @@ const RecipeDetail = () => {
             )}
             <li>
               <span className="font-semibold">Giá:</span>{" "}
-              {recipe.price ? recipe.price + " đ" : "Free"}
+              {recipe.price ? recipe.price + " Xu" : "Free"}
             </li>
             <li>
               <span className="font-semibold">Thành phần:</span>{" "}

@@ -2,85 +2,194 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { searchRecipe, searchBook, searchEbook } from '../services/SearchService';
 
-
 const Product = () => {
-
     const { searchString = "" } = useParams();
     const [Recipes, setRecipes] = useState([]);
     const [Books, setBooks] = useState([]);
     const [Ebooks, setEbooks] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         const fetchProducts = async () => {
-            const recpie = await searchRecipe(searchString);
-            const book = await searchBook(searchString);
-            const ebook = await searchEbook(searchString);
-            setRecipes(recpie.slice(0, 6));
-            setBooks(book.slice(0, 6));
-            setEbooks(ebook.slice(0, 6));
+            try {
+                const recpie = await searchRecipe(searchString);
+                const book = await searchBook(searchString);
+                const ebook = await searchEbook(searchString);
+                setRecipes(recpie.slice(0, 6));
+                setBooks(book.slice(0, 6));
+                setEbooks(ebook.slice(0, 6));
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchProducts();
     }, [searchString]);
 
-
     return (
         <section className="section-center">
-            <div className='container mt-5'>
-                <h1 className='text-center mb-5'>Tìm kiếm sản phẩm: {searchString}</h1>
-                <div className='row'>
-                    <h3 className='text-center mb-3'>Công thức nấu ăn: <a href={`/recipe/${searchString}`} className='btn btn-link'>Xem thêm</a></h3>
-                    <div className='row justify-content-center'>
-                        {Recipes.map((recipe, index) => (
-                            <div className='col-md-4 mb-4' key={index}>
-                                <div className='card h-100'>
-                                    <img className='card-img-top' src={recipe.images[0].imageUrl} alt={recipe.name} />
-                                    <div className='card-body'>
-                                        <h5 className='card-title'>{recipe.recipeName}</h5>
-                                        <p className='card-text'>{recipe.price} xu</p>
-                                        <a href={`/recipe-detail/${recipe.recipeId}`} className='btn btn-primary btn-block'>Xem chi tiết</a>
-                                    </div>
+            <div className='container'>
+                {loading ? (
+                    <div className="d-flex justify-content-center">
+                        <div className="spinner-border" role="status">
+                            <span className="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                ) : Recipes.length === 0 && Books.length === 0 && Ebooks.length === 0 ? (
+                    <h3 className='text-red-500 text-3xl'>Không tìm thấy sản phẩm: "{searchString}"</h3>
+                ) : (
+                    <div>
+                        <h1 className='mb-5 text-3xl'>Kết quả tìm kiếm: "{searchString}"</h1>
+                        {Recipes.length > 0 && (
+                            <div className="container mx-auto px-4 mt-8">
+                                {/* Tiêu đề */}
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-extrabold text-gray-800">Công thức nấu ăn</h3>
+                                    <a
+                                        href={`/recipe/${searchString}`}
+                                        className="text-custom-orange hover:text-orange-600 font-medium transition duration-300"
+                                    >
+                                        Xem thêm
+                                    </a>
+                                </div>
+
+                                {/* Grid layout */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {Recipes.map((recipe, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full"
+                                        >
+                                            {/* Hình ảnh */}
+                                            <img
+                                                className="w-full h-64 object-cover"
+                                                src={recipe.images[0].imageUrl}
+                                                alt={recipe.name}
+                                            />
+
+                                            {/* Nội dung */}
+                                            <div className="p-2 flex-grow">
+                                                <h5 className="text-lg font-medium text-gray-800 mb-2 min-h-14">
+                                                    {recipe.recipeName}
+                                                </h5>
+                                                <p className="text-red-600 font-bold mb-2 text-lg">
+                                                    {Intl.NumberFormat('de-DE').format(recipe.price)}
+                                                    <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 mb-1 ml-1 inline-block" />
+                                                </p>
+                                                <a
+                                                    href={`/recipe-detail/${recipe.recipeId}`}
+                                                    className="block w-full text-center bg-custom-orange text-white py-2 rounded-md hover:bg-orange-600 transition duration-300"
+                                                >
+                                                    Xem chi tiết
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </div>
-                <div className='row mt-5'>
-                    <h3 className='text-center mb-3'>Sách nấu ăn <a href={`/book/${searchString}`} className='btn btn-link'>Xem thêm</a></h3>
-                    <div className='row justify-content-center'>
-                        {Books.map((book, index) => (
-                            <div className='col-md-4 mb-4' key={index}>
-                                <div className='card h-100'>
-                                    <img className='card-img-top' src={book.images[0].imageUrl} alt={book.name} />
-                                    <div className='card-body'>
-                                        <h5 className='card-title'>{book.bookName}</h5>
-                                        <p className='card-text'>{book.price} xu</p>
-                                        <a href={`/book-detail/${book.bookId}`} className='btn btn-primary btn-block'>Xem chi tiết</a>
-                                    </div>
+                        )}
+                        {Ebooks.length > 0 && (
+                            <div className="container mx-auto px-4 mt-8">
+                                {/* Tiêu đề */}
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-extrabold text-gray-800">Sách điện tử</h3>
+                                    <a
+                                        href={`/ebook`}
+                                        className="text-custom-orange hover:text-orange-600 font-medium transition duration-300"
+                                    >
+                                        Xem thêm
+                                    </a>
+                                </div>
+
+                                {/* Grid layout */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {Ebooks.map((ebook, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full"
+                                        >
+                                            {/* Hình ảnh */}
+                                            <img
+                                                className="w-full h-64 object-cover"
+                                                src={ebook.imageUrl}
+                                                alt={ebook.name}
+                                            />
+
+                                            {/* Nội dung */}
+                                            <div className="p-4 flex-grow">
+                                                <h5 className="text-lg font-medium text-gray-800 mb-2 min-h-14">
+                                                    {ebook.ebookName}
+                                                </h5>
+                                                <p className="text-red-600 font-bold mb-2 text-lg">
+                                                    {Intl.NumberFormat('de-DE').format(ebook.price)}
+                                                    <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 mb-1 ml-1 inline-block" />
+                                                </p>
+                                                <a
+                                                    href={`/ebook/${ebook.ebookId}`}
+                                                    className="block w-full text-center bg-custom-orange text-white py-2 rounded-md hover:bg-orange-600 transition duration-300"
+                                                >
+                                                    Xem chi tiết
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </div>
-                <div className='row mt-5'>
-                    <h3 className='text-center mb-3'>Sách điện tử <a href={`/ebook`} className='btn btn-link'>Xem thêm</a></h3>
-                    <div className='row justify-content-center'>
-                        {Ebooks.map((ebook, index) => (
-                            <div className='col-md-4 mb-4' key={index}>
-                                <div className='card h-100'>
-                                    <img className='card-img-top' src={ebook.imageUrl} alt={ebook.name} />
-                                    <div className='card-body'>
-                                        <h5 className='card-title'>{ebook.ebookName}</h5>
-                                        <p className='card-text'>{ebook.price} xu</p>
-                                        <a href={`/ebook/${ebook.ebookId}`} className='btn btn-primary btn-block'>Xem chi tiết</a>
-                                    </div>
+                        )}
+                        {Books.length > 0 && (
+                            <div className="container mx-auto px-4 mt-8">
+                                {/* Tiêu đề */}
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-extrabold text-gray-800">Sách nấu ăn</h3>
+                                    <a
+                                        href={`/book/${searchString}`}
+                                        className="text-custom-orange hover:text-orange-600 font-medium transition duration-300"
+                                    >
+                                        Xem thêm
+                                    </a>
+                                </div>
+
+                                {/* Grid layout */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {Books.map((book, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 flex flex-col h-full"
+                                        >
+                                            {/* Hình ảnh */}
+                                            <img
+                                                className="w-full h-64 object-cover"
+                                                src={book.images[0].imageUrl}
+                                                alt={book.name}
+                                            />
+
+                                            {/* Nội dung */}
+                                            <div className="p-4 flex-grow">
+                                                <h5 className="text-lg font-medium text-gray-800 mb-2 min-h-14">
+                                                    {book.bookName}
+                                                </h5>
+                                                <p className="text-red-600 font-bold mb-2 text-lg">
+                                                    {Intl.NumberFormat('de-DE').format(book.price)}
+                                                    <img src="/images/icon/dollar.png" alt="coins" className="h-5 w-5 mb-1 ml-1 inline-block" />
+                                                </p>
+                                                <a
+                                                    href={`/book-detail/${book.bookId}`}
+                                                    className="block w-full text-center bg-custom-orange text-white py-2 rounded-md hover:bg-blue-500 transition duration-300"
+                                                >
+                                                    Chi tiết
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
+                        )}
                     </div>
-                </div>
+                )}
             </div>
         </section>
     );
-}
-
+};
 export default Product;

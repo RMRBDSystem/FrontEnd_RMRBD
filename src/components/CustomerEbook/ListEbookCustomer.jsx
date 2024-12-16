@@ -414,7 +414,7 @@ const EditEbookCustomer = () => {
                   ) : (
                     <tr>
                       <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
-                        No ebooks available
+                      Không có sách điện tử nào
                       </td>
                     </tr>
                   )}

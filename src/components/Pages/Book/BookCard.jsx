@@ -35,10 +35,10 @@ function BookCard({ book }) {
       if (!existingOrderResponse.ok) return;
 
       const allOrdersData = await existingOrderResponse.json();
-      
+
       // Filter orders for current customer and cart status
-      const cartOrders = allOrdersData.filter(order => 
-        order.customerId === parseInt(customerId) && 
+      const cartOrders = allOrdersData.filter(order =>
+        order.customerId === parseInt(customerId) &&
         order.orderCode === null
       );
 
@@ -59,7 +59,7 @@ function BookCard({ book }) {
         if (!orderDetailResponse.ok) return;
 
         const orderDetailData = await orderDetailResponse.json();
-        
+
         // If book exists in cart, set isAddedToCart to true
         setIsAddedToCart(orderDetailData.length > 0);
       }
@@ -95,10 +95,10 @@ function BookCard({ book }) {
       }
 
       const allOrdersData = await existingOrderResponse.json();
-      
+
       // Filter orders for current customer and cart status (orderCode is null)
-      const cartOrders = allOrdersData.filter(order => 
-        order.customerId === parseInt(customerId) && 
+      const cartOrders = allOrdersData.filter(order =>
+        order.customerId === parseInt(customerId) &&
         order.orderCode === null
       );
 
@@ -178,7 +178,7 @@ function BookCard({ book }) {
         }
 
         const newOrderData = await newOrderResponse.json();
-        
+
         // Add book to new order
         const addBookResponse = await fetch('https://rmrbdapi.somee.com/odata/BookOrderDetail', {
           method: 'POST',
@@ -266,10 +266,10 @@ function BookCard({ book }) {
       }
 
       const allOrdersData = await existingOrderResponse.json();
-      
+
       // Filter orders for current customer and cart status (orderCode is null)
-      const cartOrders = allOrdersData.filter(order => 
-        order.customerId === parseInt(customerId) && 
+      const cartOrders = allOrdersData.filter(order =>
+        order.customerId === parseInt(customerId) &&
         order.orderCode === null
       );
 
@@ -342,11 +342,10 @@ function BookCard({ book }) {
         <div
           className="top"
           style={{
-            backgroundImage: `url(${
-              book.images && book.images.length > 0
+            backgroundImage: `url(${book.images && book.images.length > 0
                 ? book.images[0].imageUrl
                 : "https://via.placeholder.com/150?text=No+Image"
-            })`,
+              })`,
           }}
           onClick={handleCardClick}
         ></div>
@@ -382,8 +381,14 @@ function BookCard({ book }) {
           <i className="material-icons">info_outline</i>
         </div>
         <div className="contents">
-          <h1 className="pb-2">{book.description || "Không rõ" }</h1>
-          <h1>Tác giả  {book.author || "Không rõ"}</h1>
+          <h1 className="pb-2">
+            {book.description
+              ? (book.description.length > 200
+                ? `${book.description.substring(0, 200)}...`
+                : book.description)
+              : "Không rõ"}
+          </h1>
+          <h1 className="font-bold">Tác giả  <span className="ml-8 font-medium">{book.author || "Không rõ"}</span></h1>
           <table>
             <tbody>
               <tr>
@@ -393,9 +398,8 @@ function BookCard({ book }) {
                     <FontAwesomeIcon
                       key={index}
                       icon={index < filledStars ? faStar : faStarOutline}
-                      className={`${
-                        index < filledStars ? "text-yellow-500" : "text-gray-500"
-                      }`}
+                      className={`${index < filledStars ? "text-yellow-500" : "text-gray-500"
+                        }`}
                     />
                   ))}
                 </td>

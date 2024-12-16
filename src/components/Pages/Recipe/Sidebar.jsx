@@ -110,10 +110,10 @@ function Sidebar({ onFilterChange }) {
         </label>
         <ul className="space-y-3">
           {[ // Các mức giá cho món ăn
-            { label: "Free", value: "0" },
-            { label: ">0đ - 20,000đ", value: "0-20000.000" },
-            { label: "20,000đ - 50,000đ", value: "20000.000-50000.000" },
-            { label: ">50,000đ", value: "50000.000 - 1000000000.000" },
+            { label: "Miễn phí", value: "0-0" },
+            { label: ">0 Xu - 20,000 Xu", value: "0-20000.000" },
+            { label: ">20,000 Xu - 50,000 Xu", value: "20000.000-50000.000" },
+            { label: ">50,000 Xu", value: "50000.000 - 1000000000.000" },
           ].map((priceRange, index) => (
             <li key={index} className="flex items-center">
               <input
@@ -124,25 +124,6 @@ function Sidebar({ onFilterChange }) {
                 }
               />
               <span className="text-gray-800">{priceRange.label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Đánh Giá */}
-      <div className="mb-6">
-        <label className="inline-block font-bold mb-5">
-          Đánh Giá
-        </label>
-        <ul className="space-y-3">
-          {[5, 4, 3, 2, 1].map((rating) => (
-            <li key={rating} className="flex items-center">
-              <input
-                type="checkbox"
-                className="w-4 h-4 mr-3 text-blue-500 focus:ring-blue-400 rounded"
-                onChange={() => handleFilterChange("ratings", rating)}
-              />
-              <span className="text-gray-600">{rating} sao</span>
             </li>
           ))}
         </ul>

@@ -94,7 +94,7 @@ const SearchWrapper = () => {
         <FaSearch />
       </div>
 
-      <div className={`fixed left-0 w-full h-[80px] z-50 bg-[#fca311] transition-all duration-700 ${isOpen ? 'top-0' : '-top-20'}`}>
+      <div className={`fixed left-0 w-full h-[80px] z-50 bg-black bg-opacity-50 transition-all duration-700 ${isOpen ? 'top-0' : '-top-20'}`}>
         <div className="close-btn absolute right-0 top-0 w-[70px] h-full bg-black text-white text-center flex items-center justify-center cursor-pointer" onClick={toggleSearch}>
           <FaTimes />
         </div>
@@ -122,47 +122,57 @@ const SearchWrapper = () => {
               {results.length > 0 && (
                 <div className="search-results absolute left-0 w-full bg-white border border-gray-200 rounded-md mt-2 max-h-[300px] overflow-y-auto shadow-lg">
                   {results.map((item) => (
-                    <div key={item.id || item.bookId || item.recipeId} className="result-item p-2 flex items-center hover:bg-gray-300">
-                      {item.imageUrl || (item.images && item.images[0] && item.images[0].imageUrl) ? (
-                        <img
-                          src={item.imageUrl || item.images[0].imageUrl}
-                          alt={item.bookName || item.recipeName || item.ebookName}
-                          className="w-16 h-24 object-cover mr-4"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      ) : (
-                        <div className="w-16 h-24 bg-gray-200 mr-4 flex items-center justify-center text-gray-500">
-                          No Image
-                        </div>
-                      )}
+                    <a
+                      href={
+                        item.bookId ? `/book-detail/${item.bookId}` :
+                          item.recipeId ? `/recipe-detail/${item.recipeId}` :
+                            item.ebookId ? `/ebook/${item.ebookId}` :
+                              '/'
+                      }
+                      key={item.id || item.bookId || item.recipeId}
+                    >
+                      <div key={item.id || item.bookId || item.recipeId} className="result-item p-2 flex items-center hover:bg-gray-300">
+                        {item.imageUrl || (item.images && item.images[0] && item.images[0].imageUrl) ? (
+                          <img
+                            src={item.imageUrl || item.images[0].imageUrl}
+                            alt={item.bookName || item.recipeName || item.ebookName}
+                            className="w-16 h-24 object-cover mr-4"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <div className="w-16 h-24 bg-gray-200 mr-4 flex items-center justify-center text-gray-500">
+                            No Image
+                          </div>
+                        )}
 
-                      <div>
-                        {item.ebookName && (
-                          <>
-                            <h3 className="text-lg text-gray-800 font-bold">{item.ebookName}</h3>
-                            <p className="text-sm text-gray-400 italic line-clamp-3">{item.description}</p>
-                          </>
-                        )}
-                        {item.bookName && (
-                          <>
-                            <h3 className="text-lg text-gray-800 font-bold">{item.bookName}</h3>
-                            <p className="text-sm text-gray-400 italic line-clamp-3">{item.description}</p>
-                          </>
-                        )}
-                        {item.recipeName && (
-                          <>
-                            <h3 className="text-lg text-gray-800 font-bold">{item.recipeName}</h3>
-                            <p className="text-sm text-gray-400 italic line-clamp-3">{item.ingredient}</p>
-                          </>
-                        )}
+                        <div>
+                          {item.ebookName && (
+                            <>
+                              <h3 className="text-lg text-gray-800 font-bold">{item.ebookName}</h3>
+                              <p className="text-sm text-gray-400 italic line-clamp-3">{item.description}</p>
+                            </>
+                          )}
+                          {item.bookName && (
+                            <>
+                              <h3 className="text-lg text-gray-800 font-bold">{item.bookName}</h3>
+                              <p className="text-sm text-gray-400 italic line-clamp-3">{item.description}</p>
+                            </>
+                          )}
+                          {item.recipeName && (
+                            <>
+                              <h3 className="text-lg text-gray-800 font-bold">{item.recipeName}</h3>
+                              <p className="text-sm text-gray-400 italic line-clamp-3">{item.ingredient}</p>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </a>
                   ))}
                 </div>
               )}
 
               {error && (
-                <div className="text-red-500 text-sm mt-2">{error}</div>
+                <div className="text-red-500 text-lg mt-2">{error}</div>
               )}
             </form>
           </div>

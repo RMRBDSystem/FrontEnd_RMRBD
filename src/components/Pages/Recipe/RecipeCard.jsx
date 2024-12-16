@@ -30,7 +30,7 @@ function RecipeCard({ recipe }) {
         {/* Recipe Price */}
         <div className="text-center text-gray-300 text-lg font-semibold mb-4">
           <span className="text-pink-700">
-            {recipe.price.toLocaleString()} đ
+            {recipe.price === 0 ? "Miễn Phí" : recipe.price.toLocaleString() + " Xu"}
           </span>
         </div>
 

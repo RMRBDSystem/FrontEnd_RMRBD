@@ -148,7 +148,7 @@ const FAQPage = () => {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-none"
         width="1920"
       />
-      <div className="section-center relative z-10 max-w-5xl p-8 mb-12 mt-24">
+      <div className="section-center relative z-10 max-w-5xl p-8 mb-12">
         <h1 className="inline-block py-1 px-3 mb-4 text-xs font-semibold text-center text-orange-900 bg-orange-50 rounded-full">
           Câu hỏi thường gặp: Thị trường công thức nấu ăn và sách nấu ăn
         </h1>

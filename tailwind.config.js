@@ -8,6 +8,9 @@ export default withMT({
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        'custom-gradient': 'linear-gradient(90deg, rgba(2,0,36,.39), rgba(0,0,0,.5) 1.83%, hsla(0,0%,100%,.36) 3.21%, rgba(0,0,0,.33) 4.72%, rgba(247,254,255,.28) 9.84%, hsla(0,0%,100%,0) 47.85%)'
+      },
       fontFamily: {
         sans: ['Inter Tight', 'sans-serif'],  // Cập nhật font chữ mặc định
       },

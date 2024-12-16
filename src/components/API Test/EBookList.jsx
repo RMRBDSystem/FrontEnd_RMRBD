@@ -202,7 +202,7 @@ const EbookList = () => {
             </li>
           ))
         ) : (
-          <li>No ebooks available</li>
+          <li>Không có sách điện tử nào</li>
         )}
       </ul>
     </div>
