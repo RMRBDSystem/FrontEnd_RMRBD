@@ -380,7 +380,7 @@ const Navbar = () => {
             >
               <div onClick={toggleDropdown} className="flex items-center cursor-pointer">
                 <img
-                  src={accountData.avatar || "/images/avatar.png"}
+                  src={accountData.avatar || "/images/avatar-guest.png"}
                   alt="User Avatar"
                   className="w-12 h-12 object-cover rounded-full"
                 />

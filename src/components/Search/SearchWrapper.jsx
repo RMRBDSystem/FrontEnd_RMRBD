@@ -101,12 +101,12 @@ const SearchWrapper = () => {
 
         <div className="container mx-auto relative">
           <div className="flex justify-center">
-            <form className="relative w-full max-w-[700px] " onSubmit={(e) => e.preventDefault()}>
+            <form className="relative w-full max-w-[700px] h-[100px] " onSubmit={(e) => e.preventDefault()}>
               <input
                 type="search"
                 name="search"
                 placeholder="Nhập tên sách, mô tả, hoặc tên công thức"
-                className="w-full h-12 border-2 border-white text-gray-900 text-[24px] italic p-4 mt-4 mb-4"
+                className="w-full h-12 rounded-full border-white text-gray-900 text-[24px] placeholder:italic placeholder:text-slate-400 p-4 mt-4 mb-4"
                 value={searchString}
                 onChange={handleSearchInputChange}
               />
@@ -114,13 +114,15 @@ const SearchWrapper = () => {
                 handleSearch(searchString);
               }}
                 type="submit"
-                className="absolute right-5 top-1/2 transform -translate-y-1/2 w-[60px] h-[60px] flex items-center justify-center bg-transparent border-none cursor-pointer text-black"
+                className="absolute right-5 top-1/2 transform -translate-y-1/2 flex items-center justify-center bg-transparent border-none cursor-pointer text-black"
               >
-                <FaSearch />
+                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40" height="40" viewBox="0 0 48 48">
+                  <path fill="#616161" d="M34.6 28.1H38.6V45.1H34.6z" transform="rotate(-45.001 36.586 36.587)"></path><path fill="#616161" d="M20 4A16 16 0 1 0 20 36A16 16 0 1 0 20 4Z"></path><path fill="#37474F" d="M36.2 32.1H40.2V44.400000000000006H36.2z" transform="rotate(-45.001 38.24 38.24)"></path><path fill="#64B5F6" d="M20 7A13 13 0 1 0 20 33A13 13 0 1 0 20 7Z"></path><path fill="#BBDEFB" d="M26.9,14.2c-1.7-2-4.2-3.2-6.9-3.2s-5.2,1.2-6.9,3.2c-0.4,0.4-0.3,1.1,0.1,1.4c0.4,0.4,1.1,0.3,1.4-0.1C16,13.9,17.9,13,20,13s4,0.9,5.4,2.5c0.2,0.2,0.5,0.4,0.8,0.4c0.2,0,0.5-0.1,0.6-0.2C27.2,15.3,27.2,14.6,26.9,14.2z"></path>
+                </svg>
               </button>
 
               {results.length > 0 && (
-                <div className="search-results absolute left-0 w-full bg-white border border-gray-200 rounded-md mt-2 max-h-[300px] overflow-y-auto shadow-lg">
+                <div className="search-results absolute left-0 w-full bg-white border border-gray-200 rounded-md max-h-[300px] overflow-y-auto shadow-lg">
                   {results.map((item) => (
                     <a
                       href={

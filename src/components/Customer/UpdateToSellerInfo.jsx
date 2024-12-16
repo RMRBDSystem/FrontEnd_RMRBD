@@ -181,7 +181,7 @@ const UpdateToSellerInfo = () => {
               <label className="block text-base font-medium text-gray-700 mb-1 mr-8">
                 Lưu ý
               </label>
-              <div className="flex items-center py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700">
+              <div className="px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 w-1/6">
                 {accountProfile.censorNote}
               </div>
             </div>

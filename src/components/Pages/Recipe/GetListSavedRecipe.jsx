@@ -193,7 +193,7 @@ const GetListSaveRecipe = () => {
                 alignItems: "center",
                 marginTop: 20,
               }}
-            >
+            > 
               <Typography
                 variant="h6"
                 color="text.primary"

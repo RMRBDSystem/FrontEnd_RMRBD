@@ -124,7 +124,7 @@ const RechargePage = () => {
         <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg mb-4">
           <div className="flex items-center">
             <img
-              src="/images/avatar.png"
+              src="/images/avatar-guest.png"
               alt="User avatar"
               className="w-10 h-10 rounded-full mr-3"
             />
@@ -139,8 +139,8 @@ const RechargePage = () => {
         </div>
 
         {/* Thông báo khuyến mãi */}
-        <div className="max-w-[450px] bg-yellow-100 p-2 rounded-md mb-4">
-          <p className="font-bold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-red-500">Tiết kiệm 15% khi nạp từ 100.000 XU.</span></span>
+        <div className="max-w-[320px] bg-yellow-100 p-2 rounded-md mb-4">
+          <p className="font-bold">Khuyến mãi có hạn :</p><span className="text-sm font-bold"><span className="font-semibold text-lg text-red-500">Tiết kiệm 15% khi nạp từ 100.000 XU.</span></span>
         </div>
         {/* Lựa chọn số xu */}
         <div className="grid grid-cols-4 gap-4 mb-6">

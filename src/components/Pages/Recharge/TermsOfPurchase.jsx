@@ -4,7 +4,7 @@ const TermsAndConditions = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md text-gray-800 mb-10">
       <h1 className="text-2xl font-black mb-6">
-        Điều khoảng và điều kiện dịch vụ nạp xu
+        Điều khoản và điều kiện dịch vụ nạp xu
       </h1>
       <p className="mb-4">
         <strong>Ngày áp dụng:</strong> Tháng 10, 2024
@@ -68,14 +68,15 @@ const TermsAndConditions = () => {
 
       <h2 className="text-lg font-semibold mb-4">5. Liên hệ Hỗ trợ</h2>
       <p>
-        Nếu bạn có bất kỳ câu hỏi hoặc thắc mắc nào, vui lòng liên hệ với chúng tôi qua email:{" "}
+        Nếu bạn có bất kỳ câu hỏi hoặc thắc mắc nào, vui lòng liên hệ với chúng tôi qua email:{" "} 
         <a
-          href="mailto:support@example.com"
+          href="mailto:huytronglee@gmail.com"
           className="text-blue-500 hover:underline"
         >
-          support@example.com
+          huytronglee@gmail.com
         </a>
-        .
+        <br></br>
+        hoặc icon hỗ trợ màu vàng bên góc phải màn hình.
       </p>
     </div>
   );

@@ -28,7 +28,11 @@ const CoinTransaction = () => {
             onClick={handleGoBack}></FaArrowLeft>
           <h2 className="text-2xl font-medium">Lịch sử giao dịch</h2>
         </div>
-        <span className="ml-2 text-gray-600 mb-6">Trang này chỉ hiển thị lịch sử giao dịch qua phương thức PayOS. <a href="/termsofpurchase" className="text-blue-500 hover:underline">Xem điều khoảng</a></span>
+        <span className="ml-2 text-gray-600 mb-6">Trang này chỉ hiển thị lịch sử giao dịch qua phương thức <img
+                src="/images/payos_crop.png"
+                alt="PayOS icon"
+                className="inline w-14 h-5 ml-1"
+              />. <a href="/termsofpurchase" className="text-blue-500  hover:underline">Xem điều khoản và điều kiện</a></span>
         <div className="grid gap-6">
           {transactions.length > 0 ? (
             transactions.map((transaction, index) => (
@@ -75,7 +79,7 @@ const CoinTransaction = () => {
               </div>
             ))
           ) : (
-            <p className="text-gray-500">Không có lịch sử giao dịch.</p>
+            <p className="text-red-500 mt-4">Không có lịch sử giao dịch.</p>
           )}
         </div>
       </div>

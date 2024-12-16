@@ -81,7 +81,7 @@ const AccountDetail = () => {
         {/* Image Section */}
         <div className="flex-1">
           <img
-            src={mainImage || "/images/avatar.png"}
+            src={mainImage || "/images/avatar-guest.png"}
             alt="Account"
             className="rounded-lg shadow-md object-cover w-full h-64 lg:h-full"
           />

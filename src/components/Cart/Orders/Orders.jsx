@@ -145,10 +145,10 @@ const Orders = () => {
     if (result.isConfirmed) {
       try {
         setIsProcessing(true);
-        
+
         // Find the order that's being cancelled
         const orderToCancel = orders.find(order => order.orderCode === orderCode);
-        
+
         // If the order was paid with coins (paymentType === 1), process the refund
         if (orderToCancel && orderToCancel.paymentType === 1) {
           try {
@@ -163,7 +163,7 @@ const Orders = () => {
             );
 
             const currentAccount = accountResponse.data;
-            
+
             // Update account with refunded coins
             await axios.put(
               `https://rmrbdapi.somee.com/odata/Account/info/${userId}`,
@@ -188,7 +188,7 @@ const Orders = () => {
 
         // Cancel the order
         const response = await cancelOrder(orderCode);
-        
+
         // Create a transaction record for the refund if it was a coin payment
         if (orderToCancel && orderToCancel.paymentType === 1) {
           try {
@@ -215,15 +215,15 @@ const Orders = () => {
             // Continue with the cancellation even if transaction record fails
           }
         }
-        
+
         await Swal.fire({
           title: "Thành công!",
-          text: orderToCancel?.paymentType === 1 
+          text: orderToCancel?.paymentType === 1
             ? `Đơn hàng đã được hủy và ${formatAmount(orderToCancel.totalPrice, 1)} đã được hoàn lại vào tài khoản của bạn`
             : response.message,
           icon: "success"
         });
-        
+
         window.location.reload();
       } catch (error) {
         console.error('Error cancelling order:', error);
@@ -240,11 +240,14 @@ const Orders = () => {
 
   if (isLoading) {
     return (
-      <div className="flex">
+      <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-8 md:space-y-0 md:space-x-8">
         <Sidebar />
-        <div className="container mx-auto px-4 py-8 flex-1">
-          <LoadingOverlay />
-        </div>
+        <section className='flex flex-col'><LoadingOverlay />
+
+          <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
+          <h1 className="text-2xl font-bold mb-6">Đơn Hàng Của Tôi</h1>
+          </div>
+        </section>
       </div>
     );
   }
@@ -256,7 +259,7 @@ const Orders = () => {
         {isProcessing && <LoadingOverlay />}
         <div className="section-center w-[1140px] bg-white p-4 rounded-lg shadow-md flex flex-col">
           <h1 className="text-2xl font-bold mb-6">Đơn Hàng Của Tôi</h1>
-          
+
           {orders.length === 0 ? (
             <div className="text-center text-gray-500">
               Không tìm thấy đơn hàng nào
@@ -264,8 +267,8 @@ const Orders = () => {
           ) : (
             <div className="space-y-4">
               {orders.map((order) => (
-                <div 
-                  key={order.orderId} 
+                <div
+                  key={order.orderId}
                   className="bg-white rounded-lg shadow p-6 mb-4"
                 >
                   <div className="flex justify-between items-start mb-6">
@@ -287,8 +290,8 @@ const Orders = () => {
                   </div>
 
                   {orderDetails[order.orderId]?.map((detail) => (
-                    <div 
-                      key={detail.orderDetailId} 
+                    <div
+                      key={detail.orderDetailId}
                       className="flex items-start gap-4 py-4 border-t cursor-pointer hover:bg-gray-50"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -334,7 +337,7 @@ const Orders = () => {
                       <span className="font-semibold">Phí Vận Chuyển: </span>
                       {formatAmount(order.shipFee, order.paymentType)}
                     </div>
-                    
+
                     {orderStatuses[order.orderId]?.status === 1 && (
                       <button
                         onClick={() => handleCancelOrder(order.orderCode)}

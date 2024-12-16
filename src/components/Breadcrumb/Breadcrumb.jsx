@@ -12,18 +12,33 @@ const Breadcrumb = () => {
   const breadcrumbNames = {
     book: "Sách Nấu Ăn",
     recipe: "Công Thức Nấu Ăn",
-    ebook: "Thư Viện Ebook",
-    recharge: "Nạp Xu",
-    coinTransaction: "Lịch Sử Nạp Xu",
+    ebook: "Sách Điện Tử",
+    recharge: "Nạp xu",
+    coinTransaction: "Lịch sử giao dịch",
     termsofpurchase: "Điều khoản và điều kiện mua tiền xu",
     faq: "Frequently Asked Questions",
+    product: "Tìm kiếm sản phẩm",
+    report: "Khiếu nại",
+    "list-saved-recipe": "Công thức đã lưu",
+    "recipe-list-seller" : "Công thức đã đăng",
+    "update-information" : "Thông tin cá nhân",
+    "form updated-role" : "Thông tin đã yêu cầu",
+    "book-list-customer" : "Sách nấu ăn đã đăng",
+    "list-ebook-customer" : "Sách điện tử đã đăng",
+    "saved-ebooks": "Sách điện tử đã lưu",
+    "orders": "Đơn hàng của tôi",
+    "manage-addresses": "Địa chỉ của bạn",
+    places: "Khám phá món ăn",
+    "recipe-detail" : "Chi tiết công thức",
+    "book-detail": "Chi tiết sách nấu ăn",
+    withdrawrequest: "Yêu cầu rút tiền"
   };
 
   return (
     <>
       <div className="min-h-24 flex items-end w-full p-4 bg-gray-900"></div>
       <nav className="flex items-end w-full p-4">
-        <ol className="pl-40 inline-flex space-x-1 md:space-x-2 rtl:space-x-reverse">
+        <ol className="inline-flex space-x-1 md:space-x-2 rtl:space-x-reverse">
           <li className="inline-flex items-center">
             <Link
               to="/"
@@ -45,7 +60,7 @@ const Breadcrumb = () => {
           {pathnames.map((value, index) => {
             const to = `/${pathnames.slice(0, index + 1).join("/")}`;
             const isLast = index === pathnames.length - 1;
-            const name = breadcrumbNames[value] || value.replace("-", " ");
+            const name = breadcrumbNames[value] || decodeURIComponent(value).replace("-", " ");
 
             return (
               <li key={to} aria-current={isLast ? "page" : undefined}>
@@ -72,7 +87,7 @@ const Breadcrumb = () => {
                   ) : (
                     <Link
                       to={to}
-                      className="ms-1 text-lg font-medium text-gray-600 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
+                      className="ms-1 text-lg font-medium text-gray-800 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                     >
                       {name}
                     </Link>

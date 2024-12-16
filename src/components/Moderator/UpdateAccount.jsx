@@ -68,7 +68,7 @@ const AccountList = () => {
       name: "Ảnh",
       selector: (row) => (
         <img
-          src={row.avatar || "/images/avatar.png"}
+          src={row.avatar || "/images/avatar-guest.png"}
           alt="Account preview"
           className="w-16 h-16 object-cover rounded-md"
         />

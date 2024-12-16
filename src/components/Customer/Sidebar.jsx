@@ -40,18 +40,6 @@ const Sidebar = () => {
   const userRole = accountData.role?.roleName;
   const menuItems = [
     {
-      path: "/recipe-list-seller",
-      label: "Công thức đã đăng",
-      icon: <FiBookOpen />,
-      visibleFor: ["Seller"],
-    },
-    {
-      path: "/list-saved-recipe",
-      label: "Công thức đã lưu",
-      icon: <FiHeart />,
-      visibleFor: ["Customer", "Seller"],
-    },
-    {
       path: "/update-information",
       label: "Thông tin cá nhân",
       icon: <FiUser />,
@@ -64,6 +52,25 @@ const Sidebar = () => {
       visibleFor: ["Customer", "Seller"],
     },
     {
+      path: "/list-saved-recipe",
+      label: "Công thức đã lưu",
+      icon: <FiHeart />,
+      visibleFor: ["Customer", "Seller"],
+    },
+    {
+      path: "/saved-ebooks",
+      label: "Sách điện tử đã lưu",
+      icon: <FiBookmark className="text-orange-500" />,
+      visibleFor: ["Customer", "Seller"],
+    },
+    {
+      path: "/recipe-list-seller",
+      label: "Công thức đã đăng",
+      icon: <FiBookOpen />,
+      visibleFor: ["Seller"],
+    },
+    
+    {
       path: "/book-list-customer",
       label: "Sách đã đăng",
       icon: <FiBook />,
@@ -75,21 +82,16 @@ const Sidebar = () => {
       icon: <FiFileText />,
       visibleFor: ["Seller"],
     },
-    {
-      path: "/saved-ebooks",
-      label: "Sách điện tử đã lưu",
-      icon: <FiBookmark className="text-orange-500" />,
-      visibleFor: ["Customer", "Seller"],
-    },
+    
     {
       path: "/orders",
-      label: "Lịch sử đơn hàng của sách",
+      label: "Đơn hàng của bạn",
       icon: <FiBook className="text-orange-500" />,
       visibleFor: ["Customer", "Seller"],
     },
     {
       path: "/manage-addresses",
-      label: "Quản lý địa chỉ",
+      label: "Địa chỉ của bạn",
       icon: <FiMapPin className="text-orange-500" />,
       visibleFor: ["Customer", "Seller"],
     },
@@ -99,9 +101,9 @@ const Sidebar = () => {
     <div className="w-full md:w-1/6 bg-white p-3 shadow-md">
       <div className="text-center">
         <img
-          src={accountData.avatar || "/images/avatar.png"}
+          src={accountData.avatar || "/images/avatar-guest.png"}
           alt="User Avatar"
-          className="w-16 h-16 mx-auto mb-2 object-cover border border-gray-300 rounded-full"
+          className="w-32 h-32 mx-auto mb-2 object-cover border border-gray-300 rounded-full"
         />
         <h3 className="font-bold text-lg text-gray-800">
           {accountData.userName || "User"}
