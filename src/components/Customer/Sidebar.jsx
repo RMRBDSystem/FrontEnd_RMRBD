@@ -16,7 +16,6 @@ const Sidebar = () => {
   const isFetchCalled = useRef(false);
   useEffect(() => {
     const userId = Cookies.get("UserId");
-    console.log("Gọi useEffect Sidebar");
     if (userId && !isFetchCalled.current) {
       fetchAccountData(userId);
       isFetchCalled.current = true;
